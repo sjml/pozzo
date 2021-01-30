@@ -64,11 +64,9 @@ function deleteAlbum() {
     $result = DB::DeleteAlbum($input["albumID"]);
     if (is_array($result)) {
         output(["message" => "Album deleted", "data" => $result]);
-    }
-    elseif ($result == -1) {
+    } elseif ($result == -1) {
         output(["message" => "Could not delete: no such album"], 404);
-    }
-    else {
+    } else {
         output(["message" => "Could not delete album"], 400);
     }
 }
@@ -85,5 +83,8 @@ function removePhoto() {
     }
 
     $result = DB::RemovePhotoFromAlbum($input["photoID"], $input["albumID"]);
-    output(["message" => "Removed from " . $result . " album" . ($result == 1 ? "" : "s")]);
+    output([
+        "message" =>
+            "Removed from " . $result . " album" . ($result == 1 ? "" : "s"),
+    ]);
 }

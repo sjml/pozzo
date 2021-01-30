@@ -5,8 +5,11 @@ require_once __DIR__ . "/db.php";
 class Router {
     private $handlers = [];
 
-    function AddHandler($prefix, $handler, $requireLogin=false) {
-        $this->handlers[$prefix] = ["call" => $handler, "requireLogin" => $requireLogin];
+    function AddHandler($prefix, $handler, $requireLogin = false) {
+        $this->handlers[$prefix] = [
+            "call" => $handler,
+            "requireLogin" => $requireLogin,
+        ];
     }
 
     function Route() {
@@ -18,11 +21,10 @@ class Router {
             $prefixLength = strlen($prefix);
             $match = false;
             if (substr($prefix, -1) == "$") {
-                $prefix = substr($prefix, 0, strlen($prefix)-1);
+                $prefix = substr($prefix, 0, strlen($prefix) - 1);
                 $prefixLength -= 1;
-                $match = ($prefix == $POZZO_REQUEST);
-            }
-            else {
+                $match = $prefix == $POZZO_REQUEST;
+            } else {
                 if (substr($POZZO_REQUEST, 0, $prefixLength) == $prefix) {
                     $match = true;
                 }

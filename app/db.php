@@ -80,7 +80,8 @@ class DB {
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
         $prepCommand .= "photo_id INTEGER NOT NULL, ";
         $prepCommand .= "album_id INTEGER NOT NULL, ";
-        $prepCommand .= "CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
+        $prepCommand .=
+            "CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
         $prepCommand .= "FOREIGN KEY(photo_id) REFERENCES photos(id), ";
         $prepCommand .= "FOREIGN KEY(album_id) REFERENCES albums(id) ";
         $prepCommand .= ")";
@@ -89,7 +90,7 @@ class DB {
         $statement->execute();
 
         self::SetConfig("app_key", generateKey(), "string");
-        self::SetConfig("jwt_expiration", (60 * 60 * 24), "integer");
+        self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
 
         self::SetConfig("created", 1, "integer");
     }
@@ -108,11 +109,10 @@ class DB {
         return self::$pdb->lastInsertRowID();
     }
 
-    static function GetUser($username, $includePWH=false) {
+    static function GetUser($username, $includePWH = false) {
         if ($includePWH) {
             $query = "SELECT id, name, password FROM users WHERE name = ?";
-        }
-        else {
+        } else {
             $query = "SELECT id, name FROM users WHERE name = ?";
         }
         $statement = self::$pdb->prepare($query);
@@ -292,7 +292,8 @@ class DB {
     }
 
     static function RemovePhotoFromAlbum($photoID, $albumID) {
-        $query = "DELETE FROM photos_albums WHERE (photo_id = ? AND album_id = ?)";
+        $query =
+            "DELETE FROM photos_albums WHERE (photo_id = ? AND album_id = ?)";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
         $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
@@ -318,7 +319,7 @@ class DB {
         return $ret;
     }
 
-    static function FindAlbum($identifier, $includePhotos=true) {
+    static function FindAlbum($identifier, $includePhotos = true) {
         if (is_numeric($identifier)) {
             $query = "SELECT * FROM albums WHERE id = ?";
             $statement = self::$pdb->prepare($query);

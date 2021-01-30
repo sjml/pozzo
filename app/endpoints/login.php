@@ -47,7 +47,12 @@ function login() {
 
     unset($result["password"]);
 
-    $jwt = generateJWT($result, DB::GetConfig("app_key"), 10, DB::GetConfig("jwt_expiration"));
+    $jwt = generateJWT(
+        $result,
+        DB::GetConfig("app_key"),
+        10,
+        DB::GetConfig("jwt_expiration"),
+    );
 
     output(["message" => "Login successful", "token" => $jwt]);
 }

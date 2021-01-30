@@ -37,7 +37,7 @@ function deleteImagesWithHash($hash) {
     $delSizes = array_column(sizes, "label");
     array_push($delSizes, "orig");
     foreach ($delSizes as $size) {
-        $path = getImageDirectory($size) . '/' . $hash . '.jpg';
+        $path = getImageDirectory($size) . "/" . $hash . ".jpg";
         if (file_exists($path)) {
             unlink($path);
         }

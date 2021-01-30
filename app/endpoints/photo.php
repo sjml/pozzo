@@ -45,8 +45,7 @@ function deletePhoto() {
         if ($result == -1) {
             output(["message" => "Photo not found"], 404);
             return;
-        }
-        elseif ($result == -2) {
+        } elseif ($result == -2) {
             output(["message" => "Could not delete photo"], 500);
             return;
         }
@@ -82,8 +81,7 @@ function copyPhoto() {
     $result = DB::AddPhotoToAlbum($photo["id"], $album["id"]);
     if ($result) {
         output(["photoID" => $photo["id"], "albumID" => $album["id"]]);
-    }
-    else {
+    } else {
         output(["message" => "Photo already in album"], 400);
     }
 }

@@ -3,4 +3,8 @@
 cd "$(dirname "$0")"
 cd ..
 
-prettier --config .prettierrc --write --parser php '**/**.php'
+prettier \
+  --config .prettierrc \
+  --parser php \
+  --write \
+  '**/**.php'

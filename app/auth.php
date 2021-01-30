@@ -1,17 +1,20 @@
 <?php
 
-require_once __DIR__ . '/../lib/php-jwt-5.2.0/src/JWT.php';
-require_once __DIR__ . '/../lib/php-jwt-5.2.0/src/ExpiredException.php';
-require_once __DIR__ . '/../lib/php-jwt-5.2.0/src/SignatureInvalidException.php';
-require_once __DIR__ . '/../lib/php-jwt-5.2.0/src/BeforeValidException.php';
-use \Firebase\JWT\JWT;
+require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/JWT.php";
+require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/ExpiredException.php";
+require_once __DIR__ .
+    "/../lib/php-jwt-5.2.0/src/SignatureInvalidException.php";
+require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/BeforeValidException.php";
+use Firebase\JWT\JWT;
 
 function generateKey() {
-    return 'base64:'.base64_encode(random_bytes(32));
+    return "base64:" . base64_encode(random_bytes(32));
 }
 
 function generateJWT($userData, $secret, $validOffset, $expiration) {
-    $issuer = "Pozzo / " . (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : "PHP-CLI");
+    $issuer =
+        "Pozzo / " .
+        (isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : "PHP-CLI");
     $issued_at = time();
     $notbefore = $issued_at + $validOffset;
     $expire = $issued_at + $expiration;
@@ -24,13 +27,13 @@ function generateJWT($userData, $secret, $validOffset, $expiration) {
         "data" => $userData,
     ];
 
-    $jwt = JWT::encode($token, $secret, 'HS256');
+    $jwt = JWT::encode($token, $secret, "HS256");
     return $jwt;
 }
 
 function validateJWT($token, $secret) {
     try {
-        $decoded = JWT::decode($token, $secret, ['HS256']);
+        $decoded = JWT::decode($token, $secret, ["HS256"]);
         return true;
     } catch (\Throwable $th) {
         return false;

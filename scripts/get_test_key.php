@@ -10,4 +10,3 @@ $result = DB::GetUser($testUserName);
 $jwt = generateJWT($result, DB::GetConfig("app_key"), -1, 1000);
 
 echo trim($jwt);
-
