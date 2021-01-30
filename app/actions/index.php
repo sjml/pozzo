@@ -1,10 +1,10 @@
 <?php
 
-header('Content-Type: application/json');
+header("Content-Type: application/json");
 
-$message = Array(
+$message = [
     "message" => "Hello from Pozzo.",
-    "actions" => Array("list", "upload"),
-);
+    "actions" => ["list", "upload"],
+];
 
-echo(json_encode($message));
+echo json_encode($message);
