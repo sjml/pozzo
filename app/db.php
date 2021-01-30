@@ -7,6 +7,7 @@ class DB {
     static function Init() {
         if (self::$pdb == null) {
             self::$pdb = new SQLite3(self::DB_PATH);
+            self::$pdb->busyTimeout(2000);
 
             $prepCommand = "CREATE TABLE IF NOT EXISTS photos (";
             $prepCommand .= "id INTEGER PRIMARY KEY, ";
@@ -19,6 +20,11 @@ class DB {
             $statement = self::$pdb->prepare($prepCommand);
             $statement->execute();
         }
+    }
+
+    static function Cleanup() {
+        self::$pdb->close();
+        self::$pdb = null;
     }
 
     static function Reset() {
