@@ -25,8 +25,10 @@ class DB {
     }
 
     static function Cleanup() {
-        self::$pdb->close();
-        self::$pdb = null;
+        if (self::$pdb != null) {
+            self::$pdb->close();
+            self::$pdb = null;
+        }
     }
 
     static function Reset() {
@@ -87,6 +89,7 @@ class DB {
         $statement->execute();
 
         self::SetConfig("app_key", generateKey(), "string");
+        self::SetConfig("jwt_expiration", (60 * 60 * 24), "integer");
 
         self::SetConfig("created", 1, "integer");
     }

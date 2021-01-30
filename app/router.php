@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . "/db.php";
+
 class Router {
     private $handlers = [];
 
@@ -28,7 +30,12 @@ class Router {
 
             if ($match) {
                 if ($handler["requireLogin"]) {
-                    // check and bounce 403 if needed
+                    if (!self::_validate()) {
+                        http_response_code(403);
+                        header("Content-Type: application/json");
+                        echo json_encode(["message" => "403 / Forbidden"]);
+                        return;
+                    }
                 }
 
                 $POZZO_REQUEST = substr($POZZO_REQUEST, $prefixLength);
@@ -43,5 +50,29 @@ class Router {
         }
 
         require __DIR__ . "/endpoints/404.php";
+    }
+
+    private function _validate() {
+        if (!isset($_SERVER["HTTP_AUTHORIZATION"])) {
+            return false;
+        }
+        $authHeader = $_SERVER["HTTP_AUTHORIZATION"];
+        if (substr($authHeader, 0, strlen("Bearer ")) != "Bearer ") {
+            output(["message" => "Missing bearer token"], 400);
+            return;
+        }
+        $token = substr($authHeader, strlen("Bearer "));
+
+        //// from when it was POST-ed instead of in the headers
+        // $input = json_decode(file_get_contents("php://input"), true);
+        // if (!isset($input["token"])) {
+        //     output(["message" => "Missing parameter 'token'"], 400);
+        //     return;
+        // }
+        // $token = $input["token"];
+
+        $secret = DB::GetConfig("app_key");
+
+        return validateJWT($token, $secret);
     }
 }

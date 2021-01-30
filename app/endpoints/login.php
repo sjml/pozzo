@@ -7,7 +7,7 @@ $POZZO_REQUEST = preg_replace("/^\/login/", "", $POZZO_REQUEST);
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
-$router->AddHandler("/check", ["checkLogin"]);
+$router->AddHandler("/check", ["checkLogin"], true);
 $router->AddHandler("/logout", ["logout"]);
 $router->AddHandler("/$", ["login"]);
 
@@ -20,20 +20,6 @@ function output($obj, $code = 200) {
 }
 
 function checkLogin() {
-    $input = json_decode(file_get_contents("php://input"), true);
-    if (!isset($input["token"])) {
-        output(["message" => "Missing parameter 'token'"], 400);
-        return;
-    }
-
-    $secret = DB::GetConfig("app_key");
-
-    $result = validateJWT($input["token"], $secret);
-
-    if (!$result) {
-        output(["message" => "Login invalid"], 403);
-        return;
-    }
     output(["message" => "Login valid"]);
 }
 
@@ -61,7 +47,7 @@ function login() {
 
     unset($result["password"]);
 
-    $jwt = generateJWT($result, DB::GetConfig("app_key"));
+    $jwt = generateJWT($result, DB::GetConfig("app_key"), 10, DB::GetConfig("jwt_expiration"));
 
     output(["message" => "Login successful", "token" => $jwt]);
 }

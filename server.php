@@ -10,4 +10,7 @@ if ($uri !== "/" && file_exists(__DIR__ . "/public" . $uri)) {
 
 if (substr($uri, 0, 4) == "/api") {
     require_once __DIR__ . "/public/api/index.php";
+    return true;
 }
+
+return false;

@@ -10,11 +10,11 @@ function generateKey() {
     return 'base64:'.base64_encode(random_bytes(32));
 }
 
-function generateJWT($userData, $secret) {
-    $issuer = "Pozzo / " . $_SERVER['SERVER_NAME'];
+function generateJWT($userData, $secret, $validOffset, $expiration) {
+    $issuer = "Pozzo / " . (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : "PHP-CLI");
     $issued_at = time();
-    $notbefore = $issued_at + 10;
-    $expire = $issued_at + (60 * 60 * 24);
+    $notbefore = $issued_at + $validOffset;
+    $expire = $issued_at + $expiration;
 
     $token = [
         "iss" => $issuer,
