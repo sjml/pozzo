@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/util.php';
+require_once __DIR__ . "/util.php";
 
 class DB {
     private const DB_PATH = __DIR__ . "/../pozzo.DB";
@@ -8,22 +8,27 @@ class DB {
 
     static function Init() {
         if (self::$pdb == null) {
-            if (file_exists(self::DB_PATH)) {
-                self::$pdb = new SQLite3(self::DB_PATH);
+            $creationNeeded = false;
+            if (!file_exists(self::DB_PATH)) {
+                $creationNeeded = true;
             }
-            else {
-                self::$pdb = new SQLite3(self::DB_PATH);
+
+            self::$pdb = new SQLite3(self::DB_PATH);
+            self::$pdb->busyTimeout(2000);
+            self::$pdb->enableExceptions(true);
+            self::$pdb->query("PRAGMA foreign_keys = ON;");
+            if ($creationNeeded) {
                 self::_createDB();
             }
-            self::$pdb->busyTimeout(2000);
         }
     }
 
-    static private function _createDB() {
+    private static function _createDB() {
         $prepCommand = "CREATE TABLE IF NOT EXISTS config(";
         $prepCommand .= "key TEXT NOT NULL UNIQUE,";
         $prepCommand .= "value TEXT,";
-        $prepCommand .= "type TEXT CHECK(type IN ('integer', 'string', 'float'))";
+        $prepCommand .=
+            "type TEXT CHECK(type IN ('integer', 'string', 'float'))";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
@@ -40,18 +45,26 @@ class DB {
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
         $prepCommand .= "id INTEGER PRIMARY KEY, ";
-        $prepCommand .= "title TEXT, ";
+        $prepCommand .= "title TEXT UNIQUE, ";
         $prepCommand .= "description TEXT";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
-        $prepCommand =
-            "INSERT INTO albums(title, description) VALUES('Unsorted', '')";
+        $unsortedIdx = self::CreateAlbum("Unsorted");
+        self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
+        $prepCommand .= "photo_id INTEGER NOT NULL, ";
+        $prepCommand .= "album_id INTEGER NOT NULL, ";
+        $prepCommand .= "CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
+        $prepCommand .= "FOREIGN KEY(photo_id) REFERENCES photos(id), ";
+        $prepCommand .= "FOREIGN KEY(album_id) REFERENCES albums(id) ";
+        $prepCommand .= ")";
+
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
-
 
         self::SetConfig("created", 1, "integer");
     }
@@ -89,14 +102,14 @@ class DB {
         }
 
         switch ($row["type"]) {
-            case 'integer':
-                return (int)$row["value"];
+            case "integer":
+                return (int) $row["value"];
                 break;
-            case 'float':
-                return (float)$row["value"];
+            case "float":
+                return (float) $row["value"];
                 break;
-            case 'string':
-                return (string)$row["value"];
+            case "string":
+                return (string) $row["value"];
                 break;
         }
 
@@ -135,6 +148,162 @@ class DB {
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
+
+        self::AddPhotoToAlbum(
+            $photoData["id"],
+            self::GetConfig("unsorted_album_index"),
+        );
+
         return $photoData["id"];
+    }
+
+    static function GetPhoto($id) {
+        $query = "SELECT * FROM photos WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $id, SQLITE3_INTEGER);
+        $results = $statement->execute();
+        if ($results == false) {
+            return null;
+        }
+        return $results->fetchArray(SQLITE3_ASSOC);
+    }
+
+    static function DeletePhoto($id) {
+        $photoData = self::GetPhoto($id);
+        if ($photoData == null) {
+            return -1;
+        }
+
+        $query = "DELETE FROM photos_albums WHERE photo_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
+        $query = "DELETE FROM photos WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+        if (self::$pdb->changes() == 0) {
+            return -2;
+        }
+
+        return $photoData;
+    }
+
+    static function CreateAlbum($title) {
+        if (is_numeric($title)) {
+            return -2;
+        }
+        $prepCommand = "INSERT INTO albums(title, description) VALUES(?, '')";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->bindParam(1, $title, SQLITE3_TEXT);
+        try {
+            $result = $statement->execute();
+            if (!$result) {
+                return -1;
+            }
+        } catch (\Throwable $th) {
+            return -1;
+        }
+        return self::$pdb->lastInsertRowID();
+    }
+
+    static function DeleteAlbum($id) {
+        $albumData = self::FindAlbum($id, false);
+        if ($albumData == null) {
+            return -1;
+        }
+
+        $query = "DELETE FROM photos_albums WHERE album_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $albumData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
+        $query = "DELETE FROM albums WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $albumData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+        if (self::$pdb->changes() == 0) {
+            return -2;
+        }
+
+        return $albumData;
+    }
+
+    static function AddPhotoToAlbum($photoID, $albumID) {
+        $statement = self::$pdb->prepare(
+            "INSERT INTO photos_albums VALUES(?, ?)",
+        );
+        $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
+        try {
+            $result = $statement->execute();
+            if ($result == false) {
+                return false;
+            }
+        } catch (\Throwable $th) {
+            return false;
+        }
+        return true;
+    }
+
+    static function RemovePhotoFromAlbum($photoID, $albumID) {
+        $query = "DELETE FROM photos_albums WHERE (photo_id = ? AND album_id = ?)";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
+        $results = $statement->execute();
+        $changes = self::$pdb->changes();
+        return $changes;
+    }
+
+    static function GetPhotosInAlbum($albumID) {
+        $ret = [];
+        $query = "SELECT * FROM photos_albums ";
+        $query .= "JOIN photos ON photos.id = photos_albums.photo_id ";
+        $query .= "WHERE photos_albums.album_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+        $results = $statement->execute();
+        if ($results == false) {
+            return $ret;
+        }
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            array_push($ret, $row);
+        }
+        return $ret;
+    }
+
+    static function FindAlbum($identifier, $includePhotos=true) {
+        if (is_numeric($identifier)) {
+            $query = "SELECT * FROM albums WHERE id = ?";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $identifier, SQLITE3_INTEGER);
+            $results = $statement->execute();
+            if ($results == false) {
+                return $false;
+            }
+            $albumData = $results->fetchArray(SQLITE3_ASSOC);
+        } else {
+            $query = "SELECT * FROM albums WHERE title = ?";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $identifier, SQLITE3_TEXT);
+            $results = $statement->execute();
+            if ($results == false) {
+                return $false;
+            }
+            $albumData = $results->fetchArray(SQLITE3_ASSOC);
+        }
+
+        if (!isset($albumData) || $albumData == false) {
+            return false;
+        }
+
+        if ($includePhotos) {
+            $photos = self::GetPhotosInAlbum($albumData["id"]);
+            $albumData["photos"] = $photos;
+        }
+
+        return $albumData;
     }
 }

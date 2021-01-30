@@ -33,6 +33,17 @@ function getImageDirectory($name) {
     return $ret;
 }
 
+function deleteImagesWithHash($hash) {
+    $delSizes = array_column(sizes, "label");
+    array_push($delSizes, "orig");
+    foreach ($delSizes as $size) {
+        $path = getImageDirectory($size) . '/' . $hash . '.jpg';
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
+}
+
 function importImage($filePath) {
     if (exif_imagetype($filePath) != IMAGETYPE_JPEG) {
         return null;
@@ -59,7 +70,7 @@ function processImage($photoData) {
     $img = new IMagick();
     foreach (sizes as $size) {
         $img->readImage($origPath);
-        if (!array_key_exists("width", $photoData)) {
+        if (!isset($photoData["width"])) {
             $photoData["width"] = $img->getImageWidth();
             $photoData["height"] = $img->getImageHeight();
         }

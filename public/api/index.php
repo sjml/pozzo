@@ -1,27 +1,45 @@
 <?php
 
+require_once __DIR__ . "/../../app/router.php";
 require_once __DIR__ . "/../../app/db.php";
 DB::Init();
 register_shutdown_function(["DB", "Cleanup"]);
 
-$request = $_SERVER["REQUEST_URI"];
-
-switch ($request) {
-    case "/api/":
-        require __DIR__ . "/../../app/actions/index.php";
-        break;
-    case "/api/list":
-        require __DIR__ . "/../../app/actions/list.php";
-        break;
-    case "/api/reset":
-        require __DIR__ . "/../../app/actions/reset.php";
-        break;
-    case "/api/upload":
-        require __DIR__ . "/../../app/actions/upload.php";
-        break;
-    case "/api/testImport":
-        require __DIR__ . "/../../app/actions/testImport.php";
-        break;
-    default:
-        require __DIR__ . "/../../app/actions/404.php";
+$POZZO_REQUEST = $_SERVER["REQUEST_URI"];
+$POZZO_REQUEST = preg_replace("/^\/api/", "", $POZZO_REQUEST);
+if ($POZZO_REQUEST == "/") {
+    $POZZO_REQUEST = "/index";
 }
+
+$router = new Router();
+
+$router->AddHandler("/index", [
+    "require",
+    __DIR__ . "/../../app/endpoints/index.php",
+]);
+$router->AddHandler("/album", [
+    "require",
+    __DIR__ . "/../../app/endpoints/album.php",
+]);
+$router->AddHandler("/photo", [
+    "require",
+    __DIR__ . "/../../app/endpoints/photo.php",
+]);
+$router->AddHandler("/list", [
+    "require",
+    __DIR__ . "/../../app/endpoints/list.php",
+]);
+$router->AddHandler("/reset", [
+    "require",
+    __DIR__ . "/../../app/endpoints/reset.php",
+]);
+$router->AddHandler("/upload", [
+    "require",
+    __DIR__ . "/../../app/endpoints/upload.php",
+]);
+$router->AddHandler("/testImport", [
+    "require",
+    __DIR__ . "/../../app/endpoints/testImport.php",
+]);
+
+$router->Route();

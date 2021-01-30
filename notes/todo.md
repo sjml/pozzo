@@ -1,6 +1,6 @@
-1. Album REST stuff (view, create, add photo, remove photo)
-   - make title unique
-2. Put uploaded pictures into unsorted album.
+1. Setup simple username/password thing
+   - make router smarter -- certain routes require login, others take only certain methods, etc
+2. test setup?
 3. Frontend basic looks
    - choose dev tool (Vue? Svelte? Blergh.)
    - make basic album view
