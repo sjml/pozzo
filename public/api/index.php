@@ -17,6 +17,10 @@ $router->AddHandler("/index", [
     "require",
     __DIR__ . "/../../app/endpoints/index.php",
 ]);
+$router->AddHandler("/login", [
+    "require",
+    __DIR__ . "/../../app/endpoints/login.php",
+]);
 $router->AddHandler("/album", [
     "require",
     __DIR__ . "/../../app/endpoints/album.php",

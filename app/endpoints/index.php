@@ -4,7 +4,7 @@ header("Content-Type: application/json");
 
 $message = [
     "message" => "Hello from Pozzo.",
-    "actions" => ["list", "upload", "album"],
+    "endpoints" => ["index", "login", "list", "upload", "album", "photo"],
 ];
 
 echo json_encode($message);

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . "/util.php";
+require_once __DIR__ . "/auth.php";
 
 class DB {
     private const DB_PATH = __DIR__ . "/../pozzo.DB";
@@ -23,7 +24,26 @@ class DB {
         }
     }
 
+    static function Cleanup() {
+        self::$pdb->close();
+        self::$pdb = null;
+    }
+
+    static function Reset() {
+        self::Cleanup();
+        unlink(self::DB_PATH);
+        self::Init();
+    }
+
     private static function _createDB() {
+        $prepCommand = "CREATE TABLE IF NOT EXISTS users(";
+        $prepCommand .= "id INTEGER PRIMARY KEY, ";
+        $prepCommand .= "name TEXT NOT NULL UNIQUE,";
+        $prepCommand .= "password TEXT";
+        $prepCommand .= ")";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
         $prepCommand = "CREATE TABLE IF NOT EXISTS config(";
         $prepCommand .= "key TEXT NOT NULL UNIQUE,";
         $prepCommand .= "value TEXT,";
@@ -66,12 +86,39 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
+        self::SetConfig("app_key", generateKey(), "string");
+
         self::SetConfig("created", 1, "integer");
     }
 
-    static function Cleanup() {
-        self::$pdb->close();
-        self::$pdb = null;
+    static function CreateUser($user, $pw) {
+        $pw = hashPassword($pw);
+        $prepCommand = "INSERT INTO users (name, password) VALUES (?, ?)";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->bindParam(1, $user, SQLITE3_TEXT);
+        $statement->bindParam(2, $pw, SQLITE3_TEXT);
+        try {
+            $result = $statement->execute();
+        } catch (\Throwable $th) {
+            return false;
+        }
+        return self::$pdb->lastInsertRowID();
+    }
+
+    static function GetUser($username, $includePWH=false) {
+        if ($includePWH) {
+            $query = "SELECT id, name, password FROM users WHERE name = ?";
+        }
+        else {
+            $query = "SELECT id, name FROM users WHERE name = ?";
+        }
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $username, SQLITE3_TEXT);
+        $results = $statement->execute();
+        if ($results == false) {
+            return null;
+        }
+        return $results->fetchArray(SQLITE3_ASSOC);
     }
 
     static function SetConfig($key, $value, $type) {
@@ -114,12 +161,6 @@ class DB {
         }
 
         return false;
-    }
-
-    static function Reset() {
-        self::Cleanup();
-        unlink(self::DB_PATH);
-        self::Init();
     }
 
     static function GetAllPhotos() {

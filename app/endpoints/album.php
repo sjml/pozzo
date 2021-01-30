@@ -7,12 +7,12 @@ $POZZO_REQUEST = preg_replace("/^\/album/", "", $POZZO_REQUEST);
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
-// $router->AddHandler("/index", ["newAlbum"]); // give list of albums
+// $router->AddHandler("/index", ["albumIndex"]); // give list of albums
 $router->AddHandler("/new", ["newAlbum"]);
 $router->AddHandler("/view", ["viewAlbum"]);
 $router->AddHandler("/remove", ["removePhoto"]);
 $router->AddHandler("/delete", ["deleteAlbum"]);
-// $router->AddHandler("/edit", ["newAlbum"]); // change album's title or description
+// $router->AddHandler("/edit", ["editAlbum"]); // change album's title or description
 
 $router->Route();
 

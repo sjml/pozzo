@@ -5,11 +5,11 @@ cd ..
 
 SAMPLES_DIR=samples
 BASE_URL=localhost:8080/api
-# BASE_URL=http://pozzo.shaneliesegang.com/api
+# BASE_URL=https://pozzo.shaneliesegang.com/api
 
 
 curl $BASE_URL/reset
 
 files=$SAMPLES_DIR/*
 
-parallel -j6 curl -s -F "photoUp=@./{}" --output - "$BASE_URL/upload" ::: ${files[*]}
+parallel -j4 curl -s -F "photoUp=@./{}" --output - "$BASE_URL/upload" ::: ${files[*]}
