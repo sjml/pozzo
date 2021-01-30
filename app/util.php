@@ -1,5 +1,14 @@
 <?php
 
+function stringInArray($needle, $haystack) {
+    foreach ($haystack as $val) {
+        if ($val == $needle) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function removeDir($targetDir) {
     if (is_dir($targetDir)) {
         $contents = array_diff(scandir($targetDir), [".", ".."]);
