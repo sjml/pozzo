@@ -8,8 +8,8 @@ $POZZO_REQUEST = preg_replace("/^\/photo/", "", $POZZO_REQUEST);
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
-$router->AddHandler("/delete", ["deletePhoto"]);
-$router->AddHandler("/copy", ["copyPhoto"]);
+$router->AddHandler("/delete", ["deletePhoto"], true);
+$router->AddHandler("/copy", ["copyPhoto"], true);
 $router->AddHandler("/view", ["viewPhoto"]);
 
 $router->Route();

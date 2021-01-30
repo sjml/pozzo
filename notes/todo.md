@@ -8,6 +8,7 @@
     header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers      Authorization, X-Requested-With");
     ```
    - `Authorization` as key in header?
+   - router methods
 2. testing setup?
 3. Frontend basic looks
    - choose dev tool (Vue? Svelte? Blergh.)

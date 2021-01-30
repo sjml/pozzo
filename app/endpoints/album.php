@@ -8,11 +8,11 @@ require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
 // $router->AddHandler("/index", ["albumIndex"]); // give list of albums
-$router->AddHandler("/new", ["newAlbum"]);
+$router->AddHandler("/new", ["newAlbum"], true);
 $router->AddHandler("/view", ["viewAlbum"]);
-$router->AddHandler("/remove", ["removePhoto"]);
-$router->AddHandler("/delete", ["deleteAlbum"]);
-// $router->AddHandler("/edit", ["editAlbum"]); // change album's title or description
+$router->AddHandler("/remove", ["removePhoto"], true);
+$router->AddHandler("/delete", ["deleteAlbum"], true);
+// $router->AddHandler("/edit", ["editAlbum"], true); // change album's title or description
 
 $router->Route();
 

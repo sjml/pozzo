@@ -3,8 +3,8 @@
 class Router {
     private $handlers = [];
 
-    function AddHandler($prefix, $handler) {
-        $this->handlers[$prefix] = $handler;
+    function AddHandler($prefix, $handler, $requireLogin=false) {
+        $this->handlers[$prefix] = ["call" => $handler, "requireLogin" => $requireLogin];
     }
 
     function Route() {
@@ -25,12 +25,18 @@ class Router {
                     $match = true;
                 }
             }
+
             if ($match) {
+                if ($handler["requireLogin"]) {
+                    // check and bounce 403 if needed
+                }
+
                 $POZZO_REQUEST = substr($POZZO_REQUEST, $prefixLength);
-                if ($handler[0] == "require") {
-                    require $handler[1];
+                $call = $handler["call"];
+                if ($call[0] == "require") {
+                    require $call[1];
                 } else {
-                    call_user_func($handler[0], array_slice($handler, 1));
+                    call_user_func($call[0], array_slice($call, 1));
                 }
                 return;
             }
