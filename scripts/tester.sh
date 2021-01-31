@@ -15,13 +15,13 @@ echo
 jwt=$(php ./make_test_user.php)
 
 # upload some images
+pushd ../samples > /dev/null
 if [[ $1 = "full" ]]; then
-  pushd ../samples
   imgs=$(ls)
-  popd
 else
-  imgs=(IMG_3845.jpeg IMG_3957.jpeg IMG_3955.jpeg)
+  imgs=$(ls | shuf -n 5)
 fi
+popd > /dev/null
 for i in ${imgs[*]}; do
   curl \
     -H "Authorization: Bearer $jwt" \

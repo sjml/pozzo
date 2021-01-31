@@ -64,7 +64,7 @@ function importImage($filePath) {
     return $photoData;
 }
 
-function processImage($photoData) {
+function processImage(&$photoData) {
     $origPath = getImageDirectory("orig") . "/" . $photoData["hash"] . ".jpg";
 
     $img = new IMagick();
@@ -73,7 +73,7 @@ function processImage($photoData) {
         if (!isset($photoData["width"])) {
             $photoData["width"] = $img->getImageWidth();
             $photoData["height"] = $img->getImageHeight();
-            $photoData["aspect"] = $img->getImageWidth() / $img->getImageHeight();
+            $photoData["aspect"] = (float)$img->getImageWidth() / (float)$img->getImageHeight();
         }
         $img->setImageCompressionQuality(90);
 

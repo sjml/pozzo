@@ -1,18 +1,16 @@
-1. Frontend basic looks
-   - make basic album view
-2. Deployment setup
+1. Deployment setup
    - copying: app, lib, public (-img), scripts
    - can probably rsync it all for now
-3. Upload flow
+2. Upload flow
    - login flow first
-4. New album frontend hookup
-5. Create new album during sort
-6. Nice transitions between albums
-7. Individual picture view
+3. New album frontend hookup
+4. Create new album during sort
+5. Nice transitions between albums
+6. Individual picture view
    - exif w/map embed
-8. Splash page
-9. Remove test endpoints (reset, testImport)
-10. Add admin+UI endpoint to do reset and other such things?
+7. Splash page
+8. Remove test endpoints (reset, testImport)
+9. Add admin+UI endpoint to do reset and other such things?
    - Config endpoint (read-only?) to give site name, img sizes, etc. for sure
 
 ## future
@@ -30,3 +28,4 @@
 ## for funsies
 * identify interesting parts of photos and center on them for cropping? 
     - how to avoid Twitter problem with ignoring black people
+* do the cool thing where a low-res blurred version of the photo loads first

@@ -60,6 +60,7 @@ class DB {
         $prepCommand .= "title TEXT, ";
         $prepCommand .= "hash TEXT, ";
         $prepCommand .= "width INTEGER, height INTEGER, ";
+        $prepCommand .= "aspect FLOAT, ";
         $prepCommand .= "size INTEGER";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
@@ -182,13 +183,14 @@ class DB {
 
     static function InsertPhoto($photoData) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos(title, hash, width, height, size) values(?,?,?,?,?)",
+            "INSERT INTO photos(title, hash, width, height, aspect, size) values(?,?,?,?,?,?)",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
         $statement->bindParam(3, $photoData["width"], SQLITE3_INTEGER);
         $statement->bindParam(4, $photoData["height"], SQLITE3_INTEGER);
-        $statement->bindParam(5, $photoData["size"], SQLITE3_INTEGER);
+        $statement->bindParam(5, $photoData["aspect"], SQLITE3_FLOAT);
+        $statement->bindParam(6, $photoData["size"], SQLITE3_INTEGER);
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();

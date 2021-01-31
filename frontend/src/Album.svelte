@@ -1,12 +1,18 @@
 <script lang="ts">
-    import type{ Album } from "./pozzo.type";
+    import justifiedLayout from "justified-layout";
 
+    import type{ Album } from "./pozzo.type";
     import AlbumPhoto from "./AlbumPhoto.svelte";
 
     async function getAlbum(): Promise<Album> {
         const res = await fetch(`${location.origin}/api/album/view/1`);
         if (res.ok) {
-            const album = await res.json();
+            const album: Album = await res.json();
+            const aspects = album.photos.map(p => p.aspect);
+            layout = justifiedLayout(aspects, {
+                containerWidth: 1600,
+            });
+            console.log(layout);
             return album;
         }
         else {
@@ -15,23 +21,28 @@
         }
     }
 
+    let layout = null;
     $: albumPromise = getAlbum();
 </script>
 
 {#await albumPromise then album}
     <h2>{album.title}</h2>
-    <div class="albumPhotos">
-        {#each album.photos as photo}
-            <AlbumPhoto photo={photo} size="medium"/>
+    <div class="albumPhotos" style="height: {layout.containerHeight}px; width: {1600}px;">
+        {#each album.photos as photo, pi}
+            <AlbumPhoto photo={photo} size="medium" dims={layout.boxes[pi]} />
         {/each}
     </div>
 {/await}
 
 <style>
     .albumPhotos {
-        display: flex;
-        flex-wrap: wrap;
+        position: relative;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    h2 {
+        font-size: 3em;
+        padding-left: 20px;
     }
 </style>
