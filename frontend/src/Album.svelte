@@ -10,7 +10,7 @@
             const album: Album = await res.json();
             const aspects = album.photos.map(p => p.aspect);
             layout = justifiedLayout(aspects, {
-                containerWidth: 1600,
+                containerWidth: 1200,
             });
             console.log(layout);
             return album;
@@ -27,7 +27,7 @@
 
 {#await albumPromise then album}
     <h2>{album.title}</h2>
-    <div class="albumPhotos" style="height: {layout.containerHeight}px; width: {1600}px;">
+    <div class="albumPhotos" style="height: {layout.containerHeight}px; width: {1200}px;">
         {#each album.photos as photo, pi}
             <AlbumPhoto photo={photo} size="medium" dims={layout.boxes[pi]} />
         {/each}
