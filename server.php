@@ -27,7 +27,26 @@ if (isset($_ENV['ROLLUP_WATCH'])) {
     if (doesFileExist($req_uri, "/frontend/public")) {
         $fp = getFilePath($req_uri, "/frontend/public");
 
-        header("Content-Type: " . mime_content_type($fp));
+        // efforts to use PHP's automagic mimetype detection stuff were too frustrating,
+        //  and there's only a few kinds oif things that might get served here
+        $ext = pathinfo($fp, PATHINFO_EXTENSION);
+        switch ($ext) {
+            case 'html':
+                header("Content-Type: text/html");
+                break;
+            case 'css':
+                header("Content-Type: text/css");
+                break;
+            case 'js':
+                header("Content-Type: text/javascript");
+                break;
+            case 'map':
+                header("Content-Type: application/json");
+                break;
+            default:
+                throw new Exception("Unfamiliar file type in dev directory", 1);
+                break;
+        }
         readfile($fp);
 
         return true;

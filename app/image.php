@@ -73,6 +73,7 @@ function processImage($photoData) {
         if (!isset($photoData["width"])) {
             $photoData["width"] = $img->getImageWidth();
             $photoData["height"] = $img->getImageHeight();
+            $photoData["aspect"] = $img->getImageWidth() / $img->getImageHeight();
         }
         $img->setImageCompressionQuality(90);
 

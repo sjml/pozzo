@@ -2,7 +2,7 @@
 
 cd "$(dirname "$0")"
 
-$server="localhost:8080"
+server="localhost:8080"
 
 # reset everything
 jwt=$(php ./get_test_key.php)
@@ -15,7 +15,13 @@ echo
 jwt=$(php ./make_test_user.php)
 
 # upload some images
-imgs=(IMG_3845.jpeg IMG_3957.jpeg IMG_3955.jpeg)
+if [[ $1 = "full" ]]; then
+  pushd ../samples
+  imgs=$(ls)
+  popd
+else
+  imgs=(IMG_3845.jpeg IMG_3957.jpeg IMG_3955.jpeg)
+fi
 for i in ${imgs[*]}; do
   curl \
     -H "Authorization: Bearer $jwt" \
