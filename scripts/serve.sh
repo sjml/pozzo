@@ -3,4 +3,18 @@
 cd "$(dirname "$0")"
 cd ..
 
-PHP_CLI_SERVER_WORKERS=4 php -S 0.0.0.0:8080 -t ./public/ ./server.php
+conf="./scripts/no-debug.php.ini"
+if [[ $1 = "debug" ]]; then
+  conf="./scripts/debug.php.ini"
+fi
+
+cmd="php -c $conf -S 0.0.0.0:8080 -t ./public/ ./server.php"
+
+export PHP_CLI_SERVER_WORKERS=4
+if [[ $1 = "debug" ]]; then
+  $cmd
+else
+  $cmd 2>&1 >/dev/null | grep -v -E '(Accepted|Closing)$'
+fi
+
+
