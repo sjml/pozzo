@@ -1,7 +1,7 @@
 1. Frontend basic looks
-   - choose dev tool (Vue? Svelte? Blergh.)
    - make basic album view
 2. New album frontend hookup
+   - login flow
 3. Create new album during sort
 4. Nice transitions between albums
 5. Individual picture view
@@ -13,3 +13,5 @@
 * testing setup
 * robustify router:
     - handlers should be able to specify which methods they take
+* sweep through API responses and make sure there's some consistency
+    - "error" vs "message", response codes, JSON schema, etc.
