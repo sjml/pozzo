@@ -15,3 +15,5 @@
     - handlers should be able to specify which methods they take
 * sweep through API responses and make sure there's some consistency
     - "error" vs "message", response codes, JSON schema, etc.
+    - add index actions to each endpoint to explain what they can do?
+        - maybe the robustified Router can automatically do that?

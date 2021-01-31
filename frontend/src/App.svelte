@@ -8,5 +8,6 @@
 </main>
 
 <style>
-
+    /* just putting a nothing style here for now so the bundle.css gets built */
+    main {font-size: inherit;}
 </style>
