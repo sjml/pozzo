@@ -5,14 +5,19 @@
     import AlbumPhoto from "./AlbumPhoto.svelte";
 
     async function getAlbum(): Promise<Album> {
-        const res = await fetch(`${location.origin}/api/album/view/1`);
+        const res = await fetch(
+            `${location.origin}/api/album/view/1`,
+            {
+                body: JSON.stringify({previews: 1}),
+                method: "POST",
+            }
+        );
         if (res.ok) {
             const album: Album = await res.json();
             const aspects = album.photos.map(p => p.aspect);
             layout = justifiedLayout(aspects, {
                 containerWidth: 1200,
             });
-            console.log(layout);
             return album;
         }
         else {

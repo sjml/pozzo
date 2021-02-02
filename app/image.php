@@ -69,13 +69,14 @@ function processImage(&$photoData) {
 
     $img = new IMagick();
     foreach (sizes as $size) {
+        $img->setOption("jpeg:size", $size["maxWidth"] . "x" . $size["maxHeight"]);
         $img->readImage($origPath);
         if (!isset($photoData["width"])) {
             $photoData["width"] = $img->getImageWidth();
             $photoData["height"] = $img->getImageHeight();
             $photoData["aspect"] = (float)$img->getImageWidth() / (float)$img->getImageHeight();
         }
-        $img->setImageCompressionQuality(90);
+        $img->setImageCompressionQuality(92);
 
         $profiles = $img->getImageProfiles("icc", true);
 
@@ -92,6 +93,17 @@ function processImage(&$photoData) {
                 ".jpg",
         );
     }
+
+    // generate tiny preview
+    // convert -define jpeg:size=32x32 IMG_6738.jpeg -resize 32x32 -auto-orient -strip -quality 40 out.jpg
+    $img->setOption("jpeg:size", "32x32");
+    $img->readImage($origPath);
+    $img->scaleImage(32, 32, true);
+    $img->stripImage();
+    $img->setCompressionQuality(40);
+    $img->setImageFormat("jpeg");
+
+    $photoData["tiny"] = base64_encode($img->getImageBlob());
 
     // $exif = exif_read_data($origPath);
     // print_r($exif);

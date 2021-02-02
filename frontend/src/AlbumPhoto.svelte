@@ -1,9 +1,16 @@
 <script lang="ts">
     import type{ Photo } from "./pozzo.type";
+    import { fade } from 'svelte/transition';
 
     export let photo: Photo;
     export let size: string = "medium";
     export let dims: any;
+
+    let loaded = false;
+
+    function imageLoaded() {
+        loaded = true;
+    }
 </script>
 
 {#if photo && dims}
@@ -11,10 +18,18 @@
         class="albumPhoto"
         style={`width: ${dims.width}px; height: ${dims.height}px; top: ${dims.top}px; left: ${dims.left}px;`}
     >
-        <img
+        {#if !loaded}
+            <img class="preload"
+                out:fade="{{duration: 200}}"
+                alt="{photo.title}"
+                src="data:image/jpeg;base64,{photo.tiny}"
+                width="{dims.width}px" height="{dims.height}px"
+            />
+        {/if}
+        <img on:load={imageLoaded}
             alt="{photo.title}"
-            src="{`/img/${size}/${photo.hash}.jpg`}"
             srcset="{`/img/${size}/${photo.hash}.jpg`}, {`/img/${size}2x/${photo.hash}.jpg 2x`}"
+            src="{`/img/${size}/${photo.hash}.jpg`}"
             width="{dims.width}px" height="{dims.height}px"
         />
     </div>
@@ -23,8 +38,18 @@
 <style>
     .albumPhoto {
         position: absolute;
-        overflow: hidden;
-
         cursor: pointer;
+        overflow: hidden;
+    }
+
+    img {
+        position: absolute;
+        top: 0;
+    }
+
+    .preload {
+        filter: blur(0.8em);
+        transform: scale(1.2);
+        z-index: 100;
     }
 </style>

@@ -44,8 +44,10 @@ function newAlbum() {
 
 function viewAlbum() {
     global $POZZO_REQUEST;
+    $input = json_decode(file_get_contents("php://input"), true);
+    $previews = (isset($input["previews"]) && $input["previews"] == 1);
     $identifier = substr($POZZO_REQUEST, 1);
-    $album = DB::FindAlbum($identifier);
+    $album = DB::FindAlbum($identifier, true, $previews);
     if ($album == false) {
         output(["message" => "Album not found"], 404);
         return;

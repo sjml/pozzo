@@ -66,6 +66,13 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
+        $prepCommand = "CREATE TABLE IF NOT EXISTS photoPreviews (";
+        $prepCommand .= "id INTEGER PRIMARY KEY, ";
+        $prepCommand .= "tiny TEXT";
+        $prepCommand .= ")";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
         $prepCommand .= "id INTEGER PRIMARY KEY, ";
         $prepCommand .= "title TEXT UNIQUE, ";
@@ -183,7 +190,7 @@ class DB {
 
     static function InsertPhoto($photoData) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos(title, hash, width, height, aspect, size) values(?,?,?,?,?,?)",
+            "INSERT INTO photos (title, hash, width, height, aspect, size) VALUES (?,?,?,?,?,?)",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
@@ -195,6 +202,13 @@ class DB {
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
 
+        $statement = self::$pdb->prepare(
+            "INSERT INTO photoPreviews(id, tiny) VALUES (?, ?)",
+        );
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $statement->bindParam(2, $photoData["tiny"], SQLITE3_TEXT);
+        $statement->execute();
+
         self::AddPhotoToAlbum(
             $photoData["id"],
             self::GetConfig("unsorted_album_index"),
@@ -203,8 +217,13 @@ class DB {
         return $photoData["id"];
     }
 
-    static function GetPhoto($id) {
-        $query = "SELECT * FROM photos WHERE id = ?";
+    static function GetPhoto($id, $getPreview=false) {
+        if (!$getPreview) {
+            $query = "SELECT * FROM photos WHERE id = ?";
+        }
+        else {
+            $query = "SELECT * FROM photos INNER JOIN photoPreviews ON photos.id = photoPreviews.id WHERE photos.id = ?;";
+        }
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $id, SQLITE3_INTEGER);
         $results = $statement->execute();
@@ -304,10 +323,13 @@ class DB {
         return $changes;
     }
 
-    static function GetPhotosInAlbum($albumID) {
+    static function GetPhotosInAlbum($albumID, $getPreviews=false) {
         $ret = [];
         $query = "SELECT * FROM photos_albums ";
         $query .= "JOIN photos ON photos.id = photos_albums.photo_id ";
+        if ($getPreviews) {
+            $query .= "INNER JOIN photoPreviews ON photos.id = photoPreviews.id ";
+        }
         $query .= "WHERE photos_albums.album_id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
@@ -321,33 +343,29 @@ class DB {
         return $ret;
     }
 
-    static function FindAlbum($identifier, $includePhotos = true) {
+    static function FindAlbum($identifier, $includePhotos = true, $previews = false) {
         if (is_numeric($identifier)) {
             $query = "SELECT * FROM albums WHERE id = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_INTEGER);
-            $results = $statement->execute();
-            if ($results == false) {
-                return $false;
-            }
-            $albumData = $results->fetchArray(SQLITE3_ASSOC);
-        } else {
+        }
+        else {
             $query = "SELECT * FROM albums WHERE title = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_TEXT);
-            $results = $statement->execute();
-            if ($results == false) {
-                return $false;
-            }
-            $albumData = $results->fetchArray(SQLITE3_ASSOC);
         }
+        $results = $statement->execute();
+        if ($results == false) {
+            return $false;
+        }
+        $albumData = $results->fetchArray(SQLITE3_ASSOC);
 
         if (!isset($albumData) || $albumData == false) {
             return false;
         }
 
         if ($includePhotos) {
-            $photos = self::GetPhotosInAlbum($albumData["id"]);
+            $photos = self::GetPhotosInAlbum($albumData["id"], $previews);
             $albumData["photos"] = $photos;
         }
 
