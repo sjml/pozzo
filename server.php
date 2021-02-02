@@ -22,7 +22,7 @@ function doesFileExist($uri, $baseDir) {
     }
 }
 
-if (isset($_ENV['ROLLUP_WATCH'])) {
+if (isset($_ENV["ROLLUP_WATCH"])) {
     // running frontend dev; check there first
     if (doesFileExist($req_uri, "/frontend/public")) {
         $fp = getFilePath($req_uri, "/frontend/public");
@@ -31,16 +31,16 @@ if (isset($_ENV['ROLLUP_WATCH'])) {
         //  and there's only a few kinds oif things that might get served here
         $ext = pathinfo($fp, PATHINFO_EXTENSION);
         switch ($ext) {
-            case 'html':
+            case "html":
                 header("Content-Type: text/html");
                 break;
-            case 'css':
+            case "css":
                 header("Content-Type: text/css");
                 break;
-            case 'js':
+            case "js":
                 header("Content-Type: text/javascript");
                 break;
-            case 'map':
+            case "map":
                 header("Content-Type: application/json");
                 break;
             default:
@@ -61,8 +61,6 @@ if (substr($req_uri, 0, 4) == "/api") {
     require_once __DIR__ . "/public/api/index.php";
     return true;
 }
-
-
 
 http_response_code(404);
 echo "<pre>404 / Not Found</pre>";

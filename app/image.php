@@ -69,12 +69,16 @@ function processImage(&$photoData) {
 
     $img = new IMagick();
     foreach (sizes as $size) {
-        $img->setOption("jpeg:size", $size["maxWidth"] . "x" . $size["maxHeight"]);
+        $img->setOption(
+            "jpeg:size",
+            $size["maxWidth"] . "x" . $size["maxHeight"],
+        );
         $img->readImage($origPath);
         if (!isset($photoData["width"])) {
             $photoData["width"] = $img->getImageWidth();
             $photoData["height"] = $img->getImageHeight();
-            $photoData["aspect"] = (float)$img->getImageWidth() / (float)$img->getImageHeight();
+            $photoData["aspect"] =
+                (float) $img->getImageWidth() / (float) $img->getImageHeight();
         }
         $img->setImageCompressionQuality(92);
 

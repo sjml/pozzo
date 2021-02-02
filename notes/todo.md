@@ -25,13 +25,15 @@
 * testing setup
 * robustify backend router:
     - handlers should be able to specify which methods they take
+    - also, gzip should be enabled at the router level, which should probably
+      also have it's own output function
+    - man.... maybe I should just use a library
 * sweep through API responses and make sure there's some consistency
     - "error" vs "message", response codes, JSON schema, etc.
     - add index actions to each endpoint to explain what they can do?
         - maybe the robustified Router can automatically do that?
 * use webp/avif outputs with `<picture>` elements?
     - would mean retooling the image importing process to generate 2x as many outputs :-/
-* 
 
 ## for funsies
 * identify interesting parts of photos and center on them for cropping? 

@@ -217,12 +217,12 @@ class DB {
         return $photoData["id"];
     }
 
-    static function GetPhoto($id, $getPreview=false) {
+    static function GetPhoto($id, $getPreview = false) {
         if (!$getPreview) {
             $query = "SELECT * FROM photos WHERE id = ?";
-        }
-        else {
-            $query = "SELECT * FROM photos INNER JOIN photoPreviews ON photos.id = photoPreviews.id WHERE photos.id = ?;";
+        } else {
+            $query =
+                "SELECT * FROM photos INNER JOIN photoPreviews ON photos.id = photoPreviews.id WHERE photos.id = ?;";
         }
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $id, SQLITE3_INTEGER);
@@ -323,12 +323,13 @@ class DB {
         return $changes;
     }
 
-    static function GetPhotosInAlbum($albumID, $getPreviews=false) {
+    static function GetPhotosInAlbum($albumID, $getPreviews = false) {
         $ret = [];
         $query = "SELECT * FROM photos_albums ";
         $query .= "JOIN photos ON photos.id = photos_albums.photo_id ";
         if ($getPreviews) {
-            $query .= "INNER JOIN photoPreviews ON photos.id = photoPreviews.id ";
+            $query .=
+                "INNER JOIN photoPreviews ON photos.id = photoPreviews.id ";
         }
         $query .= "WHERE photos_albums.album_id = ?";
         $statement = self::$pdb->prepare($query);
@@ -343,13 +344,16 @@ class DB {
         return $ret;
     }
 
-    static function FindAlbum($identifier, $includePhotos = true, $previews = false) {
+    static function FindAlbum(
+        $identifier,
+        $includePhotos = true,
+        $previews = false
+    ) {
         if (is_numeric($identifier)) {
             $query = "SELECT * FROM albums WHERE id = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_INTEGER);
-        }
-        else {
+        } else {
             $query = "SELECT * FROM albums WHERE title = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_TEXT);

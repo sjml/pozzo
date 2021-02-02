@@ -18,6 +18,7 @@ $router->Route();
 
 function output($obj, $code = 200) {
     http_response_code($code);
+    ob_start("ob_gzhandler"); // need to put this in the router, probably
     header("Content-Type: application/json");
     echo json_encode($obj);
 }
@@ -45,7 +46,7 @@ function newAlbum() {
 function viewAlbum() {
     global $POZZO_REQUEST;
     $input = json_decode(file_get_contents("php://input"), true);
-    $previews = (isset($input["previews"]) && $input["previews"] == 1);
+    $previews = isset($input["previews"]) && $input["previews"] == 1;
     $identifier = substr($POZZO_REQUEST, 1);
     $album = DB::FindAlbum($identifier, true, $previews);
     if ($album == false) {
