@@ -1,6 +1,7 @@
 1. Deployment setup
    - copying: app, lib, public (-img), scripts
    - can probably rsync it all for now
+   - update tester script to run properly on server (can't use localhost, need to specify php7-4)
 2. Fix album view
    - calculate width, make responsive
 2. Upload flow
