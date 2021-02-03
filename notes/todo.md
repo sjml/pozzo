@@ -1,12 +1,9 @@
 1. Fix album view
-    - calculate width, make responsive
     - identify panoramas by aspect ratio and ensure they are in their own row
         - probably means chunking up the layout process, but that's not too bad
         - if last row ended with a widow, *maybe* don't want to do it? 
-    - might want to split the loads up, too... with the blur coverings, we can chunk up the actual image fetches by position on the page
-        - not sure I want to do lazy-loading per se -- once you have time, load it all up, but prioritize stuff that's visible
-        - so maybe chunk the loads into a priority queue, then reorder it on scroll? 
-        - important to not get *too* fancy here. 
+        - unnnnngh this would actually probably mean writing my own justified layout system which appears to be NP-hard so maybe what we got is ok
+            - would still like to do better on the last row, tho
 2. Upload flow
     - login flow first
     - side note: login/check should return a fresh token
