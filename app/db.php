@@ -39,44 +39,44 @@ class DB {
 
     private static function _createDB() {
         $prepCommand = "CREATE TABLE IF NOT EXISTS users(";
-        $prepCommand .= "id INTEGER PRIMARY KEY, ";
-        $prepCommand .= "name TEXT NOT NULL UNIQUE,";
-        $prepCommand .= "password TEXT";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", name TEXT NOT NULL UNIQUE";
+        $prepCommand .= ", password TEXT";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS config(";
-        $prepCommand .= "key TEXT NOT NULL UNIQUE,";
-        $prepCommand .= "value TEXT,";
-        $prepCommand .=
-            "type TEXT CHECK(type IN ('integer', 'string', 'float'))";
+        $prepCommand .= "key TEXT NOT NULL UNIQUE";
+        $prepCommand .= ", value TEXT";
+        $prepCommand .= ", type TEXT CHECK(type IN ('integer', 'string', 'float'))";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos (";
-        $prepCommand .= "id INTEGER PRIMARY KEY, ";
-        $prepCommand .= "title TEXT, ";
-        $prepCommand .= "hash TEXT, ";
-        $prepCommand .= "width INTEGER, height INTEGER, ";
-        $prepCommand .= "aspect FLOAT, ";
-        $prepCommand .= "size INTEGER";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", title TEXT";
+        $prepCommand .= ", hash TEXT";
+        $prepCommand .= ", width INTEGER, height INTEGER";
+        $prepCommand .= ", aspect FLOAT";
+        $prepCommand .= ", size INTEGER";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photoPreviews (";
-        $prepCommand .= "id INTEGER PRIMARY KEY, ";
-        $prepCommand .= "tiny TEXT";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", tinyJPEG TEXT";
+        $prepCommand .= ", tinyWebP TEXT";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
-        $prepCommand .= "id INTEGER PRIMARY KEY, ";
-        $prepCommand .= "title TEXT UNIQUE, ";
-        $prepCommand .= "description TEXT";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", title TEXT UNIQUE";
+        $prepCommand .= ", description TEXT";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -86,12 +86,12 @@ class DB {
         self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
-        $prepCommand .= "photo_id INTEGER NOT NULL, ";
-        $prepCommand .= "album_id INTEGER NOT NULL, ";
+        $prepCommand .= "photo_id INTEGER NOT NULL";
+        $prepCommand .= ", album_id INTEGER NOT NULL";
         $prepCommand .=
-            "CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
-        $prepCommand .= "FOREIGN KEY(photo_id) REFERENCES photos(id), ";
-        $prepCommand .= "FOREIGN KEY(album_id) REFERENCES albums(id) ";
+            ", CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
+        $prepCommand .= ", FOREIGN KEY(photo_id) REFERENCES photos(id)";
+        $prepCommand .= ", FOREIGN KEY(album_id) REFERENCES albums(id)";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -203,10 +203,10 @@ class DB {
         $photoData["id"] = self::$pdb->lastInsertRowID();
 
         $statement = self::$pdb->prepare(
-            "INSERT INTO photoPreviews(id, tiny) VALUES (?, ?)",
+            "INSERT INTO photoPreviews(id, tinyJPEG) VALUES (?, ?)",
         );
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
-        $statement->bindParam(2, $photoData["tiny"], SQLITE3_TEXT);
+        $statement->bindParam(2, $photoData["tinyJPEG"], SQLITE3_TEXT);
         $statement->execute();
 
         self::AddPhotoToAlbum(

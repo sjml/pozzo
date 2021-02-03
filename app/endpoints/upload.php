@@ -22,6 +22,7 @@ function upload() {
     $photoData["title"] = $_FILES["photoUp"]["name"];
 
     processImage($photoData);
+    unset($photoData["tinyJPEG"]);
 
     header("Content-Type: application/json");
     echo json_encode($photoData);

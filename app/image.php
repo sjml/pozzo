@@ -108,6 +108,15 @@ function processImage(&$photoData) {
                 $photoData["hash"] .
                 ".jpg",
         );
+
+        //// <sigh> until Dreamhost updates ImageMagick...
+        //// (and below for the tiny)
+        // $img->writeImage(
+        //     getImageDirectory($size["label"]) .
+        //         "/" .
+        //         $photoData["hash"] .
+        //         ".webp",
+        // );
     }
 
     // generate tiny preview
@@ -119,7 +128,11 @@ function processImage(&$photoData) {
     $img->setCompressionQuality(40);
     $img->setImageFormat("jpeg");
 
-    $photoData["tiny"] = base64_encode($img->getImageBlob());
+    $photoData["tinyJPEG"] = base64_encode($img->getImageBlob());
+
+    //// <sigh>
+    // $img->setImageFormat("webp");
+    // $photoData["tinyWebP"] = base64_encode($img->getImageBlob());
 
     // TODO: figure out what EXIF data should be pulled into the database
     // $exif = exif_read_data($origPath);

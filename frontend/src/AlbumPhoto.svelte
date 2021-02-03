@@ -22,7 +22,7 @@
             <img class="preload"
                 out:fade="{{duration: 200}}"
                 alt="{photo.title}"
-                src="data:image/jpeg;base64,{photo.tiny}"
+                src="data:image/jpeg;base64,{photo.tinyJPEG}"
                 width="{dims.width}px" height="{dims.height}px"
             />
         {/if}

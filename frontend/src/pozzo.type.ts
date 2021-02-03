@@ -7,7 +7,7 @@ export type Photo = {
     height: number,
     aspect: number,
     size: number,
-    tiny: string,
+    tinyJPEG: string,
 }
 
 export type Album = {

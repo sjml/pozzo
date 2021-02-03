@@ -32,6 +32,10 @@ jwt=$($PHP ./get_test_key.php)
 $CURL \
   -H "Authorization: Bearer $jwt" \
   $SERVER/api/reset
+if [[ $? -ne 0 ]]; then
+  echo "Could not connect to $SERVER"
+  exit 1
+fi
 echo
 
 # make a new user on the fresh site

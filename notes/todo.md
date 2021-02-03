@@ -1,4 +1,5 @@
 1. Fix album view
+    - color spaces are getting discarded on import?
     - calculate width, make responsive
     - experiment to see if widows are actually ending up justified
             - `{widowLayoutStyle: "justify"}`
@@ -38,7 +39,7 @@
         * set cache policy in .htaccess? (images should be easily cachable since their
           filenames *are* hashes... does the filepath become part of that?)
         * put normalize into bundle? 
-        * maybe webp would be good?
+        * maybe webp would be good? (would have to compile webp + imagemagick + imagick.so + maybe PHP on Dreamhost.... lotta work there)
         * lighthouse tests with 85% quality and considers anything higher "optimizable"
             - not sure I want to make that tradeoff though........
 * robustify backend router:
@@ -68,3 +69,4 @@
         - should at least compress well when sending a bunch of them together -- first 240 characters seem to be shared, out of ~900-~1000
         - webp actually does a great job here -- can get it down to about 100 bytes at 16x16, but it's not supported in Safari pre Big Sur :(
             - detection methods like [this](https://gist.github.com/jakearchibald/6c43d5c454bc8f48f83d8471f45698fa) **also** don't work in Safari because webdev is cursed 
+            - is this different? https://github.com/fregante/supports-webp/blob/master/dist/supports-webp.js 
