@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { onMount } from "svelte";
+
     import justifiedLayout from "justified-layout";
 
     import type{ Album } from "./pozzo.type";
@@ -13,35 +15,60 @@
             }
         );
         if (res.ok) {
-            const album: Album = await res.json();
-            const aspects = album.photos.map(p => p.aspect);
-            layout = justifiedLayout(aspects, {
-                containerWidth: 1200,
-            });
+            album = await res.json();
             return album;
         }
         else {
             const err = await res.json();
-            throw new Error(err);
+            console.error(err);
+            // throw new Error(err);
         }
     }
 
+    function calculateLayout(width: number) {
+        if (!width || !album) {
+            return; // initial loads; don't worry yet
+        }
+        const aspects = album.photos.map(p => p.aspect);
+        layout = justifiedLayout(aspects, {
+            targetRowHeight: 300,
+            containerWidth: width,
+            containerPadding: 10,
+            widowLayoutStyle: "center",
+        });
+    }
+
+    let containerWidth: number;
+    let album: Album = null;
     let layout = null;
-    $: albumPromise = getAlbum();
+    $: calculateLayout(containerWidth);
+    $: if (album) {calculateLayout(containerWidth);}
+
+
+    onMount(getAlbum);
 </script>
 
-{#await albumPromise then album}
+{#if album}
     <h2>{album.title}</h2>
-    <div class="albumPhotos" style="height: {layout.containerHeight}px; width: {1200}px;">
-        {#each album.photos as photo, pi}
-            <AlbumPhoto photo={photo} size="medium" dims={layout.boxes[pi]} />
-        {/each}
+
+    <div class="albumPhotos"
+        bind:clientWidth={containerWidth}
+        style={`height: ${layout?.containerHeight || 0}px;`}
+    >
+        {#if layout}
+            {#each album.photos as photo, pi}
+                <AlbumPhoto photo={photo} size="medium" dims={layout.boxes[pi]} />
+            {/each}
+        {/if}
     </div>
-{/await}
+{/if}
+
 
 <style>
     .albumPhotos {
         position: relative;
+        max-width: 95%;
+        height: 50px;
         margin-left: auto;
         margin-right: auto;
     }

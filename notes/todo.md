@@ -1,8 +1,5 @@
 1. Fix album view
-    - color spaces are getting discarded on import?
     - calculate width, make responsive
-    - experiment to see if widows are actually ending up justified
-            - `{widowLayoutStyle: "justify"}`
     - identify panoramas by aspect ratio and ensure they are in their own row
         - probably means chunking up the layout process, but that's not too bad
         - if last row ended with a widow, *maybe* don't want to do it? 

@@ -49,7 +49,8 @@ class DB {
         $prepCommand = "CREATE TABLE IF NOT EXISTS config(";
         $prepCommand .= "key TEXT NOT NULL UNIQUE";
         $prepCommand .= ", value TEXT";
-        $prepCommand .= ", type TEXT CHECK(type IN ('integer', 'string', 'float'))";
+        $prepCommand .=
+            ", type TEXT CHECK(type IN ('integer', 'string', 'float'))";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
