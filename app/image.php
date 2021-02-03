@@ -80,12 +80,24 @@ function processImage(&$photoData) {
             $photoData["aspect"] =
                 (float) $img->getImageWidth() / (float) $img->getImageHeight();
         }
-        $img->setImageCompressionQuality(92);
+
+        // Quality setting is higher than it *needs* to be by any strict definition,
+        //   but for gallery purposes I'd rather err on the side of images being
+        //   slightly too large.
+        // Very hard to pick a single number that's good for all images.
+        //   Given how image-heavy this site will be, it'll never really have
+        //   perfect lighthouse scores unless we're willing to degrade the visuals,
+        //   which... not today.
+        $img->setImageCompressionQuality(88);
 
         $profiles = $img->getImageProfiles("icc", true);
 
         $img->scaleImage($size["maxWidth"], $size["maxHeight"], true);
         $img->stripImage();
+
+        // all other profiles were removed when the image was stripped;
+        //   add back the ICC one if it existed. Leads to some cross-browser
+        //   inconsistency, but worth maintaining accuracy if it's possible!
         if (!empty($profiles)) {
             $img->profileImage("icc", $profiles["icc"]);
         }
@@ -109,6 +121,7 @@ function processImage(&$photoData) {
 
     $photoData["tiny"] = base64_encode($img->getImageBlob());
 
+    // TODO: figure out what EXIF data should be pulled into the database
     // $exif = exif_read_data($origPath);
     // print_r($exif);
 

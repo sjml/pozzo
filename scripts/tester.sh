@@ -2,46 +2,69 @@
 
 cd "$(dirname "$0")"
 
-server="localhost:8080"
+# will always be running against localhost (because want to make sure)
+#   the API is always working) but host might have different names for itself
+SERVER="localhost:8080"
+PHP=php
+FULL=0
+
+# <sigh> getopts doesn't do long arguments
+args=($@)
+for a in ${args[@]}; do
+  IFS='=' read -ra arg <<< $a
+  case ${arg[0]} in
+    "--server")
+      SERVER=${arg[1]}
+      ;;
+    "--php")
+      PHP=${arg[1]}
+      ;;
+    "--full")
+      FULL=${arg[1]}
+      ;;
+  esac
+done
+
+CURL="curl -s"
 
 # reset everything
-jwt=$(php ./get_test_key.php)
-curl \
+jwt=$($PHP ./get_test_key.php)
+$CURL \
   -H "Authorization: Bearer $jwt" \
-  $server/api/reset
+  $SERVER/api/reset
 echo
 
 # make a new user on the fresh site
-jwt=$(php ./make_test_user.php)
+jwt=$($PHP ./make_test_user.php)
 
 # upload some images
 pushd ../samples > /dev/null
-if [[ $1 = "full" ]]; then
+if [[ $FULL -eq 1 ]]; then
   imgs=$(ls)
 else
   imgs=$(ls | shuf -n 5)
 fi
 popd > /dev/null
 for i in ${imgs[*]}; do
-  curl \
+  $CURL \
     -H "Authorization: Bearer $jwt" \
     -F "photoUp=@../samples/$i" \
-    $server/api/upload
+    $SERVER/api/upload
   echo
 done
 
 # make a new album
-curl \
+$CURL \
   -H "Authorization: Bearer $jwt" \
   -X POST --data '{"title": "testAlbum"}' \
-  $server/api/album/new
+  $SERVER/api/album/new
 echo
 
 # put some of the images in it
 for i in $(seq 2); do
-  curl \
+  $CURL \
     -H "Authorization: Bearer $jwt" \
     -X POST --data "{\"photoID\": $i, \"albumID\": 2}" \
-    $server/api/photo/copy
+    $SERVER/api/photo/copy
   echo
 done
