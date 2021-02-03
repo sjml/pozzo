@@ -2,6 +2,17 @@
 
 Because the world needed another web photo gallery. 
 
+Goals:
+* modern web frontend that loads fast, runs smoothly, and is easy to hack on
+    * good-looking photo-centric interface, with EXIF data easily available
+* JSON-only API backend, as simple as possible (but no simpler)
+    * runnable on cheap shared hosting
+
+Non-goals:
+* Editing photos beyond giving titles, tags, and descriptions
+* Multi-user collaboration
+* Real-time displays (album gets updated and it's pushed to your screen)
+
 I'm imagining this as a single-to-few-users-per-installation kind of thing. Not replacing Flickr, but just something to easily have your own personal gallery, maybe shared with a few folks. 
 
 The backend is in PHP because it's easy and cheap to deploy almost anywhere. 
