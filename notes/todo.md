@@ -35,7 +35,7 @@
     - maybe setup automated lighthouse testing as GitHub action?
     - also check speed of import
 * perf notes
-    - looked at lighthouse score (mid-80s) which isn't bad considering it's mostly big images
+    - looked at lighthouse score (now low-90s) which isn't bad considering it's mostly big images
         * set cache policy in .htaccess? (images should be easily cachable since their
           filenames *are* hashes... does the filepath become part of that?)
         * put normalize into bundle? 
