@@ -1,27 +1,29 @@
-1. Fix album view
-    - identify panoramas by aspect ratio and ensure they are in their own row
-        - probably means chunking up the layout process, but that's not too bad
-        - if last row ended with a widow, *maybe* don't want to do it? 
-        - unnnnngh this would actually probably mean writing my own justified layout system which appears to be NP-hard so maybe what we got is ok
-            - would still like to do better on the last row, tho
-2. Upload flow
+1. Upload flow
     - login flow first
     - side note: login/check should return a fresh token
-    - probably routing before everything
-3. New album frontend hookup
-    - while we're here, look into passing dictionaries for params to avoid so many defaults
-4. Create new album during sort
-5. Nice transitions between albums
-6. Individual picture view
+    - probably client routing before everything
+2. New album frontend hookup
+    - private albums in backend
+        - while we're in here, look into passing dictionaries for params to avoid so many defaults
+3. Moving images between albums
+    - allowing creating a new one as you do it
+    - multiple-selection
+    - panel w/drag and drop? 
+4. Nice transitions between albums
+5. Individual picture view
     - exif w/map embed
-7. Splash page
-8. Reorder album
+    - (map on album view, too, natch)
+6. Splash page
+7. Reorder album
     - new column on albums_photos table to indicate order
-9. Remove test endpoints (reset, testImport)
-10. Add admin endpoint (+frontend UI) to do reset and other such things?
-    - Config endpoint (read-only?) to give site name, img sizes, etc. for sure
-11. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
+    - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
+8. Remove test endpoints (reset, testImport)
+9. Add admin endpoint (+frontend UI) to do reset and other such things?
+    - Config endpoint to give site name, get img sizes, etc. for sure
+        - some set at read-only (can't change sizes without reimporting everything, for instance)
+10. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
     - with image import -- do we have to read the image anew each time? not sure if that's the bottleneck, but I/O is a likely culprit
+11. Video / live pictures?
 
 ## future
 * special handling for unsorted album? (automatically removing from it)
@@ -33,7 +35,7 @@
         * set cache policy in .htaccess? (images should be easily cachable since their
           filenames *are* hashes... does the filepath become part of that?)
         * put normalize into bundle? 
-        * maybe webp would be good? (would have to compile webp + imagemagick + imagick.so + maybe PHP on Dreamhost.... lotta work there)
+        * maybe webp would be good? (would have to compile webp + imagemagick + imagick.so + maybe PHP on Dreamhost.... lotta annoyance there)
         * lighthouse tests with 85% quality and considers anything higher "optimizable"
             - not sure I want to make that tradeoff though........
 * robustify backend router:
@@ -55,6 +57,11 @@
 ## for funsies
 * identify interesting parts of photos and center on them for cropping? 
     - how to avoid Twitter problem with ignoring black people
+* identify panoramas by aspect ratio and ensure they are in their own row
+    - probably means chunking up the layout process, but that's not too bad
+    - if last row ended with a widow, *maybe* don't want to do it? 
+    - unnnnngh this would actually probably mean writing my own justified layout system which appears to be NP-hard so maybe what we got is ok
+        - would still like to do better on the last row, tho
 * have the blur image reload only do its fade if it took more than X ms to load the image
     - find predominant color and store that in photos table?
     - also, preview images are down to around ~490bytes, but that's still a lot. gotta be a way to get them smaller (plus base64 encoding adds some overhead)

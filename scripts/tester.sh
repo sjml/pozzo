@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 SERVER="localhost:8080"
 PHP=php
 FULL=0
+ONLY_RESET=0
 
 # <sigh> getopts doesn't do long arguments
 args=($@)
@@ -21,6 +22,9 @@ for a in ${args[@]}; do
       ;;
     "--full")
       FULL=${arg[1]}
+      ;;
+    "--only-reset")
+      ONLY_RESET=1
       ;;
   esac
 done
@@ -40,6 +44,10 @@ echo
 
 # make a new user on the fresh site
 jwt=$($PHP ./make_test_user.php)
+
+if [[ $ONLY_RESET = 1 ]]; then
+  exit
+fi
 
 # upload some images
 pushd ../samples > /dev/null
