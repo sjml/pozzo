@@ -31,10 +31,10 @@ function generateJWT($userData, $secret, $validOffset, $expiration) {
     return $jwt;
 }
 
-function validateJWT($token, $secret) {
+function decodeJWT($token, $secret) {
     try {
         $decoded = JWT::decode($token, $secret, ["HS256"]);
-        return true;
+        return $decoded;
     } catch (\Throwable $th) {
         return false;
     }

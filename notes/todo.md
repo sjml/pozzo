@@ -1,9 +1,4 @@
 1. Upload flow
-    - login flow first
-    - side note: login/check should return a fresh token
-    - probably client routing before everything
-        - started on it with `svelte-routing`...
-        - pre-routing: bundle was 17510 bytes, now is 26313 :-/
 2. New album frontend hookup
     - private albums in backend
         - while we're in here, look into passing dictionaries for params to avoid so many defaults
@@ -15,7 +10,11 @@
 5. Individual picture view
     - exif w/map embed
     - (map on album view, too, natch)
-6. Splash page
+6. Design pass
+    - first: look at API calls to see if they can't be cleaned up (and handle errors better)
+    - splash page
+    - color choices
+    - overall presentation
 7. Reorder album
     - new column on albums_photos table to indicate order
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?

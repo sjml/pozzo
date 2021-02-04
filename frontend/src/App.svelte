@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Router, Route } from "svelte-routing";
 
+    import Login from "./Login.svelte";
     import Album from "./Album.svelte";
     import AlbumList from "./AlbumList.svelte";
 
@@ -9,6 +10,7 @@
 
 <main>
     <h1>Pozzo</h1>
+    <Login />
 
     <Router url={url}>
         <Route path="album/:identifier" component={Album} />

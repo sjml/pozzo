@@ -4,13 +4,14 @@
     import justifiedLayout from "justified-layout";
 
     import type{ Album } from "./pozzo.type";
+    import { siteData } from "./stores";
     import AlbumPhoto from "./AlbumPhoto.svelte";
 
     export let identifier: number|string;
 
     async function getAlbum(): Promise<Album> {
         const res = await fetch(
-            `${location.origin}/api/album/view/${identifier}`,
+            `${$siteData.apiUri}/album/view/${identifier}`,
             {
                 body: JSON.stringify({previews: 1}),
                 method: "POST",

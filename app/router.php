@@ -54,27 +54,34 @@ class Router {
         require __DIR__ . "/endpoints/404.php";
     }
 
-    private function _validate() {
+    function GetJWT() {
         if (!isset($_SERVER["HTTP_AUTHORIZATION"])) {
-            return false;
+            return -1;
         }
         $authHeader = $_SERVER["HTTP_AUTHORIZATION"];
         if (substr($authHeader, 0, strlen("Bearer ")) != "Bearer ") {
+            return -2;
+        }
+        $token = substr($authHeader, strlen("Bearer "));
+        return $token;
+    }
+
+    private function _validate() {
+        $token = self::GetJWT();
+        if ($token == -1) {
+            return false;
+        }
+        if ($token == -2) {
             output(["message" => "Missing bearer token"], 400);
             return;
         }
-        $token = substr($authHeader, strlen("Bearer "));
-
-        //// from when it was POST-ed instead of in the headers
-        // $input = json_decode(file_get_contents("php://input"), true);
-        // if (!isset($input["token"])) {
-        //     output(["message" => "Missing parameter 'token'"], 400);
-        //     return;
-        // }
-        // $token = $input["token"];
 
         $secret = DB::GetConfig("app_key");
 
-        return validateJWT($token, $secret);
+        $value = decodeJWT($token, $secret);
+        if ($value == false) {
+            return false;
+        }
+        return true;
     }
 }

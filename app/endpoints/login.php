@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . "/../db.php";
+require_once __DIR__ . "/../auth.php";
 
 $POZZO_REQUEST = preg_replace("/^\/login/", "", $POZZO_REQUEST);
 
@@ -20,7 +21,22 @@ function output($obj, $code = 200) {
 }
 
 function checkLogin() {
-    output(["message" => "Login valid"]);
+    // only gets called if auth check passed
+    $timeDelayToValidity = 10;
+    global $router;
+    $decoded = decodeJWT($router->GetJWT(), DB::GetConfig("app_key"));
+    $newToken = $jwt = generateJWT(
+        $decoded->data,
+        DB::GetConfig("app_key"),
+        $timeDelayToValidity,
+        DB::GetConfig("jwt_expiration"),
+    );
+
+    output([
+        "message" => "Login valid",
+        "newToken" => $newToken,
+        "validIn" => $timeDelayToValidity,
+    ]);
 }
 
 function login() {

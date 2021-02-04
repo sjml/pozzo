@@ -1,4 +1,8 @@
 
+export type SiteConfig = {
+    apiUri: string,
+}
+
 export type Photo = {
     id: number,
     title: string,
