@@ -2,6 +2,8 @@
     - login flow first
     - side note: login/check should return a fresh token
     - probably client routing before everything
+        - started on it with `svelte-routing`...
+        - pre-routing: bundle was 17510 bytes, now is 26313 :-/
 2. New album frontend hookup
     - private albums in backend
         - while we're in here, look into passing dictionaries for params to avoid so many defaults

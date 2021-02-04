@@ -62,5 +62,11 @@ if (substr($req_uri, 0, 4) == "/api") {
     return true;
 }
 
+if (isset($_ENV["ROLLUP_WATCH"])) {
+    // let the frontend dev server handle 404s if it's around
+    require_once __DIR__ . "/public/index.html";
+    return true;
+}
+
 http_response_code(404);
 echo "<pre>404 / Not Found</pre>";

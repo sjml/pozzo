@@ -1,4 +1,4 @@
-backend tests:
+backend functionality tests
     reset site
     can't upload without credentials
     create user
@@ -20,3 +20,8 @@ backend tests:
         - images move back to unsorted
     delete album + images
         - images are gone
+
+perf/size
+    don't let import time of realistic-sized album rise above X
+    don't let lighthouse score of realistic-sized album drop below 90
+    don't let javascript bundle size rise above X

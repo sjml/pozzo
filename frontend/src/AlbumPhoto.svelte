@@ -7,10 +7,6 @@
     export let dims: any;
 
     let loaded = false;
-
-    function imageLoaded() {
-        loaded = true;
-    }
 </script>
 
 {#if photo && dims}
@@ -26,7 +22,7 @@
                 width="{dims.width}px" height="{dims.height}px"
             />
         {/if}
-        <img on:load={imageLoaded}
+        <img on:load={() => loaded = true}
             alt="{photo.title}"
             srcset="{`/img/${size}/${photo.hash}.jpg`}, {`/img/${size}2x/${photo.hash}.jpg 2x`}"
             src="{`/img/${size}/${photo.hash}.jpg`}"

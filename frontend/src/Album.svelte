@@ -6,9 +6,11 @@
     import type{ Album } from "./pozzo.type";
     import AlbumPhoto from "./AlbumPhoto.svelte";
 
+    export let identifier: number|string;
+
     async function getAlbum(): Promise<Album> {
         const res = await fetch(
-            `${location.origin}/api/album/view/1`,
+            `${location.origin}/api/album/view/${identifier}`,
             {
                 body: JSON.stringify({previews: 1}),
                 method: "POST",
