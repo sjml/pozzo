@@ -35,8 +35,14 @@ function decodeJWT($token, $secret) {
     try {
         $decoded = JWT::decode($token, $secret, ["HS256"]);
         return $decoded;
+    } catch (\Firebase\JWT\ExpiredException $th) {
+        return -1;
+    } catch (\Firebase\JWT\BeforeValidException $th) {
+        return -2;
+    } catch (\Firebase\JWT\SignatureInvalidException $th) {
+        return -3;
     } catch (\Throwable $th) {
-        return false;
+        return -128;
     }
 }
 

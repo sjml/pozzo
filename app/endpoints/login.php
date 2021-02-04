@@ -22,7 +22,7 @@ function output($obj, $code = 200) {
 
 function checkLogin() {
     // only gets called if auth check passed
-    $timeDelayToValidity = 10;
+    $timeDelayToValidity = 3;
     global $router;
     $decoded = decodeJWT($router->GetJWT(), DB::GetConfig("app_key"));
     $newToken = $jwt = generateJWT(
@@ -66,7 +66,7 @@ function login() {
     $jwt = generateJWT(
         $result,
         DB::GetConfig("app_key"),
-        10,
+        3,
         DB::GetConfig("jwt_expiration"),
     );
 

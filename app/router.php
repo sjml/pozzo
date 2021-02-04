@@ -12,6 +12,12 @@ class Router {
         ];
     }
 
+    function Output($obj, $code=200) {
+        http_response_code($code);
+        header("Content-Type: application/json");
+        echo json_encode($obj);
+    }
+
     function Route() {
         global $POZZO_REQUEST;
         if ("" == $POZZO_REQUEST) {
@@ -33,9 +39,6 @@ class Router {
             if ($match) {
                 if ($handler["requireLogin"]) {
                     if (!self::_validate()) {
-                        http_response_code(403);
-                        header("Content-Type: application/json");
-                        echo json_encode(["message" => "403 / Forbidden"]);
                         return;
                     }
                 }
@@ -72,16 +75,31 @@ class Router {
             return false;
         }
         if ($token == -2) {
-            output(["message" => "Missing bearer token"], 400);
+            self::Output(["message" => "Missing bearer token"], 400);
             return;
         }
 
         $secret = DB::GetConfig("app_key");
 
         $value = decodeJWT($token, $secret);
-        if ($value == false) {
+        if (is_numeric($value)) {
+            $errData = ["code" => $value, "message" => "403 / Forbidden"];
+            if ($value == -1) {
+                $errData["reason"] = "expired";
+            }
+            elseif ($value == -2) {
+                $errData["reason"] = "beforeValid";
+            }
+            elseif ($value == -3) {
+                $errData["reason"] = "signatureInvalid";
+            }
+            else {
+                $errData["reason"] = "unknown";
+            }
+            self::Output($errData, 403);
             return false;
         }
+
         return true;
     }
 }

@@ -11,31 +11,31 @@
         checkLogin();
     });
     async function checkLogin() {
-        try {
-            const res = await fetch(
-                `${$siteData.apiUri}/login/check`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${$loginCredentialStore}`,
-                    }
+        const res = await fetch(
+            `${$siteData.apiUri}/login/check`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${$loginCredentialStore}`,
                 }
-            );
-            if (res.ok) {
-                const checkResult = await res.json();
-                updateTimeout = setTimeout(() => {
-                    updateTimeout = null;
-                    $loginCredentialStore = checkResult.newToken;
-                }, (checkResult.validIn + 0.5) * 1000);
+            }
+        );
+        if (res.ok) {
+            const checkResult = await res.json();
+            updateTimeout = setTimeout(() => {
+                updateTimeout = null;
+                $loginCredentialStore = checkResult.newToken;
+            }, (checkResult.validIn + 0.5) * 1000);
+        }
+        else {
+            const err = await res.json();
+            if (err.code == -2) {
+                // just not valid yet; chill for a bit
             }
             else {
-                const err = await res.json();
-                console.error(err);
-                // throw new Error(err);
+                // probably an expired token
+                logout();
             }
-        } catch (error) {
-            // probably just 403-ed from expired token
         }
-
     }
 
     function logout() {
