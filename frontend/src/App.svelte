@@ -12,7 +12,7 @@
 <main>
     <h1>Pozzo</h1>
     <Login />
-    <UploadZone />
+    <!-- <UploadZone /> -->
 
     <Router url={url}>
         <Route path="album/:identifier" component={Album} />

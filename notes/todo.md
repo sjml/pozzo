@@ -1,4 +1,16 @@
 1. Upload flow
+    - have list of files
+    - have commented code for uploading one
+    - for now just assume user is only upping JPEG files
+    - to do:
+        - cycle over list of files
+        - make image preview from them
+        - put previews into list with names and progress indicators
+        - upload 4(?) at a time
+            - xhr instead of fetch lets us observe progress... 
+        - ones that failed upload for whatever reason get put on the bottom of the list
+        - when complete, if no failures, disappear loading box
+        - cancel button to stop it (maybe on individuals too?)
 2. New album frontend hookup
     - private albums in backend
         - while we're in here, look into passing dictionaries for params to avoid so many defaults
@@ -15,6 +27,11 @@
     - splash page
     - color choices
     - overall presentation
+    - dotted line for upload: https://kovart.github.io/dashed-border-generator/
+    - icons: 
+        - https://phosphoricons.com/
+        - https://icons.getbootstrap.com/
+        - etc.
 7. Reorder album
     - new column on albums_photos table to indicate order
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
@@ -25,6 +42,7 @@
 10. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
     - with image import -- do we have to read the image anew each time? not sure if that's the bottleneck, but I/O is a likely culprit
 11. Video / live pictures?
+    - let backend tell frontend what type of media it will accept
 
 ## future
 * special handling for unsorted album? (automatically removing from it)
