@@ -20,7 +20,11 @@ function serve() {
     writeBundle() {
       if (server) return;
       // server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-      server = require('child_process').spawn('bash', ['../scripts/serve.sh', 'debug'], {
+      let serverArg = "";
+      if (process.argv.includes("debug")) {
+        serverArg = "debug";
+      }
+      server = require('child_process').spawn('node', ['./scripts/server.js', serverArg], {
         stdio: ['ignore', 'inherit', 'inherit'],
         shell: true
       });
