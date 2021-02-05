@@ -25,6 +25,8 @@
         - (using heroicons for now; will evaluated thoroughly later)
 6. Reorder album
     - new column on albums_photos table to indicate order
+    - preserve order on upload
+    - sorting? (name, timestamp, etc)
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
 7. Remove test endpoints (reset, testImport)
 8. Add admin endpoint (+frontend UI) to do reset and other such things?
