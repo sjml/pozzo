@@ -22,3 +22,5 @@ pushd ./public > /dev/null
     cp -R $item $ROOT_DIR/dist/public
   done
 popd > /dev/null
+
+cp $ROOT_DIR/scripts/configs/remote.htaccess $ROOT_DIR/dist/public/.htaccess

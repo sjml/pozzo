@@ -9,4 +9,6 @@ PHP=php-7.4
 
 echo "SSHing to remote host and running reset there..."
 ssh napthali@shaneliesegang.com \
-  "cd $HOST; ./scripts/tester.sh --full=1 --server=https://$HOST --php=$PHP"
+  "cd $HOST; ./scripts/tester.sh --server=https://$HOST --php=$PHP"
+
+# --full=1
