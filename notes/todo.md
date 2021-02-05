@@ -3,13 +3,17 @@
     - have commented code for uploading one
     - for now just assume user is only upping JPEG files
     - to do:
+        - set window.onbeforeunload to display a "hold up" message
+            - https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
         - cycle over list of files
-        - make image preview from them
+        - present "Upload X files to {ALBUM_NAME || Unsorted}?" dialog
+        - make image preview from them (?)
         - put previews into list with names and progress indicators
         - upload 4(?) at a time
             - xhr instead of fetch lets us observe progress... 
         - ones that failed upload for whatever reason get put on the bottom of the list
         - when complete, if no failures, disappear loading box
+        - clear window.onbeforeunload
         - cancel button to stop it (maybe on individuals too?)
 2. New album frontend hookup
     - private albums in backend
@@ -23,7 +27,6 @@
     - exif w/map embed
     - (map on album view, too, natch)
 6. Design pass
-    - first: look at API calls to see if they can't be cleaned up (and handle errors better)
     - splash page
     - color choices
     - overall presentation
@@ -31,6 +34,8 @@
     - icons: 
         - https://phosphoricons.com/
         - https://icons.getbootstrap.com/
+        - https://heroicons.dev/ +++
+        - https://forkaweso.me/Fork-Awesome/icons/
         - etc.
 7. Reorder album
     - new column on albums_photos table to indicate order
@@ -45,7 +50,12 @@
     - let backend tell frontend what type of media it will accept
 
 ## future
+* router swap?
+    - https://github.com/AlexxNB/tinro
 * special handling for unsorted album? (automatically removing from it)
+* share buttons? :-/
+    - generate share cards
+    - https://smcllns.github.io/css-social-buttons/
 * testing setup
     - maybe setup automated lighthouse testing as GitHub action?
     - also check speed of import

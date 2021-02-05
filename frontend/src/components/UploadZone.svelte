@@ -1,20 +1,20 @@
 <script lang="ts">
     import { fade } from "svelte/transition";
 
-    import { siteData, loginCredentialStore } from "./stores";
+    import { loginCredentialStore } from "../stores";
 
-    function dragEnter(event: DragEvent) {
+    function dragEnter(_: DragEvent) {
         dragging = true;
     }
 
-    function dragLeave(event: DragEvent) {
+    function dragLeave(_: DragEvent) {
         dragging = false;
     }
 
     async function handleDrop(event: DragEvent) {
         dragging = false;
         console.log(event.dataTransfer.files.length);
-        for (const file of event.dataTransfer.files) {
+        for (const _ of event.dataTransfer.files) {
             ([...event.dataTransfer.files]).forEach((file) =>{
                 console.log(file);
             });

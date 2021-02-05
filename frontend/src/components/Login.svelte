@@ -1,7 +1,8 @@
 <script lang="ts">
     import { tick, onMount } from 'svelte';
+import { RunApi } from '../api';
 
-    import { siteData, loginCredentialStore } from "./stores";
+    import { loginCredentialStore } from "../stores";
 
     let updateTimeout: number = null;
     onMount(() => {
@@ -10,25 +11,19 @@
         }
         checkLogin();
     });
+
     async function checkLogin() {
-        const res = await fetch(
-            `${$siteData.apiUri}/login/check`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${$loginCredentialStore}`,
-                }
-            }
-        );
-        if (res.ok) {
-            const checkResult = await res.json();
+        const res = await RunApi("/login/check", {
+            authorize: true,
+        });
+        if (res.success) {
             updateTimeout = setTimeout(() => {
                 updateTimeout = null;
-                $loginCredentialStore = checkResult.newToken;
-            }, (checkResult.validIn + 0.5) * 1000);
+                $loginCredentialStore = res.data.newToken;
+            }, (res.data.validIn + 0.5) * 1000);
         }
         else {
-            const err = await res.json();
-            if (err.code == -2) {
+            if (res.data.code == -2) {
                 // just not valid yet; chill for a bit
             }
             else {
@@ -48,8 +43,7 @@
 
     let loginDisplayed: boolean = false;
     let usernameInput: HTMLInputElement;
-    async function showLogin()
-    {
+    async function showLogin() {
         usernameField = "";
         passwordField = "";
         loginMessage = "";
@@ -64,19 +58,15 @@
     let loginMessage: string = "";
     async function attemptLogin() {
         attemptingLogin = true;
-        const res = await fetch(
-            `${$siteData.apiUri}/login/`,
-            {
-                body: JSON.stringify({
-                    userName: usernameField,
-                    password: passwordField,
-                }),
-                method: "POST",
-            }
-        );
-        if (res.ok) {
-            const loginStatus = await res.json();
-            $loginCredentialStore = loginStatus.token;
+        const res = await RunApi("/login/", {
+            params: {
+                userName: usernameField,
+                password: passwordField,
+            },
+            method: "POST",
+        });
+        if (res.success) {
+            $loginCredentialStore = res.data.token;
             loginDisplayed = false;
         }
         else {

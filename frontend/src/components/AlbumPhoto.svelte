@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type{ Photo } from "./pozzo.type";
+    import type{ Photo } from "../pozzo.type";
     import { fade } from 'svelte/transition';
 
     export let photo: Photo;
