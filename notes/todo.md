@@ -1,23 +1,15 @@
-1. Upload flow
-    - for now just assume user is only upping JPEG files
-    - to do:
-        - upload 4(?) at a time
-            - xhr instead of fetch lets us observe progress... 
-        - ones that failed upload for whatever reason get put on the bottom of the list
-        - when complete, if no failures, disappear loading box
-        - cancel button to stop it (maybe on individuals too?)
-2. New album frontend hookup
+1. New album frontend hookup
     - private albums in backend
         - while we're in here, look into passing dictionaries for params to avoid so many defaults
-3. Moving images between albums
+2. Moving images between albums
     - allowing creating a new one as you do it
     - multiple-selection
     - panel w/drag and drop? 
-4. Nice transitions between albums
-5. Individual picture view
+3. Nice transitions between albums
+4. Individual picture view
     - exif w/map embed
     - (map on album view, too, natch)
-6. Design pass
+5. Design pass
     - splash page
     - color choices
     - overall presentation
@@ -28,16 +20,17 @@
         - https://heroicons.dev/ +++
         - https://forkaweso.me/Fork-Awesome/icons/
         - etc.
-7. Reorder album
+        - (using heroicons for now; will evaluated thoroughly later)
+6. Reorder album
     - new column on albums_photos table to indicate order
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
-8. Remove test endpoints (reset, testImport)
-9. Add admin endpoint (+frontend UI) to do reset and other such things?
+7. Remove test endpoints (reset, testImport)
+8. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-10. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
+9. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
     - with image import -- do we have to read the image anew each time? not sure if that's the bottleneck, but I/O is a likely culprit
-11. Video / live pictures?
+10. Video / live pictures?
     - let backend tell frontend what type of media it will accept
 
 ## future

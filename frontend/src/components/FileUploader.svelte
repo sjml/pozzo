@@ -4,12 +4,12 @@
     import { HumanBytes } from "../util";
     import type { FileUploadStatus } from "../pozzo.type";
     import { userStoppedUploadScroll } from "../stores";
+    import { UploadFile } from "../api";
 
     export let uploadStatus: FileUploadStatus;
 
     let visibleDiv: HTMLDivElement;
     const dispatch = createEventDispatcher();
-    const uploadSpeed = 250000;
     export async function startUpload() {
         if (uploadStatus.status > 0) {
             return;
@@ -23,24 +23,26 @@
             });
         }
 
-        // fake upload
-        while (progressBar.value < 1.0) {
-            progressBar.value += uploadSpeed / uploadStatus.file.size;
-            await new Promise(p => setTimeout(p, 200));
-        }
-        // \fake upload
-
-        // fake processing
-        statusString = "Processing..."
-        progressBar.removeAttribute("value");
-        await new Promise(p => setTimeout(p, 1500));
+        const uploadRes = await UploadFile(uploadStatus.file,
+            (progress: number) => progressBar.value = progress,
+            (_uploadStatus: boolean) => {
+                statusString = "Processing…";
+                progressBar.removeAttribute("value");
+            }
+        );
         progressBar.value = 1.0;
-        statusString = "Done!"
-        // \fake processing
 
+        if (uploadRes.success) {
+            statusString = "Done!";
+            uploadStatus.status = 2;
+            dispatch("fileUploadDone");
+        }
+        else {
+            statusString = "Failed :(";
+            uploadStatus.status = 3;
+            dispatch("fileUploadFailed");
+        }
 
-        uploadStatus.status = 2;
-        dispatch("fileUploadDone");
     }
 
     onMount(() => {
@@ -54,6 +56,12 @@
             previewAlt = uploadStatus.file.name;
         };
     });
+
+    $: {
+        if (progressBar && uploadStatus.status == 0) {
+            progressBar.value = 0
+        };
+    }
 
     let previewSrc = null;
     let previewAlt = "";

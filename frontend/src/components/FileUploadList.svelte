@@ -23,14 +23,30 @@
             currentUploadCount += 1;
         }
     }
-    function uploadDone() {
+
+    function fileUploadDone() {
         currentUploadCount -= 1;
         if (currentUploadCount == 0 && uploadStackPointer >= uploadStatuses.length) {
-            dispatch("finished");
+            queueIsEmpty();
         }
         else {
             queueUploads();
         }
+    }
+
+    let failedUploadCount = 0;
+    function fileUploadFailed() {
+        failedUploadCount += 1;
+        fileUploadDone();
+    }
+
+    function queueIsEmpty() {
+        if (failedUploadCount == 0) {
+            dispatch("finished");
+            return;
+        }
+        uploadStatuses = uploadStatuses.filter(us => us.status == 3);
+        awaitingConfirmation = true;
     }
 
     let awaitingConfirmation = true;
@@ -53,7 +69,14 @@
 
     async function start() {
         window.addEventListener("beforeunload", befUn);
+        failedUploadCount = 0;
+        uploadStackPointer = 0;
+        currentUploadCount = 0;
         awaitingConfirmation = false;
+        for (let i=0; i < uploadStatuses.length; i++) {
+            uploadStatuses[i].status = 0;
+        }
+
         await tick();
         await new Promise(p => setTimeout(p, 400));
         $userStoppedUploadScroll = false;
@@ -68,7 +91,12 @@
 <div class="fileUploadList" on:click={() => $userStoppedUploadScroll = true}>
     {#if awaitingConfirmation}
         <div class="confirm">
-            Upload {fileList.length} images?
+            {#if failedUploadCount > 0}
+                {(failedUploadCount == 1) ? "This image " : "These images "}did not upload
+                successfully. Do you want to try again?
+            {:else}
+                Upload {fileList.length} image{(fileList.length == 1) ? "" : "s"}?
+            {/if}
             <div class="yesno">
                 <div class="yes"
                     on:click={start}
@@ -115,7 +143,11 @@
 
     {#if uploadStatuses}
         {#each uploadStatuses as uploadStatus}
-            <FileUploader uploadStatus={uploadStatus} on:fileUploadDone={uploadDone} />
+            <FileUploader
+                uploadStatus={uploadStatus}
+                on:fileUploadDone={fileUploadDone}
+                on:fileUploadFailed={fileUploadFailed}
+            />
         {/each}
     {/if}
 </div>

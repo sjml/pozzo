@@ -13,48 +13,12 @@
     }
 
     let fileList: File[];
-    // let fileList: File[] = [
-    //     // {name: "longer_than_it_should_be_what_about_now_filename_with_things_if_it_keeps_going_to_the_ends_of_the_earth.jpg", size: 2343452, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file2.jpg", size: 7987235,  lastModified: 1612536620, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file3.jpg", size: 312, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file4.jpg", size: 1234567, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     // {name: "longer_than_it_should_be_what_about_now_filename_with_things_if_it_keeps_going_to_the_ends_of_the_earth.jpg", size: 2343452, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file2.jpg", size: 7987235,  lastModified: 1612536620, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file3.jpg", size: 312, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file4.jpg", size: 1234567, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     // {name: "longer_than_it_should_be_what_about_now_filename_with_things_if_it_keeps_going_to_the_ends_of_the_earth.jpg", size: 2343452, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file2.jpg", size: 7987235,  lastModified: 1612536620, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file3.jpg", size: 312, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file4.jpg", size: 1234567, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     // {name: "longer_than_it_should_be_what_about_now_filename_with_things_if_it_keeps_going_to_the_ends_of_the_earth.jpg", size: 2343452, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file2.jpg", size: 7987235,  lastModified: 1612536620, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file3.jpg", size: 312, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    //     {name: "file4.jpg", size: 1234567, lastModified: 1612536624, type: "image/jpeg", arrayBuffer:null, slice: null, stream: null, text: null},
-    // ];
 
     async function handleDrop(event: DragEvent) {
         dragging = false;
-        fileList = [...event.dataTransfer.files];
-
-        // let f = event.dataTransfer.files[0];
-        // let fd = new FormData();
-        // fd.append('photoUp', f);
-
-        // const res = await fetch(`${$siteData.apiUri}/upload`, {
-        //     method: "POST",
-        //     body: fd,
-        //     headers: {
-        //         'Authorization': `Bearer ${$loginCredentialStore}`,
-        //     }
-        // });
-        // if (res.ok) {
-        //     const feedback = await res.json();
-        //     console.log(feedback);
-        // }
-        // else {
-        //     const err = await res.json();
-        //     console.error(err);
-        // }
+        let filteringList = [...event.dataTransfer.files];
+        filteringList = filteringList.filter(f => f.type == "image/jpeg");
+        fileList = filteringList;
     }
 
     let dragging: boolean = false;
