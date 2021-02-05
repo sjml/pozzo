@@ -15,6 +15,12 @@ export type ApiOptions = {
     method?: string,
 }
 
+export type FileUploadStatus = {
+    file: File,
+    status: number,
+    startUploadCallback?: Function,
+}
+
 export type Photo = {
     id: number,
     title: string,

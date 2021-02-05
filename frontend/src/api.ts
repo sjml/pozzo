@@ -21,6 +21,7 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
         `${get(siteData).apiUri}${url}`,
         fetchParams
     );
+
     try {
         if (res.ok) {
             const retrieved = await res.json();
@@ -48,6 +49,70 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
     }
 }
 
-export async function fileUpload(file: File) {
+// doin' it old-school with XHR so we can get progress reports
+export async function UploadFile(file: File, progressCallback: Function = null, finishedUploadCallback: Function = null): Promise<ApiResult> {
+    return new Promise((resolve, reject) => {
+        const url = `${get(siteData).apiUri}/upload`;
+        const xhr = new XMLHttpRequest();
+        const fd = new FormData();
 
+        xhr.upload.onprogress = (ev) => {
+            if (ev.lengthComputable) {
+                if (progressCallback) {
+                    progressCallback(ev.loaded / ev.total);
+                }
+            }
+        };
+
+        xhr.upload.onload = (_) => {
+            if (finishedUploadCallback) {
+                finishedUploadCallback(true);
+            }
+        };
+
+        xhr.upload.onerror = (_) => {
+            if (finishedUploadCallback) {
+                finishedUploadCallback(false);
+            }
+        };
+
+        xhr.upload.onabort = (_) => {
+            if (finishedUploadCallback) {
+                finishedUploadCallback(false);
+            }
+        };
+
+        xhr.onload = (_) => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve({
+                    success: true,
+                    code: xhr.status,
+                    data: JSON.parse(xhr.responseText)
+                });
+            }
+            else {
+                // not rejecting so data pack always
+                //   makes its way back to caller
+                resolve({
+                    success: false,
+                    code: xhr.status,
+                    data: JSON.parse(xhr.responseText)
+                });
+            }
+        }
+
+        xhr.onerror = (_) => {
+            resolve({
+                success: false,
+                code: 500,
+                data: {error: xhr.responseText}
+            });
+        }
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Authorization", `Bearer ${get(loginCredentialStore)}`);
+
+        fd.append("photoUp", file);
+        xhr.send(fd);
+    });
 }

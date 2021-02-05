@@ -99,7 +99,7 @@ const listener = polkaInstance.listen(port, err => {
 function shutdownAll() {
   console.log(colors.yellow("\n⚡️ Shutting down..."));
   if (listener) {
-    console.log(colors.blue("Shutting down proxy"));
+    console.log(colors.blue("Shutting down frontend proxies"));
     listener.server.close();
   }
   if (phpServer) {

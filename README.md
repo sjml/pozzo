@@ -11,7 +11,7 @@ Goals:
 Non-goals:
 * Editing photos beyond giving titles, tags, and descriptions
 * Multi-user collaboration
-* Real-time displays (album gets updated and it's pushed to your screen)
+* Real-time displays (album gets updated elsewhere and it's pushed to your screen)
 
 I'm imagining this as a single-to-few-users-per-installation kind of thing. Not replacing Flickr, but just something to easily have your own personal gallery, maybe shared with a few folks. 
 

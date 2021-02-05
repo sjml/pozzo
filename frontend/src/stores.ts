@@ -16,3 +16,5 @@ export const siteData = readable<SiteConfig>(
         //   set() with the completed SiteConfig object
     }
 );
+
+export const userStoppedUploadScroll = writable<boolean>(false);

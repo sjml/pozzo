@@ -1,19 +1,10 @@
 1. Upload flow
-    - have list of files
-    - have commented code for uploading one
     - for now just assume user is only upping JPEG files
     - to do:
-        - set window.onbeforeunload to display a "hold up" message
-            - https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
-        - cycle over list of files
-        - present "Upload X files to {ALBUM_NAME || Unsorted}?" dialog
-        - make image preview from them (?)
-        - put previews into list with names and progress indicators
         - upload 4(?) at a time
             - xhr instead of fetch lets us observe progress... 
         - ones that failed upload for whatever reason get put on the bottom of the list
         - when complete, if no failures, disappear loading box
-        - clear window.onbeforeunload
         - cancel button to stop it (maybe on individuals too?)
 2. New album frontend hookup
     - private albums in backend
