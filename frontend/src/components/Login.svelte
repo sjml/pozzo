@@ -129,7 +129,7 @@ import { RunApi } from '../api';
 <style>
     .login {
         margin: 10px;
-        position: fixed;
+        position: absolute;
         top: 0;
         right: 0;
         z-index: 500;

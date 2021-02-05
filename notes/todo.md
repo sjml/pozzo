@@ -10,6 +10,8 @@
     - exif w/map embed
     - (map on album view, too, natch)
 5. Design pass
+    - need to add cache-busting :-/
+    - login link started sticking?
     - splash page
     - color choices
     - overall presentation
