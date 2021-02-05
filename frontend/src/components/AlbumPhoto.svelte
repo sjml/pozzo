@@ -26,7 +26,6 @@
             alt="{photo.title}"
             srcset="{`/img/${size}/${photo.hash}.jpg`}, {`/img/${size}2x/${photo.hash}.jpg 2x`}"
             src="{`/img/${size}/${photo.hash}.jpg`}"
-            width="{dims.width}px"
         />
     </div>
 {/if}
@@ -36,6 +35,14 @@
         position: absolute;
         cursor: pointer;
         overflow: hidden;
+    }
+
+    img {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .preload {
