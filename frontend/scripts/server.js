@@ -7,7 +7,7 @@ const colors = require('kleur');
 
 
 const debug = process.argv.includes("debug");
-
+const noFront = process.argv.includes("no_front");
 
 
 
@@ -83,15 +83,17 @@ const static = wrapSirv("Static", "../public", {dev: true, single: true});
 
 
 const port = 3000;
-const polkaInstance = polka()
-  .use(php)
-  .use(compress(), frontend)
-  .use(compress(), static)
-;
+let polkaInstance = polka();
+
+polkaInstance = polkaInstance.use(php);
+if (!noFront) {
+  polkaInstance = polkaInstance.use(compress(), frontend);
+}
+polkaInstance = polkaInstance.use(compress(), static);
 
 const listener = polkaInstance.listen(port, err => {
   if (err) throw err;
-  console.log(colors.green(`\n🚀 Hosting on http://0.0.0.0:${port}`));
+  console.log(colors.green(`\n🚀 Hosting on http://0.0.0.0:${port} ${noFront ? "(static only)":""}`));
 });
 
 function shutdownAll() {
