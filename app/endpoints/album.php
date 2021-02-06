@@ -18,8 +18,6 @@ $router->Route();
 
 function output($obj, $code = 200) {
     http_response_code($code);
-    ob_start("ob_gzhandler"); // need to put this in the router, probably
-    //  or maybe just zlib.output_compression in php.ini?
     header("Content-Type: application/json");
     echo json_encode($obj);
 }
@@ -31,8 +29,9 @@ function newAlbum() {
         output(["message" => "Missing 'title'"], 400);
         return;
     }
+    $isPrivate = isset($input["isPrivate"]) ? $input["isPrivate"] : false;
 
-    $result = DB::CreateAlbum($input["title"]);
+    $result = DB::CreateAlbum($input["title"], $isPrivate);
     if ($result == -1) {
         output(["message" => "Could not create album: Duplicate title"], 400);
         return;

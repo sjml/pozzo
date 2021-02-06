@@ -85,7 +85,7 @@ const static = wrapSirv("Static", "../public", {dev: true, single: true});
 const port = 3000;
 let polkaInstance = polka();
 
-polkaInstance = polkaInstance.use(php);
+polkaInstance = polkaInstance.use(compress(), php);
 if (!noFront) {
   polkaInstance = polkaInstance.use(compress(), frontend);
 }

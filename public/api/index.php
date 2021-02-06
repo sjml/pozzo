@@ -41,9 +41,5 @@ $router->AddHandler("/upload", [
     "require",
     __DIR__ . "/../../app/endpoints/upload.php",
 ]);
-$router->AddHandler("/testImport", [
-    "require",
-    __DIR__ . "/../../app/endpoints/testImport.php",
-]);
 
 $router->Route();

@@ -1,6 +1,4 @@
 1. New album frontend hookup
-    - private albums in backend
-        - while we're in here, look into passing dictionaries for params to avoid so many defaults
 2. Moving images between albums
     - allowing creating a new one as you do it
     - multiple-selection
@@ -11,7 +9,9 @@
     - (map on album view, too, natch)
 5. Design pass
     - need to add cache-busting :-/
-    - login link started sticking?
+        - https://github.com/posthtml/posthtml ??
+        - something simpler?
+    - accessibility checks
     - splash page
     - color choices
     - overall presentation
@@ -23,12 +23,15 @@
         - https://forkaweso.me/Fork-Awesome/icons/
         - etc.
         - (using heroicons for now; will evaluated thoroughly later)
+    - also pick a few consistent sizes for icon usages
+        - rollover reactions?
+        - animation of stroke-width? 
 6. Reorder album
     - new column on albums_photos table to indicate order
     - preserve order on upload
     - sorting? (name, timestamp, etc)
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
-7. Remove test endpoints (reset, testImport)
+7. Remove reset endpoints
 8. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
@@ -36,6 +39,7 @@
     - with image import -- do we have to read the image anew each time? not sure if that's the bottleneck, but I/O is a likely culprit
 10. Video / live pictures?
     - let backend tell frontend what type of media it will accept
+    - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 
 ## future
 * router swap?
@@ -81,6 +85,7 @@
         - would still like to do better on the last row, tho
 * have the blur image reload only do its fade if it took more than X ms to load the image
     - find predominant color and store that in photos table?
+    - https://github.com/woltapp/blurhash
     - also, preview images are down to around ~490bytes, but that's still a lot. gotta be a way to get them smaller (plus base64 encoding adds some overhead)
         - [I made a test site to look at different compression options!](https://sjml.github.io/blur-load-test/)
         - smaller dimensions don't win much; JPEG overhead is small but meaningful at this size

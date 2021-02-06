@@ -78,6 +78,7 @@ class DB {
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", title TEXT UNIQUE";
         $prepCommand .= ", description TEXT";
+        $prepCommand .= ", isPrivate BOOLEAN";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -245,6 +246,11 @@ class DB {
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
+        $query = "DELETE FROM photoPreviews WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
         $query = "DELETE FROM photos WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
@@ -256,13 +262,14 @@ class DB {
         return $photoData;
     }
 
-    static function CreateAlbum($title) {
+    static function CreateAlbum($title, $isPrivate = false) {
         if (is_numeric($title)) {
             return -2;
         }
-        $prepCommand = "INSERT INTO albums(title, description) VALUES(?, '')";
+        $prepCommand = "INSERT INTO albums(title, description, isPrivate) VALUES(?, '', ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
+        $statement->bindParam(2, $isPrivate, SQLITE3_INTEGER);
         try {
             $result = $statement->execute();
             if (!$result) {

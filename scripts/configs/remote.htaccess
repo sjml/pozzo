@@ -1,7 +1,0 @@
-DirectoryIndex index.html
-
-RewriteEngine On
-
-RewriteRule ^index\.html$ - [L]
-RewriteCond %{REQUEST_URI} !^/(api|build|css|img|favicon.png)/
-RewriteRule . index.html [L]
