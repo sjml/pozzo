@@ -1,9 +1,9 @@
 <script lang="ts">
     import { tick, onMount } from "svelte";
-    import { fade } from "svelte/transition";
+
+    import Overlay from "./Overlay.svelte";
 
     import { RunApi } from '../api';
-
     import { loginCredentialStore } from "../stores";
 
     let updateTimeout: number = null;
@@ -91,10 +91,7 @@
 <div class="login">
     {#if $loginCredentialStore.length == 0}
         {#if loginDisplayed}
-            <div class="overlay"
-                on:click|self={() => loginDisplayed = false}
-                transition:fade={{duration: 200}}
-            >
+            <Overlay on:clickedOutside={() => loginDisplayed = false}>
                 <div class="login-prompt">
                     <form on:submit|preventDefault={attemptLogin}>
                         <label>
@@ -116,7 +113,7 @@
                     </form>
                     <div class="login-message">{loginMessage}&nbsp;</div>
                 </div>
-            </div>
+            </Overlay>
         {/if}
         <div class="link" on:click={showLogin} title="Log In">
             <svg
@@ -172,21 +169,6 @@
     }
     .link:hover {
         text-decoration: underline;
-    }
-
-    .overlay {
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
     }
 
     .login-prompt {

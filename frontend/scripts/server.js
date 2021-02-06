@@ -113,6 +113,7 @@ const listener = devServer.listen(port, err => {
 
 function shutdownAll() {
   console.log(colors.yellow("\n⚡️ Shutting down..."));
+  colors.reset();
   if (listener) {
     console.log(colors.blue("Shutting down frontend proxies"));
     listener.server.close();

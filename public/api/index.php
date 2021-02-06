@@ -13,15 +13,15 @@ if ($_SERVER["SERVER_NAME"] == "0.0.0.0") {
     register_shutdown_function(function () {
         $error = error_get_last();
         switch ($error['type'] ?? 0) {
-        case E_ERROR:
-        case E_PARSE:
-        case E_CORE_ERROR:
-        case E_COMPILE_ERROR:
-        case E_RECOVERABLE_ERROR:
-            http_response_code(500);
-            header("Content-Type: application/json");
-            echo json_encode(["error" => "server-side error"]);
-            break;
+            case E_ERROR:
+            case E_PARSE:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_RECOVERABLE_ERROR:
+                http_response_code(500);
+                header("Content-Type: application/json");
+                echo json_encode(["error" => "server-side error"]);
+                break;
         }
     });
     http_response_code(500);

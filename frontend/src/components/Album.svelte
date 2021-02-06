@@ -2,24 +2,32 @@
     import { onMount } from "svelte";
 
     import justifiedLayout from "justified-layout";
+    import { navigate } from "svelte-routing";
 
     import { RunApi } from "../api";
     import type{ Album } from "../pozzo.type";
     import AlbumPhoto from "./AlbumPhoto.svelte";
+import { loginCredentialStore } from "../stores";
 
 
     export let identifier: number|string;
 
-    async function getAlbum() {
+    async function getAlbum(_) {
         const res = await RunApi(`/album/view/${identifier}`, {
             params: {previews: 1},
-            method: "POST"
+            method: "POST",
+            authorize: true,
         });
         if (res.success) {
             album = res.data;
         }
         else {
-            console.error(res);
+            if (res.code == 404) {
+                navigate("/", {replace: true});
+            }
+            else {
+                console.error(res);
+            }
         }
     }
 
@@ -42,8 +50,11 @@
     $: calculateLayout(containerWidth);
     $: if (album) {calculateLayout(containerWidth);}
 
+    onMount(() => {
+        getAlbum(null);
+    });
 
-    onMount(getAlbum);
+    $: getAlbum($loginCredentialStore)
 </script>
 
 {#if album}

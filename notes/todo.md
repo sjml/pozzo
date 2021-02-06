@@ -1,17 +1,23 @@
-1. New album frontend hookup
-2. Moving images between albums
+1. Moving images between albums
     - allowing creating a new one as you do it
     - multiple-selection
     - panel w/drag and drop? 
-3. Nice transitions between albums
-4. Individual picture view
+2. Nice transitions between albums
+3. Individual picture view
     - exif w/map embed
     - (map on album view, too, natch)
     - redo file system scheme (and include unique user/time salt) (#9 on this list at present)
+4. Reorder album
+    - new column on albums_photos table to indicate order
+    - preserve order on upload
+    - sorting? (name, timestamp, etc)
+    - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
 5. Design pass
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
         - something simpler?
+    - class name consistency (kebab vs camel)
+    - allow setting title, add pozzo branding note at bottom
     - accessibility checks
     - splash page
     - color choices
@@ -27,18 +33,13 @@
     - also pick a few consistent sizes for icon usages
         - rollover reactions?
         - animation of stroke-width? 
-6. Reorder album
-    - new column on albums_photos table to indicate order
-    - preserve order on upload
-    - sorting? (name, timestamp, etc)
-    - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
-7. Remove reset endpoint
-8. Add admin endpoint (+frontend UI) to do reset and other such things?
+6. Remove reset endpoint
+7. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-9. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
+8. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
     - with image import -- do we have to read the image anew each time? not sure if that's the bottleneck, but I/O is a likely culprit
-10. Video / live pictures?
+9. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 

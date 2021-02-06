@@ -392,6 +392,10 @@ class DB {
             return false;
         }
 
+        if ($albumData["isPrivate"] && $_REQUEST["POZZO_AUTH"] != 1) {
+            return false;
+        }
+
         if ($includePhotos) {
             $photos = self::GetPhotosInAlbum($albumData["id"], $previews);
             $albumData["photos"] = $photos;

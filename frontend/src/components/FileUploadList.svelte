@@ -1,7 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
-
     import { userStoppedUploadScroll } from "../stores";
     import type { FileUploadStatus } from "../pozzo.type";
     import FileUploader from "./FileUploader.svelte";

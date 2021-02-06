@@ -11,7 +11,7 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
     if (opts.params) {
         fetchParams.body = JSON.stringify(opts.params);
     }
-    if (opts.authorize) {
+    if (opts.authorize && get(loginCredentialStore).length > 0) {
         fetchParams.headers = {
             Authorization: `Bearer ${get(loginCredentialStore)}`,
         }
@@ -52,6 +52,14 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
 // doin' it old-school with XHR so we can get progress reports
 export async function UploadFile(file: File, progressCallback: Function = null, finishedUploadCallback: Function = null): Promise<ApiResult> {
     return new Promise((resolve, reject) => {
+        if (get(loginCredentialStore).length == 0) {
+            resolve({
+                success: false,
+                code: 403,
+                data: {error: "Unauthorized"}
+            });
+        }
+
         const url = `${get(siteData).apiUri}/upload`;
         const xhr = new XMLHttpRequest();
         const fd = new FormData();
