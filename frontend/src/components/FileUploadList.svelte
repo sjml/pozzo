@@ -163,6 +163,7 @@
         max-height: 85vh;
         overflow-y: scroll;
         margin: auto;
+        pointer-events: all;
     }
 
     .confirm {
