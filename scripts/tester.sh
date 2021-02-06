@@ -29,7 +29,7 @@ for a in ${args[@]}; do
   esac
 done
 
-CURL="curl -s"
+CURL="curl -s -i"
 
 # reset everything
 jwt=$($PHP ./get_test_key.php)
@@ -65,10 +65,10 @@ for i in ${imgs[*]}; do
   echo
 done
 
-# make a new album
+# make a new private album
 $CURL \
   -H "Authorization: Bearer $jwt" \
-  -X POST --data '{"title": "testAlbum"}' \
+  -X POST --data '{"title": "testAlbum", "isPrivate": 1}' \
   $SERVER/api/album/new
 echo
 

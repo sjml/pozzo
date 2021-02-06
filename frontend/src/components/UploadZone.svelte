@@ -52,7 +52,7 @@
         pointer-events: none;
     }
     .dragIndicator {
-        background-color: rgb(121, 121, 121);
+        background-image: radial-gradient(ellipse, rgba(0,0,0,0) 50%, rgb(121, 121, 121) 120%);
         opacity: 0.5;
         width: 100%;
         height: 100%;

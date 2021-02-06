@@ -1,13 +1,13 @@
 backend functionality tests
-    reset site
+    ✅ reset site
     can't upload without credentials
-    create user
-    get credentials
-    upload 10 pictures
+    ✅ create user
+    ✅ get credentials
+    ✅ upload 10 pictures
     should all be in unsorted
-    create new album
-    move 5 pictures to that album
-    create another new album (set to private)
+    ✅ create new album
+    ✅ move 5 pictures to that album
+    ✅ create another new album (set to private)
     move other 5 images to the private album
     "unsorted" album is empty now
     credentialed user can see album

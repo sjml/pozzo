@@ -5,6 +5,7 @@
 
     import { RunApi } from "../api";
     import type { Album } from "../pozzo.type";
+    import { loginCredentialStore } from "../stores";
 
     async function getAlbumList() {
         const res = await RunApi("/album/list", {authorize: true});
@@ -20,9 +21,16 @@
     onMount(getAlbumList);
 </script>
 
-{#if albumList}
-    <div class="albumList">
+<div class="albumList">
+    <div class="header">
         <h2>Albums</h2>
+        {#if $loginCredentialStore.length > 0}
+            <div class="addAlbum" title="Add Album">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+        {/if}
+    </div>
+    {#if albumList}
         {#each albumList as album}
             <div class="navAlbum">
                 <Link to={`album/${album.title}`}>
@@ -30,8 +38,8 @@
                 </Link>
             </div>
         {/each}
-    </div>
-{/if}
+    {/if}
+</div>
 
 <style>
     .albumList {
@@ -40,5 +48,16 @@
     .navAlbum {
         margin: 10px;
         cursor: pointer;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+    }
+    .addAlbum {
+        width: 30px;
+        margin-left: 10px;
+        cursor: pointer;
+        display: flex;
     }
 </style>

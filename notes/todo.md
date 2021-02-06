@@ -7,6 +7,7 @@
 4. Individual picture view
     - exif w/map embed
     - (map on album view, too, natch)
+    - redo file system scheme (and include unique user/time salt) (#9 on this list at present)
 5. Design pass
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
@@ -31,7 +32,7 @@
     - preserve order on upload
     - sorting? (name, timestamp, etc)
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
-7. Remove reset endpoints
+7. Remove reset endpoint
 8. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
