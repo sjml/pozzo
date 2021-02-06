@@ -8,7 +8,7 @@ require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/BeforeValidException.php";
 use Firebase\JWT\JWT;
 
 class Auth {
-    private static function _getJWT() {
+    static function GetJWT() {
         if (!isset($_SERVER["HTTP_AUTHORIZATION"])) {
             return -1;
         }
@@ -21,7 +21,7 @@ class Auth {
     }
 
     static function Validate() {
-        $token = self::_getJWT();
+        $token = self::GetJWT();
         if ($token == -1) {
             return -1;
         }
@@ -65,7 +65,7 @@ class Auth {
         $token = [
             "iss" => $issuer,
             "iat" => $issued_at,
-            "nbf" => $notbefore,
+            // "nbf" => $notbefore, // causing more problems than it's worth
             "exp" => $expire,
             "data" => $userData,
         ];

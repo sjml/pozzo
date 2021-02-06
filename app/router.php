@@ -39,7 +39,7 @@ class Router {
                 if ($handler["requireLogin"]) {
                     if ($_REQUEST["POZZO_AUTH"] != 1) {
                         $status = 403;
-                        $errData = ["code" => $value, "message" => "403 / Forbidden"];
+                        $errData = ["code" => $_REQUEST["POZZO_AUTH"], "message" => "403 / Forbidden"];
                         switch ($_REQUEST["POZZO_AUTH"]) {
                             case 0:
                                 $status = 500;

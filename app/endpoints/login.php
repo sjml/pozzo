@@ -24,7 +24,7 @@ function checkLogin() {
     // only gets called if auth check passed
     $timeDelayToValidity = 3;
     global $router;
-    $decoded = Auth::DecodeJWT($router->GetJWT(), DB::GetConfig("app_key"));
+    $decoded = Auth::DecodeJWT(Auth::GetJWT(), DB::GetConfig("app_key"));
     $newToken = Auth::GenerateJWT(
         $decoded->data,
         DB::GetConfig("app_key"),

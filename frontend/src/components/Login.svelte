@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { tick, onMount } from 'svelte';
-import { RunApi } from '../api';
+    import { tick, onMount } from "svelte";
+    import { fade } from "svelte/transition";
+
+    import { RunApi } from '../api';
 
     import { loginCredentialStore } from "../stores";
 
@@ -23,7 +25,7 @@ import { RunApi } from '../api';
             }, (res.data.validIn + 0.5) * 1000);
         }
         else {
-            if (res.data.code == -2) {
+            if (res.data.code == -4) {
                 // just not valid yet; chill for a bit
             }
             else {
@@ -91,6 +93,7 @@ import { RunApi } from '../api';
         {#if loginDisplayed}
             <div class="overlay"
                 on:click|self={() => loginDisplayed = false}
+                transition:fade={{duration: 200}}
             >
                 <div class="login-prompt">
                     <form on:submit|preventDefault={attemptLogin}>
@@ -115,12 +118,38 @@ import { RunApi } from '../api';
                 </div>
             </div>
         {/if}
-        <div class="link" on:click={showLogin}>
-            Login
+        <div class="link" on:click={showLogin} title="Log In">
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                </path>
+            </svg>
         </div>
     {:else}
-        <div class="link" on:click={logout}>
-            Logout
+        <div class="link" on:click={logout} title="Log Out">
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                </path>
+            </svg>
         </div>
     {/if}
 </div>
@@ -137,6 +166,9 @@ import { RunApi } from '../api';
 
     .link {
         cursor: pointer;
+    }
+    .link svg {
+        width: 30px;
     }
     .link:hover {
         text-decoration: underline;

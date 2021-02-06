@@ -10,14 +10,13 @@
 
     export let identifier: number|string;
 
-    async function getAlbum(): Promise<Album> {
+    async function getAlbum() {
         const res = await RunApi(`/album/view/${identifier}`, {
             params: {previews: 1},
             method: "POST"
         });
         if (res.success) {
             album = res.data;
-            return album;
         }
         else {
             console.error(res);

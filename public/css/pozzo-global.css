@@ -7,3 +7,7 @@ body {
     color: rgb(214, 214, 214);
     background-color: rgb(32, 32, 32);
 }
+
+a:visited, a {
+    color: rgb(214, 214, 214);
+}

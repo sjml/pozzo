@@ -262,6 +262,22 @@ class DB {
         return $photoData;
     }
 
+    static function GetAlbumList($includePrivate = false) {
+        $prepCommand = "SELECT * FROM albums";
+        if (!$includePrivate) {
+            $prepCommand .= " WHERE isPrivate != 1";
+        }
+        $statement = self::$pdb->prepare($prepCommand);
+        $results = $statement->execute();
+
+        $ret = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            array_push($ret, $row);
+        }
+        $results->finalize();
+        return $ret;
+    }
+
     static function CreateAlbum($title, $isPrivate = false) {
         if (is_numeric($title)) {
             return -2;

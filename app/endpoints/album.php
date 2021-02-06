@@ -7,7 +7,7 @@ $_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/album/", "", $_REQUEST["POZZO_REQ
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
-// $router->AddHandler("/index", ["albumIndex"]); // give list of albums
+$router->AddHandler("/list", ["albumList"]); // give list of albums
 $router->AddHandler("/new", ["newAlbum"], true);
 $router->AddHandler("/view", ["viewAlbum"]);
 $router->AddHandler("/remove", ["removePhoto"], true);
@@ -20,6 +20,12 @@ function output($obj, $code = 200) {
     http_response_code($code);
     header("Content-Type: application/json");
     echo json_encode($obj);
+}
+
+function albumList() {
+    $fetchPrivate = ($_REQUEST["POZZO_AUTH"] == 1);
+    $albums = DB::GetAlbumList($fetchPrivate);
+    output($albums);
 }
 
 // create new album with given title, return index
