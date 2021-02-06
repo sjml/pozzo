@@ -15,6 +15,7 @@ function resetSite() {
     removeDir(__DIR__ . "/../../public/img");
 
     header("Content-Type: application/json");
+    http_response_code(200);
     $message = ["message" => "Site reset."];
     echo json_encode($message);
 }

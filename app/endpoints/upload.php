@@ -5,7 +5,7 @@ require_once __DIR__ . "/../image.php";
 
 const imgDir = __DIR__ . "/../../public/img";
 
-$POZZO_REQUEST = preg_replace("/^\/upload/", "", $POZZO_REQUEST);
+$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/upload/", "", $_REQUEST["POZZO_REQUEST"]);
 $router = new Router();
 
 $router->AddHandler("/$", ["upload"], true);

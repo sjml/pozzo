@@ -7,6 +7,6 @@ DB::Init();
 register_shutdown_function(["DB", "Cleanup"]);
 
 $result = DB::GetUser($testUserName);
-$jwt = generateJWT($result, DB::GetConfig("app_key"), -1, 1000);
+$jwt = Auth::GenerateJWT($result, DB::GetConfig("app_key"), -1, 1000);
 
 echo trim($jwt);

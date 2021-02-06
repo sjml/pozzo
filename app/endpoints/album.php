@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../db.php";
 
-$POZZO_REQUEST = preg_replace("/^\/album/", "", $POZZO_REQUEST);
+$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/album/", "", $_REQUEST["POZZO_REQUEST"]);
 
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
@@ -44,10 +44,9 @@ function newAlbum() {
 }
 
 function viewAlbum() {
-    global $POZZO_REQUEST;
     $input = json_decode(file_get_contents("php://input"), true);
     $previews = isset($input["previews"]) && $input["previews"] == 1;
-    $identifier = substr($POZZO_REQUEST, 1);
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
     $album = DB::FindAlbum($identifier, true, $previews);
     if ($album == false) {
         output(["message" => "Album not found"], 404);

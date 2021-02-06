@@ -19,9 +19,8 @@ class Router {
     }
 
     function Route() {
-        global $POZZO_REQUEST;
-        if ("" == $POZZO_REQUEST) {
-            $POZZO_REQUEST = "/";
+        if ("" == $_REQUEST["POZZO_REQUEST"]) {
+            $_REQUEST["POZZO_REQUEST"] = "/";
         }
         foreach ($this->handlers as $prefix => $handler) {
             $prefixLength = strlen($prefix);
@@ -29,21 +28,50 @@ class Router {
             if (substr($prefix, -1) == "$") {
                 $prefix = substr($prefix, 0, strlen($prefix) - 1);
                 $prefixLength -= 1;
-                $match = $prefix == $POZZO_REQUEST;
+                $match = $prefix == $_REQUEST["POZZO_REQUEST"];
             } else {
-                if (substr($POZZO_REQUEST, 0, $prefixLength) == $prefix) {
+                if (substr($_REQUEST["POZZO_REQUEST"], 0, $prefixLength) == $prefix) {
                     $match = true;
                 }
             }
 
             if ($match) {
                 if ($handler["requireLogin"]) {
-                    if (!self::_validate()) {
+                    if ($_REQUEST["POZZO_AUTH"] != 1) {
+                        $status = 403;
+                        $errData = ["code" => $value, "message" => "403 / Forbidden"];
+                        switch ($_REQUEST["POZZO_AUTH"]) {
+                            case 0:
+                                $status = 500;
+                                $errData["reason"] = "validation not performed";
+                                break;
+                            case -1:
+                                $status = 400;
+                                $errData["reason"] = "missing auth headers";
+                                break;
+                            case -2:
+                                $status = 400;
+                                $errData["reason"] = "missing bearer token";
+                                break;
+                            case -3:
+                                $errData["reason"] = "expired";
+                                break;
+                            case -4:
+                                $errData["reason"] = "beforeValid";
+                                break;
+                            case -5:
+                                $errData["reason"] = "signatureInvalid";
+                                break;
+                            default:
+                                $errData["reason"] = "unknown";
+                                break;
+                        }
+                        self::Output($errData, $status);
                         return;
                     }
                 }
 
-                $POZZO_REQUEST = substr($POZZO_REQUEST, $prefixLength);
+                $_REQUEST["POZZO_REQUEST"] = substr($_REQUEST["POZZO_REQUEST"], $prefixLength);
                 $call = $handler["call"];
                 if ($call[0] == "require") {
                     require $call[1];
@@ -55,51 +83,5 @@ class Router {
         }
 
         require __DIR__ . "/endpoints/404.php";
-    }
-
-    function GetJWT() {
-        if (!isset($_SERVER["HTTP_AUTHORIZATION"])) {
-            return -1;
-        }
-        $authHeader = $_SERVER["HTTP_AUTHORIZATION"];
-        if (substr($authHeader, 0, strlen("Bearer ")) != "Bearer ") {
-            return -2;
-        }
-        $token = substr($authHeader, strlen("Bearer "));
-        return $token;
-    }
-
-    private function _validate() {
-        $token = self::GetJWT();
-        if ($token == -1) {
-            return false;
-        }
-        if ($token == -2) {
-            self::Output(["message" => "Missing bearer token"], 400);
-            return;
-        }
-
-        $secret = DB::GetConfig("app_key");
-
-        $value = decodeJWT($token, $secret);
-        if (is_numeric($value)) {
-            $errData = ["code" => $value, "message" => "403 / Forbidden"];
-            if ($value == -1) {
-                $errData["reason"] = "expired";
-            }
-            elseif ($value == -2) {
-                $errData["reason"] = "beforeValid";
-            }
-            elseif ($value == -3) {
-                $errData["reason"] = "signatureInvalid";
-            }
-            else {
-                $errData["reason"] = "unknown";
-            }
-            self::Output($errData, 403);
-            return false;
-        }
-
-        return true;
     }
 }

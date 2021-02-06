@@ -3,7 +3,7 @@
 require_once __DIR__ . "/../db.php";
 require_once __DIR__ . "/../auth.php";
 
-$POZZO_REQUEST = preg_replace("/^\/login/", "", $POZZO_REQUEST);
+$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/login/", "", $_REQUEST["POZZO_REQUEST"]);
 
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
@@ -24,8 +24,8 @@ function checkLogin() {
     // only gets called if auth check passed
     $timeDelayToValidity = 3;
     global $router;
-    $decoded = decodeJWT($router->GetJWT(), DB::GetConfig("app_key"));
-    $newToken = $jwt = generateJWT(
+    $decoded = Auth::DecodeJWT($router->GetJWT(), DB::GetConfig("app_key"));
+    $newToken = Auth::GenerateJWT(
         $decoded->data,
         DB::GetConfig("app_key"),
         $timeDelayToValidity,
@@ -56,14 +56,14 @@ function login() {
         return;
     }
 
-    if (!verifyPassword($input["password"], $result["password"])) {
+    if (!Auth::VerifyPassword($input["password"], $result["password"])) {
         output(["message" => "Login failed"], 403);
         return;
     }
 
     unset($result["password"]);
 
-    $jwt = generateJWT(
+    $jwt = Auth::GenerateJWT(
         $result,
         DB::GetConfig("app_key"),
         3,

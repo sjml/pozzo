@@ -1,5 +1,5 @@
-const sirv = require("sirv");
 const polka = require("polka");
+const sirv = require("sirv");
 const proxy = require("http-proxy-middleware");
 const compress = require('compression');
 const colors = require('kleur');
@@ -10,6 +10,16 @@ const debug = process.argv.includes("debug");
 const noFront = process.argv.includes("no_front");
 
 
+function displayCode(statusCode) {
+  if (statusCode < 300) {
+    return colors.bgGreen().black(`[${statusCode}]`);
+  }
+  if (statusCode < 400) {
+    return colors.bgYellow().black(`[${statusCode}]`);
+  }
+  return colors.bgRed().black(`[${statusCode}]`);
+}
+
 
 let phpConf = "../scripts/configs/no-debug.php.ini";
 if (debug) {
@@ -19,6 +29,7 @@ if (debug) {
 const phpProcessMap = {};
 const phpMatcher = new RegExp("^\\[([0-9]+)\\] \\[[^\\]]*\\](.*)$");
 const phpLaunchedMatcher = new RegExp("^PHP [0-9\\.]+ Development Server .*\\) started$");
+const phpProcessMatcher = new RegExp("^[0-9.:]+ \\[([0-9]+)\\]: (.*)$");
 function processPHPOutput(data) {
   const dataStr = data.toString().trim();
   const messages = dataStr.split("\n");
@@ -38,7 +49,8 @@ function processPHPOutput(data) {
       if (message.endsWith("Accepted") || message.endsWith("Closing")) {
         return;
       }
-      console.log(colors.green(`PHP${debug?"_D":""}@${phpProcessMap[processID]}:: `) + message.replace(/^[0-9.:]+ /, ""));
+      const outputMatch = message.match(phpProcessMatcher);
+      console.log(colors.green(`PHP${debug?"_D":""}@${phpProcessMap[processID]}::`) + displayCode(outputMatch[1]) + ` ${outputMatch[2]}`);
     }
   });
 }
@@ -68,30 +80,33 @@ const php = proxy.createProxyMiddleware("/api", {
 
 
 
-function wrapSirv(name, dir, options) {
+function wrapStatic(name, dir, options) {
   const sirver = sirv(dir, options);
-  // console.log(sirver.)
   return (req, res, next) => {
     sirver(req, res, next);
-    console.log(colors.green(`${name}::`) + `[${res.statusCode}]: ${req.originalUrl || req.url}`);
+    if (res.headersSent && (!res.pozzoDevSent)) {
+      res.pozzoDevSent = true;
+      console.log(colors.green(`${name}::`) + `[${res.statusCode}]: ${req.originalUrl || req.url}`);
+    }
   };
 }
 
-const frontend = wrapSirv("Frontend", "./public", {dev: true});
-const static = wrapSirv("Static", "../public", {dev: true, single: true});
+const frontend = wrapStatic("Frontend", "./public", {dev: true});
+const static = wrapStatic("Static", "../public", {dev: true, single: true});
 
 
 
 const port = 3000;
-let polkaInstance = polka();
+let devServer = polka();
 
-polkaInstance = polkaInstance.use(compress(), php);
+devServer = devServer.use(compress());
+devServer = devServer.use(php);
 if (!noFront) {
-  polkaInstance = polkaInstance.use(compress(), frontend);
+  devServer = devServer.use(frontend);
 }
-polkaInstance = polkaInstance.use(compress(), static);
+devServer = devServer.use(static);
 
-const listener = polkaInstance.listen(port, err => {
+const listener = devServer.listen(port, err => {
   if (err) throw err;
   console.log(colors.green(`\n🚀 Hosting on http://0.0.0.0:${port} ${noFront ? "(static only)":""}`));
 });

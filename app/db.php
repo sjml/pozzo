@@ -99,14 +99,14 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
-        self::SetConfig("app_key", generateKey(), "string");
+        self::SetConfig("app_key", Auth::GenerateKey(), "string");
         self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
 
         self::SetConfig("created", 1, "integer");
     }
 
     static function CreateUser($user, $pw) {
-        $pw = hashPassword($pw);
+        $pw = Auth::HashPassword($pw);
         $prepCommand = "INSERT INTO users (name, password) VALUES (?, ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $user, SQLITE3_TEXT);

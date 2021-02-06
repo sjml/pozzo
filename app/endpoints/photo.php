@@ -3,7 +3,7 @@
 require_once __DIR__ . "/../db.php";
 require_once __DIR__ . "/../image.php";
 
-$POZZO_REQUEST = preg_replace("/^\/photo/", "", $POZZO_REQUEST);
+$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/photo/", "", $_REQUEST["POZZO_REQUEST"]);
 
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
@@ -21,8 +21,7 @@ function output($obj, $code = 200) {
 }
 
 function viewPhoto() {
-    global $POZZO_REQUEST;
-    $identifier = substr($POZZO_REQUEST, 1);
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
     $photo = DB::GetPhoto($identifier);
     if ($photo == null) {
         output(["message" => "Photo not found"], 404);
