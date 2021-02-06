@@ -2,7 +2,11 @@
 
 require_once __DIR__ . "/../db.php";
 
-$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/album/", "", $_REQUEST["POZZO_REQUEST"]);
+$_REQUEST["POZZO_REQUEST"] = preg_replace(
+    "/^\/album/",
+    "",
+    $_REQUEST["POZZO_REQUEST"],
+);
 
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
@@ -23,7 +27,7 @@ function output($obj, $code = 200) {
 }
 
 function albumList() {
-    $fetchPrivate = ($_REQUEST["POZZO_AUTH"] == 1);
+    $fetchPrivate = $_REQUEST["POZZO_AUTH"] == 1;
     $albums = DB::GetAlbumList($fetchPrivate);
     output($albums);
 }

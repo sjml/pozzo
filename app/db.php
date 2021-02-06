@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/util.php";
 require_once __DIR__ . "/auth.php";
+require_once __DIR__ . "/image.php";
 
 class DB {
     private const DB_PATH = __DIR__ . "/../pozzo.DB";
@@ -61,7 +62,23 @@ class DB {
         $prepCommand .= ", hash TEXT";
         $prepCommand .= ", width INTEGER, height INTEGER";
         $prepCommand .= ", aspect FLOAT";
+        $prepCommand .= ", uploadTimeStamp DATETIME";
         $prepCommand .= ", size INTEGER";
+        $prepCommand .= ", latitude FLOAT";
+        $prepCommand .= ", longitude FLOAT";
+
+        foreach (photoExifFields as $meta => $datums) {
+            foreach ($datums as $field) {
+                $prepCommand .= ", ";
+                $prepCommand .= $meta . "_" . $field . " ";
+                if (strpos($field, "DateTime") !== false) {
+                    $prepCommand .= "DATETIME";
+                } else {
+                    $prepCommand .= "TEXT";
+                }
+            }
+        }
+
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
@@ -192,7 +209,7 @@ class DB {
 
     static function InsertPhoto($photoData) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos (title, hash, width, height, aspect, size) VALUES (?,?,?,?,?,?)",
+            "INSERT INTO photos (title, hash, width, height, aspect, size, uploadTimeStamp) VALUES (?,?,?,?,?,?,date('now'))",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
@@ -203,6 +220,49 @@ class DB {
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
+
+        $prepCommand = "UPDATE photos SET ";
+        $vals = [];
+        $stmtStrings = [];
+        foreach (photoExifFields as $meta => $datums) {
+            foreach ($datums as $field) {
+                if ($photoData[$meta . "_" . $field] != null) {
+                    array_push($stmtStrings, $meta . "_" . $field . " = ?");
+                    if (strpos($field, "DateTime") !== false) {
+                        $date = \DateTime::createFromFormat(
+                            "Y:m:d H:i:s",
+                            $photoData[$meta . "_" . $field],
+                        );
+
+                        array_push($vals, [
+                            $date->format("U"),
+                            SQLITE3_INTEGER,
+                        ]);
+                    } else {
+                        array_push($vals, [
+                            $photoData[$meta . "_" . $field],
+                            SQLITE3_TEXT,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        if (array_key_exists("latitude", $photoData)) {
+            array_push($stmtStrings, "latitude = ?, longitude = ?");
+
+            array_push($vals, [$photoData["latitude"], SQLITE3_FLOAT]);
+            array_push($vals, [$photoData["longitude"], SQLITE3_FLOAT]);
+        }
+
+        $prepCommand .= implode(", ", $stmtStrings);
+        $prepCommand .= " WHERE id = " . $photoData["id"];
+
+        $statement = self::$pdb->prepare($prepCommand);
+        foreach ($vals as $i => $value) {
+            $statement->bindParam($i + 1, $value[0], $value[1]);
+        }
+        $statement->execute();
 
         $statement = self::$pdb->prepare(
             "INSERT INTO photoPreviews(id, tinyJPEG) VALUES (?, ?)",
@@ -282,7 +342,8 @@ class DB {
         if (is_numeric($title)) {
             return -2;
         }
-        $prepCommand = "INSERT INTO albums(title, description, isPrivate) VALUES(?, '', ?)";
+        $prepCommand =
+            "INSERT INTO albums(title, description, isPrivate) VALUES(?, '', ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $isPrivate, SQLITE3_INTEGER);

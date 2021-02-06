@@ -3,7 +3,11 @@
 require_once __DIR__ . "/../db.php";
 require_once __DIR__ . "/../auth.php";
 
-$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/login/", "", $_REQUEST["POZZO_REQUEST"]);
+$_REQUEST["POZZO_REQUEST"] = preg_replace(
+    "/^\/login/",
+    "",
+    $_REQUEST["POZZO_REQUEST"],
+);
 
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();

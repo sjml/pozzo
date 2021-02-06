@@ -35,14 +35,11 @@ class Auth {
         if (is_numeric($value)) {
             if ($value == -1) {
                 return -3;
-            }
-            elseif ($value == -2) {
+            } elseif ($value == -2) {
                 return -4;
-            }
-            elseif ($value == -3) {
+            } elseif ($value == -3) {
                 return -5;
-            }
-            else {
+            } else {
                 return $value;
             }
         }
@@ -57,7 +54,9 @@ class Auth {
     static function GenerateJWT($userData, $secret, $validOffset, $expiration) {
         $issuer =
             "Pozzo / " .
-            (isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : "PHP-CLI");
+            (isset($_SERVER["SERVER_NAME"])
+                ? $_SERVER["SERVER_NAME"]
+                : "PHP-CLI");
         $issued_at = time();
         $notbefore = $issued_at + $validOffset;
         $expire = $issued_at + $expiration;

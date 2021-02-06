@@ -25,6 +25,36 @@ const sizes = [
     ],
 ];
 
+const photoExifFields = [
+    "IFD0" => ["Make", "Model", "DateTime"],
+    "EXIF" => [
+        "ExposureTime",
+        "FNumber",
+        "ISOSpeedRatings",
+        "DateTimeOriginal",
+        "ShutterSpeedValue",
+        "ApertureValue",
+        "BrightnessValue",
+        "MeteringMode",
+        "Flash",
+        "FocalLength",
+        "SubjectLocation",
+        "MakerNote",
+    ],
+    "GPS" => [
+        "GPSLatitudeRef",
+        "GPSLatitude",
+        "GPSLongitudeRef",
+        "GPSLongitude",
+        "GPSAltitudeRef",
+        "GPSAltitude",
+        "GPSSpeedRef",
+        "GPSSpeed",
+        "GPSImgDirectionRef",
+        "GPSImgDirection",
+    ],
+];
+
 function getImageDirectory($name) {
     $ret = __DIR__ . "/../public/img/" . $name;
     if (!is_dir($ret)) {
@@ -134,9 +164,61 @@ function processImage(&$photoData) {
     // $img->setImageFormat("webp");
     // $photoData["tinyWebP"] = base64_encode($img->getImageBlob());
 
-    // TODO: figure out what EXIF data should be pulled into the database
-    // $exif = exif_read_data($origPath);
-    // print_r($exif);
+    processExif($photoData, $origPath);
 
     $photoData["id"] = DB::InsertPhoto($photoData);
+}
+
+function _gpsToDegrees($val) {
+    $ds = explode("/", $val[0]);
+    $ms = explode("/", $val[1]);
+    $ss = explode("/", $val[2]);
+    $d = floatval($ds[0]) / floatval($ds[1]);
+    $m = floatval($ms[0]) / floatval($ms[1]);
+    $s = floatval($ss[0]) / floatval($ss[1]);
+
+    return $d + $m / 60.0 + $s / 3600.0;
+}
+
+function processExif(&$photoData, $originalFilePath) {
+    $exif = exif_read_data($originalFilePath, 0, true);
+
+    foreach (photoExifFields as $meta => $datums) {
+        // just fill them with nulls and let the
+        //   database worry about it
+        if (!array_key_exists($meta, $exif)) {
+            $exif[$meta] = [];
+        }
+        foreach ($datums as $field) {
+            if (!array_key_exists($field, $exif[$meta])) {
+                $photoData[$meta . "_" . $field] = null;
+                continue;
+            }
+            $val = $exif[$meta][$field];
+            if (is_array($val)) {
+                $val = "[" . implode(", ", $val) . "]";
+            }
+            $photoData[$meta . "_" . $field] = strval($val);
+        }
+    }
+
+    if (array_key_exists("GPS", $exif)) {
+        $gpsLat = $exif["GPS"]["GPSLatitude"];
+        $gpsLatRef = $exif["GPS"]["GPSLatitudeRef"];
+        $gpsLon = $exif["GPS"]["GPSLongitude"];
+        $gpsLonRef = $exif["GPS"]["GPSLongitudeRef"];
+
+        $lat = _gpsToDegrees($gpsLat);
+        $lon = _gpsToDegrees($gpsLon);
+
+        if ($gpsLatRef != "N") {
+            $lat = -$lat;
+        }
+        if ($gpsLonRef != "E") {
+            $lon = -$lon;
+        }
+
+        $photoData["latitude"] = $lat;
+        $photoData["longitude"] = $lon;
+    }
 }

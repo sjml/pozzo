@@ -20,12 +20,6 @@ function displayCode(statusCode) {
   return colors.bgRed().black(`[${statusCode}]`);
 }
 
-
-let phpConf = "../scripts/configs/no-debug.php.ini";
-if (debug) {
-  phpConf = "../scripts/configs/debug.php.ini";
-}
-
 const phpProcessMap = {};
 const phpMatcher = new RegExp("^\\[([0-9]+)\\] \\[[^\\]]*\\](.*)$");
 const phpLaunchedMatcher = new RegExp("^PHP [0-9\\.]+ Development Server .*\\) started$");
@@ -36,7 +30,7 @@ function processPHPOutput(data) {
   messages.forEach((m) => {
     const match = m.match(phpMatcher);
     if (match == null) {
-      console.error("Couldn't parse PHP output:", m);
+      console.log(colors.bgRed("PHP ERROR: ") + " " + m);
       return;
     }
     const processID = match[1];
@@ -50,9 +44,21 @@ function processPHPOutput(data) {
         return;
       }
       const outputMatch = message.match(phpProcessMatcher);
-      console.log(colors.green(`PHP${debug?"_D":""}@${phpProcessMap[processID]}::`) + displayCode(outputMatch[1]) + ` ${outputMatch[2]}`);
+      if (!outputMatch) {
+        console.log(colors.bgRed("PHP ERROR: ") + " " + message);
+      }
+      else {
+        console.log(colors.green(`PHP${debug?"_D":""}@${phpProcessMap[processID]}::`) + displayCode(outputMatch[1]) + ` ${outputMatch[2]}`);
+      }
     }
   });
+}
+
+
+
+let phpConf = "../scripts/configs/no-debug.php.ini";
+if (debug) {
+  phpConf = "../scripts/configs/debug.php.ini";
 }
 
 const phpServer = require('child_process').spawn('php', [

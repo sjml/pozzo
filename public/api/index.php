@@ -12,7 +12,7 @@ register_shutdown_function(["DB", "Cleanup"]);
 if ($_SERVER["SERVER_NAME"] == "0.0.0.0") {
     register_shutdown_function(function () {
         $error = error_get_last();
-        switch ($error['type'] ?? 0) {
+        switch ($error["type"] ?? 0) {
             case E_ERROR:
             case E_PARSE:
             case E_CORE_ERROR:
@@ -28,7 +28,11 @@ if ($_SERVER["SERVER_NAME"] == "0.0.0.0") {
 }
 
 $_REQUEST["POZZO_REQUEST"] = $_SERVER["REQUEST_URI"];
-$_REQUEST["POZZO_REQUEST"] = preg_replace("/^\/api/", "", $_REQUEST["POZZO_REQUEST"]);
+$_REQUEST["POZZO_REQUEST"] = preg_replace(
+    "/^\/api/",
+    "",
+    $_REQUEST["POZZO_REQUEST"],
+);
 if ($_REQUEST["POZZO_REQUEST"] == "/") {
     $_REQUEST["POZZO_REQUEST"] = "/index";
 }
