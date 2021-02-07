@@ -1,10 +1,10 @@
 1. Reorder album
-    - backend reorder command
     - frontend reorder ui
     - then make it so individual photo pages can navigate left/right if we're viewing through an album
         - then add exif w/map embed to picture pages
         - THEN album photo map
     - then remove individual image views -- can only see through an album
+    - delete album UI
 2. Design pass
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
@@ -36,6 +36,7 @@
         - rollover reactions?
         - animation of stroke-width?
 3. editing titles and descriptions on photos/albums 
+    - photos should record which user uploaded them
 4. Remove reset endpoint
 5. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure

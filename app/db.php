@@ -465,6 +465,22 @@ class DB {
         return $ret;
     }
 
+    static function ReorderAlbum($albumID, $newOrdering) {
+        // there is almost certainly some clever SQL I could write to do this all
+        //   in one statement...
+        $prepCommand = "UPDATE photos_albums SET ordering = ? WHERE photo_id = ? AND album_id = ?";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->bindParam(3, $albumID, SQLITE3_INTEGER);
+        foreach ($newOrdering as $i => $pid) {
+            $orderIdx = $i + 1; // PHP gets cranky passing arithmetic results directly :-/
+            $statement->bindParam(1, $orderIdx, SQLITE3_INTEGER);
+            $statement->bindParam(2, $pid, SQLITE3_INTEGER);
+            $statement->execute();
+            $statement->reset();
+        }
+        return true;
+    }
+
     static function FindAlbum(
         $identifier,
         $includePhotos = true,

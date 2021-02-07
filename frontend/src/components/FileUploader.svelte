@@ -45,7 +45,7 @@
 
     }
 
-    onMount(() => {
+    onMount(async () => {
         uploadStatus.startUploadCallback = () => startUpload();
         progressBar.value = 0;
 

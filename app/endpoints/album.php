@@ -16,6 +16,7 @@ $router->AddHandler("/new", ["newAlbum"], true);
 $router->AddHandler("/view", ["viewAlbum"]);
 $router->AddHandler("/remove", ["removePhoto"], true);
 $router->AddHandler("/delete", ["deleteAlbum"], true);
+$router->AddHandler("/reorder", ["reorderAlbum"], true);
 // $router->AddHandler("/edit", ["editAlbum"], true); // change album's title or description
 
 $router->Route();
@@ -99,4 +100,47 @@ function removePhoto() {
         "message" =>
             "Removed from " . $result . " album" . ($result == 1 ? "" : "s"),
     ]);
+}
+
+function reorderAlbum() {
+    $input = json_decode(file_get_contents("php://input"), true);
+
+    if (!isset($input["newOrdering"]) || !is_array($input["newOrdering"])) {
+        output(["message" => "Invalid or missing parameter 'ordering'"], 400);
+        return;
+    }
+    $newOrdering = $input["newOrdering"];
+
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
+    $album = DB::FindAlbum($identifier, true, false);
+    if ($album == false) {
+        output(["message" => "Album not found"], 404);
+        return;
+    }
+
+    $existingPids = [];
+    foreach ($album["photos"] as $photoData) {
+        array_push($existingPids, $photoData["id"]);
+    }
+
+    if (count($existingPids) != count($newOrdering)) {
+        output(["message" => "Miscount of ordering data"], 400);
+        return;
+    }
+
+    foreach ($newOrdering as $pid) {
+        if (!in_array($pid, $existingPids)) {
+            output(["message" => "Misplaced order index", "badIndex" => $pid], 400);
+            return;
+        }
+    }
+
+    $unique = array_unique($newOrdering);
+    if (count($unique) != count($newOrdering)) {
+        output(["message" => "Non-unique indices"], 400);
+        return;
+    }
+
+    $result = DB::ReorderAlbum($album["id"], $newOrdering);
+    output(["message" => "Reordered album"]);
 }
