@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Router, Route } from "svelte-routing";
+    import { Router, Route, Link } from "svelte-routing";
 
     import Login from "./Login.svelte";
     import UploadZone from "./UploadZone.svelte";
@@ -10,11 +10,13 @@
 </script>
 
 <main>
-    <h1>Pozzo</h1>
-    <Login />
-    <UploadZone />
-
     <Router url={url}>
+        <Link to={"/"}>
+            <h1 class="homelink">Pozzo</h1>
+        </Link>
+        <Login />
+        <UploadZone />
+
         <Route path="album/:identifier" component={Album} />
         <Route component={AlbumList} />
     </Router>

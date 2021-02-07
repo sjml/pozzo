@@ -1,18 +1,48 @@
 <script lang="ts">
-    import type{ Photo } from "../pozzo.type";
-    import { fade } from 'svelte/transition';
+    import { getContext } from "svelte";
+    import { fade } from "svelte/transition";
+
+    import type { Photo } from "../pozzo.type";
+    import { albumSelectionStore } from "../stores";
 
     export let photo: Photo;
+    export let photoID: number;
     export let size: string = "medium";
     export let dims: any;
 
     let loaded = false;
+
+    let isSelected = false;
+    function handleClick(evt: MouseEvent) {
+        if (!evt.metaKey) {
+            return;
+        }
+        const selIdx = $albumSelectionStore.indexOf(photoID);
+        if (selIdx != -1) {
+            isSelected = false;
+            $albumSelectionStore = $albumSelectionStore.filter(si => si != photoID);
+        }
+        else {
+            isSelected = true;
+            $albumSelectionStore = [...$albumSelectionStore, photoID];
+        }
+    }
+    function handleContextMenu(_: MouseEvent) {
+        if ($albumSelectionStore.length == 0) {
+            $albumSelectionStore = [photoID];
+        }
+    }
+
+    $: isSelected = $albumSelectionStore.indexOf(photoID) >= 0
 </script>
 
 {#if photo && dims}
     <div
         class="albumPhoto"
+        class:selected={isSelected}
         style={`width: ${dims.width}px; height: ${dims.height}px; top: ${dims.top}px; left: ${dims.left}px;`}
+        on:click={handleClick}
+        on:contextmenu={handleContextMenu}
     >
         {#if !loaded}
             <img class="preload"
@@ -43,6 +73,11 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    .selected {
+        outline: 3px solid white;
+
     }
 
     .preload {

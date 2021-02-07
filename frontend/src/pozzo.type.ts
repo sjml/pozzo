@@ -33,6 +33,7 @@ export type Photo = {
 }
 
 export type Album = {
+    id: number,
     title: string,
     description: string,
     photos: Photo[]

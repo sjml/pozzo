@@ -18,3 +18,5 @@ export const siteData = readable<SiteConfig>(
 );
 
 export const userStoppedUploadScroll = writable<boolean>(false);
+
+export const albumSelectionStore = writable<number[]>([]);

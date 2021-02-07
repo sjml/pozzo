@@ -48,7 +48,7 @@ function processPHPOutput(data) {
         console.log(colors.bgRed("PHP ERROR: ") + " " + message);
       }
       else {
-        console.log(colors.green(`PHP${debug?"_D":""}@${phpProcessMap[processID]}::`) + displayCode(outputMatch[1]) + ` ${outputMatch[2]}`);
+        console.log(colors.green(`   PHP${debug?"_D":""}@${phpProcessMap[processID]}::`) + displayCode(outputMatch[1]) + ` ${outputMatch[2]}`);
       }
     }
   });
@@ -92,13 +92,13 @@ function wrapStatic(name, dir, options) {
     sirver(req, res, next);
     if (res.headersSent && (!res.pozzoDevSent)) {
       res.pozzoDevSent = true;
-      console.log(colors.green(`${name}::`) + `[${res.statusCode}]: ${req.originalUrl || req.url}`);
+      console.log(colors.green(`${name}::`) + `${displayCode(res.statusCode)} ${req.originalUrl || req.url}`);
     }
   };
 }
 
 const frontend = wrapStatic("Frontend", "./public", {dev: true});
-const static = wrapStatic("Static", "../public", {dev: true, single: true});
+const static   = wrapStatic("  Static", "../public", {dev: true, single: true});
 
 
 

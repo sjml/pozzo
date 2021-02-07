@@ -19,7 +19,7 @@
         });
         if (res.success) {
             addingNew = false;
-            getAlbumList();
+            getAlbumList(null);
         }
         else {
             newAlbumMessage = "Duplicate name!";

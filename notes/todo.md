@@ -1,7 +1,6 @@
 1. Moving images between albums
     - allowing creating a new one as you do it
-    - multiple-selection
-    - panel w/drag and drop? 
+    - limit to logged in users
 2. Nice transitions between albums
 3. Individual picture view
     - exif w/map embed
@@ -10,13 +9,17 @@
 4. Reorder album
     - new column on albums_photos table to indicate order
     - preserve order on upload
+    - upload directly to album instead of to unsorted
     - sorting? (name, timestamp, etc)
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
 5. Design pass
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
         - something simpler?
+    - check for all console error statements and handle gracefully in UI
+    - album previews
     - class name consistency (kebab vs camel)
+    - transition selection border appearance
     - allow setting title, add pozzo branding note at bottom
     - accessibility checks
     - splash page
@@ -44,9 +47,11 @@
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 
 ## future
-* router swap?
-    - https://github.com/AlexxNB/tinro
 * special handling for unsorted album? (automatically removing from it)
+    - "smart" albums in general? (let's not get crazy)
+    - option for copying to album instead of moving to it
+        - trivial on the backend, but UX of "this photo is in multiple albums" is questionable
+* investigate: https://github.com/tangrams/tangram
 * share buttons? :-/
     - generate share cards
     - https://smcllns.github.io/css-social-buttons/

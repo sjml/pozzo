@@ -1,14 +1,15 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, setContext, getContext } from "svelte";
 
     import justifiedLayout from "justified-layout";
     import { navigate } from "svelte-routing";
 
     import { RunApi } from "../api";
-    import type{ Album } from "../pozzo.type";
+    import type { Album, Photo } from "../pozzo.type";
     import AlbumPhoto from "./AlbumPhoto.svelte";
-import { loginCredentialStore } from "../stores";
-
+    import PhotoContextMenu from "./PhotoContextMenu.svelte";
+    import { loginCredentialStore, albumSelectionStore } from "../stores";
+    import { albumContextMenuKey } from "../keys";
 
     export let identifier: number|string;
 
@@ -19,6 +20,7 @@ import { loginCredentialStore } from "../stores";
             authorize: true,
         });
         if (res.success) {
+            $albumSelectionStore = [];
             album = res.data;
         }
         else {
@@ -44,6 +46,43 @@ import { loginCredentialStore } from "../stores";
         });
     }
 
+    function handleKeydown(evt: KeyboardEvent) {
+        if (evt.key == "a" && evt.metaKey) {
+            $albumSelectionStore = [...Array(album.photos.length).keys()];
+            evt.preventDefault();
+        }
+        if (evt.key == "d" && evt.metaKey) {
+            $albumSelectionStore = [];
+            evt.preventDefault();
+        }
+    }
+
+    let selectedPhotos: Photo[] = [];
+    $: selectedPhotos = $albumSelectionStore.map(pi => album.photos[pi]);
+
+    let contextMenuVisible = false;
+    let clickLocation: number[] = [0, 0];
+    setContext(albumContextMenuKey, {
+        clickLocation: clickLocation,
+        getSelectedPhotos: () => selectedPhotos
+    });
+
+    function handleContextMenu(evt: MouseEvent) {
+        evt.preventDefault();
+        if (contextMenuVisible) {
+            contextMenuVisible = false;
+        }
+        else {
+            clickLocation[0] = evt.clientX;
+            clickLocation[1] = evt.clientY;
+            contextMenuVisible = true;
+        }
+    }
+    function contextMenuExecuted(_: CustomEvent) {
+        contextMenuVisible = false;
+        getAlbum(null);
+    }
+
     let containerWidth: number;
     let album: Album = null;
     let layout = null;
@@ -57,16 +96,33 @@ import { loginCredentialStore } from "../stores";
     $: getAlbum($loginCredentialStore)
 </script>
 
+
+<svelte:window
+    on:keydown={handleKeydown}
+/>
+
 {#if album}
     <h2>{album.title}</h2>
 
     <div class="albumPhotos"
-        bind:clientWidth={containerWidth}
-        style={`height: ${layout?.containerHeight || 0}px;`}
-    >
+            bind:clientWidth={containerWidth}
+            on:contextmenu={handleContextMenu}
+            style={`height: ${layout?.containerHeight || 0}px;`}
+        >
+        {#if contextMenuVisible}
+            <PhotoContextMenu
+                currentAlbum={album}
+                on:done={contextMenuExecuted}
+            />
+        {/if}
         {#if layout}
             {#each album.photos as photo, pi}
-                <AlbumPhoto photo={photo} size="medium" dims={layout.boxes[pi]} />
+                <AlbumPhoto
+                    photo={photo}
+                    photoID={pi}
+                    size="medium"
+                    dims={layout.boxes[pi]}
+                />
             {/each}
         {/if}
     </div>

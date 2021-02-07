@@ -10,4 +10,5 @@ body {
 
 a:visited, a {
     color: rgb(214, 214, 214);
+    text-decoration: none;
 }
