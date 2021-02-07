@@ -9,7 +9,7 @@ export function HumanBytes(byteCount: number): string {
     return `${pretty} ${["B", "kB", "MB", "GB", "TB"][order]}`;
 }
 
-export function getImgPath(size:string, hash: string) {
+export function GetImgPath(size:string, hash: string, uniq: string) {
     const dirs = hash.match(/.{1,2}/g).slice(0,3);
-    return `/img/${dirs.join("/")}/${hash}_${size}.jpg`;
+    return `/img/${dirs.join("/")}/${hash}_${uniq}_${size}.jpg`;
 }

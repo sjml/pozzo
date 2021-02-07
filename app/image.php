@@ -55,7 +55,7 @@ const photoExifFields = [
     ],
 ];
 
-function getImagePath($sizeLabel, $hash) {
+function getImagePath($sizeLabel, $hash, $uniq) {
     $ret = __DIR__ . "/../public/img/";
     $dirs = str_split($hash, 2);
     $dirs = array_slice($dirs, 0, 3);
@@ -63,14 +63,14 @@ function getImagePath($sizeLabel, $hash) {
     if (!is_dir($ret)) {
         mkdir($ret, 0755, true);
     }
-    return $ret . "/" . $hash . "_" . $sizeLabel . ".jpg";
+    return $ret . "/" . $hash . "_" . $uniq . "_" . $sizeLabel . ".jpg";
 }
 
-function deleteImagesWithHash($hash) {
+function deleteImagesWithHash($hash, $uniq) {
     $delSizes = array_column(sizes, "label");
     array_push($delSizes, "orig");
     foreach ($delSizes as $size) {
-        $path = getImagePath($size, $hash);
+        $path = getImagePath($size, $hash, $uniq);
         if (file_exists($path)) {
             unlink($path);
         }
@@ -85,10 +85,11 @@ function importImage($filePath) {
         "title" => basename($filePath),
         "size" => filesize($filePath),
         "hash" => md5_file($filePath),
+        "uniq" => uniqid(),
     ];
 
 
-    $origPath = getImagePath("orig", $photoData["hash"]);
+    $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
     if (is_uploaded_file($filePath)) {
         move_uploaded_file($filePath, $origPath);
     } else {
@@ -99,7 +100,7 @@ function importImage($filePath) {
 }
 
 function processImage(&$photoData) {
-    $origPath = getImagePath("orig", $photoData["hash"]);
+    $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
 
     $img = new IMagick();
     foreach (sizes as $size) {
@@ -136,7 +137,7 @@ function processImage(&$photoData) {
             $img->profileImage("icc", $profiles["icc"]);
         }
 
-        $img->writeImage(getImagePath($size["label"], $photoData["hash"]));
+        $img->writeImage(getImagePath($size["label"], $photoData["hash"], $photoData["uniq"]));
     }
 
     // generate tiny preview
@@ -190,10 +191,6 @@ function processExif(&$photoData, $originalFilePath) {
             }
             $photoData[$meta . "_" . $field] = strval($val);
         }
-    }
-
-    if ($photoData["title"] == "IMG_3918.jpg") {
-        $debug = true;
     }
 
     if (array_key_exists("GPS", $exif)) {

@@ -4,7 +4,7 @@
 
     import type { Photo } from "../pozzo.type";
     import { RunApi } from "../api";
-    import { getImgPath } from "../util";
+    import { GetImgPath } from "../util";
 
     async function getPhoto() {
         const res = await RunApi(`/photo/view/${photoID}`, {
@@ -67,8 +67,8 @@
             {/if}
             <img on:load={() => loaded = true}
                 alt="{photo.title}"
-                srcset="{getImgPath(size, photo.hash)}, {`${getImgPath(size + "2x", photo.hash)} 2x`}"
-                src="{getImgPath(size, photo.hash)}"
+                srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
+                src="{GetImgPath(size, photo.hash, photo.uniq)}"
                 style={`width: ${photoW}px; height: ${photoH}px;`}
             />
         </div>

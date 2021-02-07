@@ -57,7 +57,7 @@ function deletePhoto() {
         }
     }
 
-    deleteImagesWithHash($result["hash"]);
+    deleteImagesWithHash($result["hash"], $result["uniq"]);
 
     output(["message" => "Photo deleted", "data" => $result]);
 }

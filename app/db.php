@@ -60,6 +60,7 @@ class DB {
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", title TEXT";
         $prepCommand .= ", hash TEXT";
+        $prepCommand .= ", uniq TEXT";
         $prepCommand .= ", width INTEGER, height INTEGER";
         $prepCommand .= ", aspect FLOAT";
         $prepCommand .= ", uploadTimeStamp DATETIME";
@@ -112,6 +113,7 @@ class DB {
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
         $prepCommand .= "photo_id INTEGER NOT NULL";
         $prepCommand .= ", album_id INTEGER NOT NULL";
+        $prepCommand .= ", ordering INTEGER";
         $prepCommand .=
             ", CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
         $prepCommand .= ", FOREIGN KEY(photo_id) REFERENCES photos(id)";
@@ -214,16 +216,17 @@ class DB {
 
     static function InsertPhoto($photoData) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos (title, hash, width, height, aspect, size, uploadTimeStamp, latitude, longitude) VALUES (?,?,?,?,?,?,date('now'),?,?)",
+            "INSERT INTO photos (title, hash, uniq, width, height, aspect, size, uploadTimeStamp, latitude, longitude) VALUES (?,?,?,?,?,?,?,date('now'),?,?)",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
-        $statement->bindParam(3, $photoData["width"], SQLITE3_INTEGER);
-        $statement->bindParam(4, $photoData["height"], SQLITE3_INTEGER);
-        $statement->bindParam(5, $photoData["aspect"], SQLITE3_FLOAT);
-        $statement->bindParam(6, $photoData["size"], SQLITE3_INTEGER);
-        $statement->bindParam(7, $photoData["latitude"], SQLITE3_FLOAT);
-        $statement->bindParam(8, $photoData["longitude"], SQLITE3_FLOAT);
+        $statement->bindParam(3, $photoData["uniq"], SQLITE3_TEXT);
+        $statement->bindParam(4, $photoData["width"], SQLITE3_INTEGER);
+        $statement->bindParam(5, $photoData["height"], SQLITE3_INTEGER);
+        $statement->bindParam(6, $photoData["aspect"], SQLITE3_FLOAT);
+        $statement->bindParam(7, $photoData["size"], SQLITE3_INTEGER);
+        $statement->bindParam(8, $photoData["latitude"], SQLITE3_FLOAT);
+        $statement->bindParam(9, $photoData["longitude"], SQLITE3_FLOAT);
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
@@ -387,7 +390,7 @@ class DB {
 
     static function AddPhotoToAlbum($photoID, $albumID) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos_albums VALUES(?, ?)",
+            "INSERT INTO photos_albums (photo_id, album_id) VALUES(?, ?)",
         );
         $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
         $statement->bindParam(2, $albumID, SQLITE3_INTEGER);

@@ -25,6 +25,7 @@ export type Photo = {
     id: number,
     title: string,
     hash: string,
+    uniq: string,
     width: number,
     height: number,
     aspect: number,

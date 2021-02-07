@@ -1,12 +1,11 @@
 1. Reorder album
-    - new column on albums_photos table to indicate order
     - preserve order on upload
     - upload directly to album instead of to unsorted
     - sorting? (name, timestamp, etc)
-    - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
     - then make it so individual photo pages can navigate left/right if we're viewing through an album
         - then add exif w/map embed to picture pages
         - THEN album photo map
+    - then remove individual image views -- can only see through an album
 2. Design pass
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
