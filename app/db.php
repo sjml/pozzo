@@ -390,10 +390,22 @@ class DB {
 
     static function AddPhotoToAlbum($photoID, $albumID) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos_albums (photo_id, album_id) VALUES(?, ?)",
+            "SELECT ordering FROM photos_albums WHERE album_id = ? ORDER BY ordering ASC"
+        );
+        $statement->bindParam(1, $albumID);
+        $results = $statement->execute();
+        $highest = 0;
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            $highest = $row["ordering"];
+        }
+        $orderIdx = $highest + 1;
+
+        $statement = self::$pdb->prepare(
+            "INSERT INTO photos_albums (photo_id, album_id, ordering) VALUES(?, ?, ?)",
         );
         $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
         $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
+        $statement->bindParam(3, $orderIdx, SQLITE3_INTEGER);
         try {
             $result = $statement->execute();
             if ($result == false) {
@@ -424,7 +436,7 @@ class DB {
             $query .=
                 "INNER JOIN photoPreviews ON photos.id = photoPreviews.id ";
         }
-        $query .= "WHERE photos_albums.album_id = ?";
+        $query .= "WHERE photos_albums.album_id = ? ORDER BY ordering";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
         $results = $statement->execute();

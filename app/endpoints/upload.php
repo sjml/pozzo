@@ -33,6 +33,8 @@ function upload() {
         header("Content-Type: application/json");
         echo json_encode($photoData);
     } catch (\Throwable $th) {
-        // just keep chugging for now
+        http_response_code(500);
+        header("Content-Type: application/json");
+        echo json_encode(["message" => "upload failure", "data" => [$th->getMessage(), $th->getTraceAsString()]]);
     }
 }
