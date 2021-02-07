@@ -4,6 +4,7 @@
     import type { Photo, Album } from "../pozzo.type";
     import { albumContextMenuKey } from "../keys";
     import { RunApi } from "../api";
+    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
 
     const context = getContext(albumContextMenuKey);
 
@@ -19,14 +20,26 @@
 
     const dispatch = createEventDispatcher();
 
-    async function handleAlbumMove(targetAlbum: Album) {
+    function newAlbumMove(evt: CustomEvent) {
+        newAlbumPromptShowing = false;
+        handleAlbumMove(evt.detail.newAlbumID);
+    }
+
+    async function handleAlbumMove(targetAlbum: (Album|number)) {
+        let targetID: number;
+        if (typeof targetAlbum === "number") {
+            targetID = targetAlbum;
+        }
+        else {
+            targetID = targetAlbum.id;
+        }
         for (let p of photos) {
             const copyRes = await RunApi("/photo/copy", {
                 authorize: true,
                 method: "POST",
                 params: {
                     photoID: p.id,
-                    albumID: targetAlbum.id
+                    albumID: targetID
                 }
             });
             if (!copyRes.success) {
@@ -78,8 +91,16 @@
     export let currentAlbum: Album;
     let albumList: Album[] = [];
     let albumListShown = false;
+    let newAlbumPromptShowing = false;
 
 </script>
+
+{#if newAlbumPromptShowing}
+    <NewAlbumPrompt
+        on:dismissed={() => newAlbumPromptShowing = false}
+        on:done={newAlbumMove}
+    />
+{/if}
 
 <div
     class="contextMenu"
@@ -98,10 +119,12 @@
         {/if}
     </div>
     {#if albumListShown}
-        <!-- <div class="album menu-item">
+        <div class="album menu-item"
+            on:click={() => newAlbumPromptShowing = true}
+        >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             Move to New Album…
-        </div> -->
+        </div>
         {#each albumList as album}
             {#if album.id != currentAlbum.id}
                 <div class="album menu-item"
