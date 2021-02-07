@@ -3,6 +3,7 @@
 
     import type { Photo } from "../pozzo.type";
     import { albumSelectionStore, loginCredentialStore } from "../stores";
+    import { getImgPath } from "../util";
 
     export let photo: Photo;
     export let photoID: number;
@@ -59,8 +60,8 @@
         {/if}
         <img on:load={() => loaded = true}
             alt="{photo.title}"
-            srcset="{`/img/${size}/${photo.hash}.jpg`}, {`/img/${size}2x/${photo.hash}.jpg 2x`}"
-            src="{`/img/${size}/${photo.hash}.jpg`}"
+            srcset="{getImgPath(size, photo.hash)}, {`${getImgPath(size + "2x", photo.hash)} 2x`}"
+            src="{getImgPath(size, photo.hash)}"
         />
     </div>
 {/if}

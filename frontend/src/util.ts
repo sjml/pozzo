@@ -8,3 +8,8 @@ export function HumanBytes(byteCount: number): string {
     const pretty = calced.toFixed(numDecimals);
     return `${pretty} ${["B", "kB", "MB", "GB", "TB"][order]}`;
 }
+
+export function getImgPath(size:string, hash: string) {
+    const dirs = hash.match(/.{1,2}/g).slice(0,3);
+    return `/img/${dirs.join("/")}/${hash}_${size}.jpg`;
+}

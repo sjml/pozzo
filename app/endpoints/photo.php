@@ -25,8 +25,11 @@ function output($obj, $code = 200) {
 }
 
 function viewPhoto() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    $getPreview = isset($input["preview"]) && $input["preview"] == 1;
+
     $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
-    $photo = DB::GetPhoto($identifier);
+    $photo = DB::GetPhoto($identifier, $getPreview);
     if ($photo == null) {
         output(["message" => "Photo not found"], 404);
         return;

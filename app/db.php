@@ -67,19 +67,24 @@ class DB {
         $prepCommand .= ", latitude FLOAT";
         $prepCommand .= ", longitude FLOAT";
 
+        $prepCommand .= ")";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS photoMeta (";
+        $fieldDescs = [];
         foreach (photoExifFields as $meta => $datums) {
             foreach ($datums as $field) {
-                $prepCommand .= ", ";
-                $prepCommand .= $meta . "_" . $field . " ";
+                $dbFieldName = $meta . "_" . $field . " ";
                 if (strpos($field, "DateTime") !== false) {
-                    $prepCommand .= "DATETIME";
+                    array_push($fieldDescs, $dbFieldName . " " . "DATETIME");
                 } else {
-                    $prepCommand .= "TEXT";
+                    array_push($fieldDescs, $dbFieldName . " " . "TEXT");
                 }
             }
         }
 
-        $prepCommand .= ")";
+        $prepCommand .= implode(", ", $fieldDescs) . ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
@@ -209,7 +214,7 @@ class DB {
 
     static function InsertPhoto($photoData) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos (title, hash, width, height, aspect, size, uploadTimeStamp) VALUES (?,?,?,?,?,?,date('now'))",
+            "INSERT INTO photos (title, hash, width, height, aspect, size, uploadTimeStamp, latitude, longitude) VALUES (?,?,?,?,?,?,date('now'),?,?)",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
@@ -217,17 +222,19 @@ class DB {
         $statement->bindParam(4, $photoData["height"], SQLITE3_INTEGER);
         $statement->bindParam(5, $photoData["aspect"], SQLITE3_FLOAT);
         $statement->bindParam(6, $photoData["size"], SQLITE3_INTEGER);
+        $statement->bindParam(7, $photoData["latitude"], SQLITE3_FLOAT);
+        $statement->bindParam(8, $photoData["longitude"], SQLITE3_FLOAT);
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
 
-        $prepCommand = "UPDATE photos SET ";
         $vals = [];
-        $stmtStrings = [];
+        $fieldList = [];
+        $prepCommand = "INSERT INTO photoMeta (";
         foreach (photoExifFields as $meta => $datums) {
             foreach ($datums as $field) {
                 if ($photoData[$meta . "_" . $field] != null) {
-                    array_push($stmtStrings, $meta . "_" . $field . " = ?");
+                    array_push($fieldList, $meta . "_" . $field);
                     if (strpos($field, "DateTime") !== false) {
                         $date = \DateTime::createFromFormat(
                             "Y:m:d H:i:s",
@@ -248,15 +255,8 @@ class DB {
             }
         }
 
-        if (array_key_exists("latitude", $photoData)) {
-            array_push($stmtStrings, "latitude = ?, longitude = ?");
-
-            array_push($vals, [$photoData["latitude"], SQLITE3_FLOAT]);
-            array_push($vals, [$photoData["longitude"], SQLITE3_FLOAT]);
-        }
-
-        $prepCommand .= implode(", ", $stmtStrings);
-        $prepCommand .= " WHERE id = " . $photoData["id"];
+        $prepCommand .= implode(", ", $fieldList) . ") ";
+        $prepCommand .= "VALUES (?" . str_repeat(", ?", count($vals)-1) . ")";
 
         $statement = self::$pdb->prepare($prepCommand);
         foreach ($vals as $i => $value) {
@@ -307,6 +307,11 @@ class DB {
         $results = $statement->execute();
 
         $query = "DELETE FROM photoPreviews WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
+        $query = "DELETE FROM photoMeta WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();

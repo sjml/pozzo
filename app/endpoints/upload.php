@@ -25,10 +25,14 @@ function upload() {
     }
     $photoData["title"] = $_FILES["photoUp"]["name"];
 
-    processImage($photoData);
-    unset($photoData["tinyJPEG"]);
+    try {
+        processImage($photoData);
+        unset($photoData["tinyJPEG"]);
 
-    http_response_code(200);
-    header("Content-Type: application/json");
-    echo json_encode($photoData);
+        http_response_code(200);
+        header("Content-Type: application/json");
+        echo json_encode($photoData);
+    } catch (\Throwable $th) {
+        // just keep chugging for now
+    }
 }

@@ -2,7 +2,7 @@
     import { onMount, setContext } from "svelte";
 
     import justifiedLayout from "justified-layout";
-    import { navigate } from "svelte-routing";
+    import { navigate, Link } from "svelte-routing";
 
     import { RunApi } from "../api";
     import type { Album, Photo } from "../pozzo.type";
@@ -123,12 +123,14 @@
         {/if}
         {#if layout}
             {#each album.photos as photo, pi}
-                <AlbumPhoto
-                    photo={photo}
-                    photoID={pi}
-                    size="medium"
-                    dims={layout.boxes[pi]}
-                />
+                <!-- <Link to={`/album/${identifier}/${photo.id}`} > -->
+                    <AlbumPhoto
+                        photo={photo}
+                        photoID={pi}
+                        size="medium"
+                        dims={layout.boxes[pi]}
+                    />
+                <!-- </Link> -->
             {/each}
         {/if}
     </div>

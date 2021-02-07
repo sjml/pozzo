@@ -64,7 +64,6 @@ for i in ${imgs[*]}; do
     $SERVER/api/upload
   echo
 done
-
 # make a new private album
 $CURL \
   -H "Authorization: Bearer $jwt" \
@@ -78,6 +77,7 @@ for i in $(seq 2); do
     -H "Authorization: Bearer $jwt" \
     -X POST --data "{\"photoID\": $i, \"albumID\": 2}" \
     $SERVER/api/photo/copy
+  echo
   $CURL \
     -H "Authorization: Bearer $jwt" \
     -X POST --data "{\"photoID\": $i, \"albumID\": 1}" \

@@ -154,11 +154,7 @@
 
 <style>
     .login {
-        margin: 10px;
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 500;
+        padding: 5px 10px;
     }
 
     .link {

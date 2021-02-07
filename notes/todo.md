@@ -1,20 +1,20 @@
-1. Nice transitions between albums
-2. Individual picture view
-    - exif w/map embed
-    - (map on album view, too, natch)
-    - redo file system scheme (and include unique user/time salt) (#9 on this list at present)
-3. Reorder album
+1. Reorder album
     - new column on albums_photos table to indicate order
     - preserve order on upload
     - upload directly to album instead of to unsorted
     - sorting? (name, timestamp, etc)
     - last_updated column, too, so there's *some* possiblity of knowing if you're out of sync?
-4. Design pass
+    - then make it so individual photo pages can navigate left/right if we're viewing through an album
+        - then add exif w/map embed to picture pages
+        - THEN album photo map
+2. Design pass
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
         - something simpler?
     - check for all console error statements and handle gracefully in UI
+    - see about switching to stackblur for image loads
     - album previews
+    - transitions between albums and stuff
     - class name consistency (kebab vs camel)
     - transition selection border appearance
     - allow setting title, add pozzo branding note at bottom
@@ -33,13 +33,11 @@
     - also pick a few consistent sizes for icon usages
         - rollover reactions?
         - animation of stroke-width? 
-5. Remove reset endpoint
-6. Add admin endpoint (+frontend UI) to do reset and other such things?
+3. Remove reset endpoint
+4. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-7. Look at directory layout for images -- how to split better, etc. if there's going to be different formats eventually (and there will be) should they get their own directories or be alongside?
-    - with image import -- do we have to read the image anew each time? not sure if that's the bottleneck, but I/O is a likely culprit
-8. Video / live pictures?
+5. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 

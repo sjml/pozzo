@@ -57,6 +57,10 @@
 <style>
     .albumList {
         padding-left: 30px;
+        margin-top: 4em;
+    }
+    h2 {
+        margin: 0;
     }
     .navAlbum {
         margin: 10px;

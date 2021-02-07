@@ -5,31 +5,45 @@
     import UploadZone from "./UploadZone.svelte";
     import Album from "./Album.svelte";
     import AlbumList from "./AlbumList.svelte";
+    import PhotoPage from "./PhotoPage.svelte";
 
     export let url = "";
 </script>
 
-<main>
-    <Router url={url}>
+<Router url={url}>
+    <nav>
         <Link to={"/"}>
-            <h1 class="homelink">Pozzo</h1>
+            <h1>Pozzo</h1>
         </Link>
         <Login />
+    </nav>
+    <main>
         <UploadZone />
 
         <Route path="album/:identifier" component={Album} />
+        <!-- <Route path="album/:albumIdentifier/:photoID" component={PhotoPage} /> -->
+        <Route path="photo/:photoID" component={PhotoPage} />
         <Route component={AlbumList} />
-    </Router>
-
-</main>
+    </main>
+</Router>
 
 <style>
-    main {
-        padding-bottom: 30px;
+    nav {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        background-color: rgb(32, 32, 32);
+        font-size: large;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 300;
     }
 
-    h1 {
-        padding: 20px;
-        font-size: 4em;
+    nav h1 {
+        padding: 5px 10px;
+        font-weight: bolder;
+        font-size: 1.4em;
+        margin: 0;
     }
 </style>

@@ -55,19 +55,22 @@ const photoExifFields = [
     ],
 ];
 
-function getImageDirectory($name) {
-    $ret = __DIR__ . "/../public/img/" . $name;
+function getImagePath($sizeLabel, $hash) {
+    $ret = __DIR__ . "/../public/img/";
+    $dirs = str_split($hash, 2);
+    $dirs = array_slice($dirs, 0, 3);
+    $ret .= implode("/", $dirs);
     if (!is_dir($ret)) {
         mkdir($ret, 0755, true);
     }
-    return $ret;
+    return $ret . "/" . $hash . "_" . $sizeLabel . ".jpg";
 }
 
 function deleteImagesWithHash($hash) {
     $delSizes = array_column(sizes, "label");
     array_push($delSizes, "orig");
     foreach ($delSizes as $size) {
-        $path = getImageDirectory($size) . "/" . $hash . ".jpg";
+        $path = getImagePath($size, $hash);
         if (file_exists($path)) {
             unlink($path);
         }
@@ -84,7 +87,8 @@ function importImage($filePath) {
         "hash" => md5_file($filePath),
     ];
 
-    $origPath = getImageDirectory("orig") . "/" . $photoData["hash"] . ".jpg";
+
+    $origPath = getImagePath("orig", $photoData["hash"]);
     if (is_uploaded_file($filePath)) {
         move_uploaded_file($filePath, $origPath);
     } else {
@@ -95,7 +99,7 @@ function importImage($filePath) {
 }
 
 function processImage(&$photoData) {
-    $origPath = getImageDirectory("orig") . "/" . $photoData["hash"] . ".jpg";
+    $origPath = getImagePath("orig", $photoData["hash"]);
 
     $img = new IMagick();
     foreach (sizes as $size) {
@@ -132,21 +136,7 @@ function processImage(&$photoData) {
             $img->profileImage("icc", $profiles["icc"]);
         }
 
-        $img->writeImage(
-            getImageDirectory($size["label"]) .
-                "/" .
-                $photoData["hash"] .
-                ".jpg",
-        );
-
-        //// <sigh> until Dreamhost updates ImageMagick...
-        //// (and below for the tiny)
-        // $img->writeImage(
-        //     getImageDirectory($size["label"]) .
-        //         "/" .
-        //         $photoData["hash"] .
-        //         ".webp",
-        // );
+        $img->writeImage(getImagePath($size["label"], $photoData["hash"]));
     }
 
     // generate tiny preview
@@ -202,23 +192,33 @@ function processExif(&$photoData, $originalFilePath) {
         }
     }
 
+    if ($photoData["title"] == "IMG_3918.jpg") {
+        $debug = true;
+    }
+
     if (array_key_exists("GPS", $exif)) {
-        $gpsLat = $exif["GPS"]["GPSLatitude"];
-        $gpsLatRef = $exif["GPS"]["GPSLatitudeRef"];
-        $gpsLon = $exif["GPS"]["GPSLongitude"];
-        $gpsLonRef = $exif["GPS"]["GPSLongitudeRef"];
+        $gpsLat = array_key_exists("GPSLatitude", $exif["GPS"]) ? $exif["GPS"]["GPSLatitude"] : null;
+        $gpsLatRef = array_key_exists("GPSLatitudeRef", $exif["GPS"]) ? $exif["GPS"]["GPSLatitudeRef"] : null;
+        $gpsLon = array_key_exists("GPSLongitude", $exif["GPS"]) ? $exif["GPS"]["GPSLongitude"] : null;
+        $gpsLonRef = array_key_exists("GPSLongitudeRef", $exif["GPS"]) ? $exif["GPS"]["GPSLongitudeRef"] : null;
 
-        $lat = _gpsToDegrees($gpsLat);
-        $lon = _gpsToDegrees($gpsLon);
+        if ($gpsLat != null && $gpsLatRef != null && $gpsLon != null && $gpsLonRef != null) {
+            $lat = _gpsToDegrees($gpsLat);
+            $lon = _gpsToDegrees($gpsLon);
 
-        if ($gpsLatRef != "N") {
-            $lat = -$lat;
+            if ($gpsLatRef != "N") {
+                $lat = -$lat;
+            }
+            if ($gpsLonRef != "E") {
+                $lon = -$lon;
+            }
+
+            $photoData["latitude"] = $lat;
+            $photoData["longitude"] = $lon;
         }
-        if ($gpsLonRef != "E") {
-            $lon = -$lon;
+        else {
+            $photoData["latitude"] = null;
+            $photoData["longitude"] = null;
         }
-
-        $photoData["latitude"] = $lat;
-        $photoData["longitude"] = $lon;
     }
 }
