@@ -72,11 +72,15 @@ $CURL \
   $SERVER/api/album/new
 echo
 
-# put some of the images in it
+# move some of the images in it
 for i in $(seq 2); do
   $CURL \
     -H "Authorization: Bearer $jwt" \
     -X POST --data "{\"photoID\": $i, \"albumID\": 2}" \
     $SERVER/api/photo/copy
+  $CURL \
+    -H "Authorization: Bearer $jwt" \
+    -X POST --data "{\"photoID\": $i, \"albumID\": 1}" \
+    $SERVER/api/album/remove
   echo
 done

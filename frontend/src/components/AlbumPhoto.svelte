@@ -1,9 +1,8 @@
 <script lang="ts">
-    import { getContext } from "svelte";
     import { fade } from "svelte/transition";
 
     import type { Photo } from "../pozzo.type";
-    import { albumSelectionStore } from "../stores";
+    import { albumSelectionStore, loginCredentialStore } from "../stores";
 
     export let photo: Photo;
     export let photoID: number;
@@ -14,6 +13,9 @@
 
     let isSelected = false;
     function handleClick(evt: MouseEvent) {
+        if ($loginCredentialStore.length == 0) {
+            return;
+        }
         if (!evt.metaKey) {
             return;
         }
@@ -28,6 +30,9 @@
         }
     }
     function handleContextMenu(_: MouseEvent) {
+        if ($loginCredentialStore.length == 0) {
+            return;
+        }
         if ($albumSelectionStore.length == 0) {
             $albumSelectionStore = [photoID];
         }

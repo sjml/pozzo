@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, setContext, getContext } from "svelte";
+    import { onMount, setContext } from "svelte";
 
     import justifiedLayout from "justified-layout";
     import { navigate } from "svelte-routing";
@@ -47,6 +47,9 @@
     }
 
     function handleKeydown(evt: KeyboardEvent) {
+        if ($loginCredentialStore.length == 0) {
+            return;
+        }
         if (evt.key == "a" && evt.metaKey) {
             $albumSelectionStore = [...Array(album.photos.length).keys()];
             evt.preventDefault();
@@ -68,6 +71,9 @@
     });
 
     function handleContextMenu(evt: MouseEvent) {
+        if ($loginCredentialStore.length == 0) {
+            return;
+        }
         evt.preventDefault();
         if (contextMenuVisible) {
             contextMenuVisible = false;
