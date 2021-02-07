@@ -18,6 +18,8 @@ export type ApiOptions = {
 export type FileUploadStatus = {
     file: File,
     status: number,
+    index: number,
+    targetAlbum?: number,
     startUploadCallback?: Function,
 }
 
@@ -30,6 +32,7 @@ export type Photo = {
     height: number,
     aspect: number,
     size: number,
+    ordering?: number,
     tinyJPEG: string,
 }
 
@@ -37,5 +40,6 @@ export type Album = {
     id: number,
     title: string,
     description: string,
+    highestIndex: number,
     photos: Photo[]
 }

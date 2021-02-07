@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
-    import { userStoppedUploadScroll } from "../stores";
+    import { userStoppedUploadScroll, currentAlbumStore } from "../stores";
     import type { FileUploadStatus } from "../pozzo.type";
     import FileUploader from "./FileUploader.svelte";
 
@@ -51,8 +51,27 @@
     let awaitingConfirmation = true;
     onMount(async () => {
         $userStoppedUploadScroll = false;
-        uploadStatuses = fileList.map((f) => {
-            return {file: f, status: 0};
+
+        let targetAlbumID = null;
+        let offset = 1;
+        if ($currentAlbumStore != null) {
+            targetAlbumID = $currentAlbumStore.id;
+            const existingIndices = $currentAlbumStore.photos.map((p) => p.ordering);
+            if (existingIndices.length == 0) {
+                offset = 1;
+            }
+            else {
+                offset = Math.max(...existingIndices) + 1;
+            }
+        }
+
+        uploadStatuses = fileList.map((f, i) => {
+            return {
+                file: f,
+                status: 0,
+                index: i+offset,
+                targetAlbum: targetAlbumID
+            };
         });
     });
 
@@ -117,7 +136,7 @@
                     Upload
                 </div>
                 <div class="no"
-                    on:click={() => dispatch("finished")}
+                    on:click={() => dispatch("dismissed")}
                 >
                     <svg
                         class="w-6 h-6"

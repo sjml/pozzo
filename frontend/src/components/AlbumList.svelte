@@ -1,12 +1,13 @@
 <script lang="ts">
-    import { onMount, tick } from "svelte";
+    import { onMount } from "svelte";
 
-    import { Link } from "svelte-routing";
+    import { Link, navigate } from "svelte-routing";
 
     import { RunApi } from "../api";
     import type { Album } from "../pozzo.type";
     import { loginCredentialStore } from "../stores";
     import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
+    import UploadZone from "./UploadZone.svelte";
 
     async function getAlbumList(_) {
         const res = await RunApi("/album/list", {authorize: true});
@@ -24,8 +25,18 @@
         getAlbumList(null);
     });
 
+    function onUploadDone(evt: CustomEvent) {
+        if (evt.detail.numFiles > 0) {
+            navigate("/album/Unsorted");
+        }
+    }
+
     $: getAlbumList($loginCredentialStore)
 </script>
+
+{#if $loginCredentialStore.length > 0}
+    <UploadZone on:done={onUploadDone} />
+{/if}
 
 <div class="albumList">
     {#if addingNew}

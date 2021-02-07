@@ -2,7 +2,6 @@
     import { Router, Route, Link } from "svelte-routing";
 
     import Login from "./Login.svelte";
-    import UploadZone from "./UploadZone.svelte";
     import Album from "./Album.svelte";
     import AlbumList from "./AlbumList.svelte";
     import PhotoPage from "./PhotoPage.svelte";
@@ -18,8 +17,6 @@
         <Login />
     </nav>
     <main>
-        <UploadZone />
-
         <Route path="album/:identifier" component={Album} />
         <!-- <Route path="album/:albumIdentifier/:photoID" component={PhotoPage} /> -->
         <Route path="photo/:photoID" component={PhotoPage} />

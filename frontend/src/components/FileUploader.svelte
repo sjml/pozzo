@@ -23,7 +23,7 @@
             });
         }
 
-        const uploadRes = await UploadFile(uploadStatus.file,
+        const uploadRes = await UploadFile(uploadStatus,
             (progress: number) => progressBar.value = progress,
             (_uploadStatus: boolean) => {
                 statusString = "Processing…";

@@ -1,5 +1,5 @@
 import { writable, readable } from 'svelte/store';
-import type { SiteConfig } from './pozzo.type';
+import type { SiteConfig, Album } from './pozzo.type';
 
 export const loginCredentialStore = writable<string>(localStorage.getItem("pozzoLoginJWT") || "");
 loginCredentialStore.subscribe(value => {
@@ -17,6 +17,8 @@ export const siteData = readable<SiteConfig>(
     }
 );
 
+// TODO: this could maybe be context instead...
 export const userStoppedUploadScroll = writable<boolean>(false);
 
 export const albumSelectionStore = writable<number[]>([]);
+export const currentAlbumStore = writable<Album>(null);

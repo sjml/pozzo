@@ -10,6 +10,6 @@ export function HumanBytes(byteCount: number): string {
 }
 
 export function GetImgPath(size:string, hash: string, uniq: string) {
-    const dirs = hash.match(/.{1,2}/g).slice(0,3);
+    const dirs = hash.match(/.{1,2}/g).slice(0,3).map((d) => {if (d == "ad") return "a_"; else return d; });
     return `/img/${dirs.join("/")}/${hash}_${uniq}_${size}.jpg`;
 }

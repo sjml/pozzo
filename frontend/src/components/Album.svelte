@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, setContext } from "svelte";
+    import { onMount, onDestroy, setContext } from "svelte";
 
     import justifiedLayout from "justified-layout";
     import { navigate, Link } from "svelte-routing";
@@ -8,7 +8,8 @@
     import type { Album, Photo } from "../pozzo.type";
     import AlbumPhoto from "./AlbumPhoto.svelte";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
-    import { loginCredentialStore, albumSelectionStore } from "../stores";
+    import UploadZone from "./UploadZone.svelte";
+    import { loginCredentialStore, albumSelectionStore, currentAlbumStore } from "../stores";
     import { albumContextMenuKey } from "../keys";
 
     export let identifier: number|string;
@@ -95,8 +96,13 @@
     $: calculateLayout(containerWidth);
     $: if (album) {calculateLayout(containerWidth);}
 
-    onMount(() => {
-        getAlbum(null);
+    onMount(async () => {
+        await getAlbum(null);
+        $currentAlbumStore = album;
+    });
+
+    onDestroy(() => {
+        $currentAlbumStore = null;
     });
 
     $: getAlbum($loginCredentialStore)
@@ -107,7 +113,12 @@
     on:keydown={handleKeydown}
 />
 
+
 {#if album}
+    {#if $loginCredentialStore.length > 0}
+        <UploadZone on:done={() => getAlbum(null)} />
+    {/if}
+
     <h2>{album.title}</h2>
 
     <div class="albumPhotos"

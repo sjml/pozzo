@@ -17,25 +17,27 @@ $router->AddHandler("/$", ["upload"], true);
 $router->Route();
 
 function upload() {
-    $orderSlot = null;
-    $albumID = null;
-    $input = json_decode(file_get_contents("php://input"), true);
-    if ($input && array_key_exists("order")) {
-        $orderSlot = $input["order"];
-    }
-    if ($input && array_key_exists("albumID")) {
-        $orderSlot = $input["albumID"];
-    }
-
-    $photoData = importImage($_FILES["photoUp"]["tmp_name"]);
-    if ($photoData == null) {
-        http_response_code(415);
-        echo '{"error": "415 / Unsupported Media Type"}';
-        return;
-    }
-    $photoData["title"] = $_FILES["photoUp"]["name"];
-
     try {
+        $orderSlot = null;
+        $albumID = null;
+        if (array_key_exists("data", $_POST)) {
+            $input = json_decode($_POST["data"], true);
+            if ($input && array_key_exists("order", $input)) {
+                $orderSlot = $input["order"];
+            }
+            if ($input && array_key_exists("albumID", $input)) {
+                $albumID = $input["albumID"];
+            }
+        }
+
+        $photoData = importImage($_FILES["photoUp"]["tmp_name"]);
+        if ($photoData == null) {
+            http_response_code(415);
+            echo '{"error": "415 / Unsupported Media Type"}';
+            return;
+        }
+        $photoData["title"] = $_FILES["photoUp"]["name"];
+
         processImage($photoData, $albumID, $orderSlot);
         unset($photoData["tinyJPEG"]);
 
@@ -45,6 +47,9 @@ function upload() {
     } catch (\Throwable $th) {
         http_response_code(500);
         header("Content-Type: application/json");
-        echo json_encode(["message" => "upload failure", "data" => [$th->getMessage(), $th->getTraceAsString()]]);
+        echo json_encode([
+            "message" => "upload failure",
+            "data" => [$th->getMessage(), $th->getTraceAsString()],
+        ]);
     }
 }

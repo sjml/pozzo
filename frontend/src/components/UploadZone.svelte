@@ -1,16 +1,28 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
 
     import { loginCredentialStore } from "../stores";
     import FileUploadList from "./FileUploadList.svelte";
 
     let fileList: File[];
+    const dispatch = createEventDispatcher();
 
     async function handleDrop(event: DragEvent) {
         let filteringList = [...event.dataTransfer.files];
         filteringList = filteringList.filter(f => f.type == "image/jpeg");
         fileList = filteringList;
         dragCount = 0;
+    }
+
+    function onFinish() {
+        dispatch("done", {numFiles: fileList.length});
+        fileList = null;
+    }
+
+    function onDismiss() {
+        fileList = null;
+        dispatch("done", {numFiles: 0});
     }
 
     let dragCount = 0;
@@ -25,7 +37,11 @@
 {#if (dragCount > 0 || fileList != null) && $loginCredentialStore.length > 0}
     {#if fileList}
         <div class="uploadZone">
-            <FileUploadList fileList={fileList} on:finished={() => fileList = null} />
+            <FileUploadList
+                fileList={fileList}
+                on:finished={onFinish}
+                on:dismissed={onDismiss}
+            />
         </div>
     {:else}
         <div class="uploadZone"
@@ -47,7 +63,7 @@
         right: 0;
         bottom: 0;
         left: 0;
-        z-index: 200;
+        z-index: 400;
         display: flex;
         pointer-events: none;
     }

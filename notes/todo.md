@@ -1,7 +1,6 @@
 1. Reorder album
-    - preserve order on upload
-    - upload directly to album instead of to unsorted
-    - sorting? (name, timestamp, etc)
+    - backend reorder command
+    - frontend reorder ui
     - then make it so individual photo pages can navigate left/right if we're viewing through an album
         - then add exif w/map embed to picture pages
         - THEN album photo map
@@ -11,6 +10,10 @@
         - https://github.com/posthtml/posthtml ??
         - something simpler?
     - check for all console error statements and handle gracefully in UI
+        - test bad responses for everything... broken file upload hangs the UI?
+    - url thinks
+        - image urls that aren't predictable? 
+        - remove album numberic urls?
     - see about switching to stackblur for image loads
     - album previews
     - transitions between albums and stuff
@@ -31,12 +34,13 @@
         - (using heroicons for now; will evaluated thoroughly later)
     - also pick a few consistent sizes for icon usages
         - rollover reactions?
-        - animation of stroke-width? 
-3. Remove reset endpoint
-4. Add admin endpoint (+frontend UI) to do reset and other such things?
+        - animation of stroke-width?
+3. editing titles and descriptions on photos/albums 
+4. Remove reset endpoint
+5. Add admin endpoint (+frontend UI) to do reset and other such things?
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-5. Video / live pictures?
+6. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 

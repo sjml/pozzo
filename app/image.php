@@ -57,8 +57,21 @@ const photoExifFields = [
 
 function getImagePath($sizeLabel, $hash, $uniq) {
     $ret = __DIR__ . "/../public/img/";
-    $dirs = str_split($hash, 2);
-    $dirs = array_slice($dirs, 0, 3);
+    $rawDirs = str_split($hash, 2);
+    $rawDirs = array_slice($rawDirs, 0, 3);
+    $dirs = [];
+    foreach ($rawDirs as $d) {
+        // having directories called "ad" in an image path
+        //   can trigger some adblockers
+        if ($d == "ad") {
+            array_push($dirs, "a_");
+        }
+        else {
+            array_push($dirs, $d);
+        }
+    }
+
+
     $ret .= implode("/", $dirs);
     if (!is_dir($ret)) {
         mkdir($ret, 0755, true);
@@ -87,7 +100,6 @@ function importImage($filePath) {
         "hash" => md5_file($filePath),
         "uniq" => uniqid(),
     ];
-
 
     $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
     if (is_uploaded_file($filePath)) {
@@ -137,7 +149,13 @@ function processImage(&$photoData, $albumID, $order) {
             $img->profileImage("icc", $profiles["icc"]);
         }
 
-        $img->writeImage(getImagePath($size["label"], $photoData["hash"], $photoData["uniq"]));
+        $img->writeImage(
+            getImagePath(
+                $size["label"],
+                $photoData["hash"],
+                $photoData["uniq"],
+            ),
+        );
     }
 
     // generate tiny preview
@@ -194,12 +212,25 @@ function processExif(&$photoData, $originalFilePath) {
     }
 
     if (array_key_exists("GPS", $exif)) {
-        $gpsLat = array_key_exists("GPSLatitude", $exif["GPS"]) ? $exif["GPS"]["GPSLatitude"] : null;
-        $gpsLatRef = array_key_exists("GPSLatitudeRef", $exif["GPS"]) ? $exif["GPS"]["GPSLatitudeRef"] : null;
-        $gpsLon = array_key_exists("GPSLongitude", $exif["GPS"]) ? $exif["GPS"]["GPSLongitude"] : null;
-        $gpsLonRef = array_key_exists("GPSLongitudeRef", $exif["GPS"]) ? $exif["GPS"]["GPSLongitudeRef"] : null;
+        $gpsLat = array_key_exists("GPSLatitude", $exif["GPS"])
+            ? $exif["GPS"]["GPSLatitude"]
+            : null;
+        $gpsLatRef = array_key_exists("GPSLatitudeRef", $exif["GPS"])
+            ? $exif["GPS"]["GPSLatitudeRef"]
+            : null;
+        $gpsLon = array_key_exists("GPSLongitude", $exif["GPS"])
+            ? $exif["GPS"]["GPSLongitude"]
+            : null;
+        $gpsLonRef = array_key_exists("GPSLongitudeRef", $exif["GPS"])
+            ? $exif["GPS"]["GPSLongitudeRef"]
+            : null;
 
-        if ($gpsLat != null && $gpsLatRef != null && $gpsLon != null && $gpsLonRef != null) {
+        if (
+            $gpsLat != null &&
+            $gpsLatRef != null &&
+            $gpsLon != null &&
+            $gpsLonRef != null
+        ) {
             $lat = _gpsToDegrees($gpsLat);
             $lon = _gpsToDegrees($gpsLon);
 
@@ -212,8 +243,7 @@ function processExif(&$photoData, $originalFilePath) {
 
             $photoData["latitude"] = $lat;
             $photoData["longitude"] = $lon;
-        }
-        else {
+        } else {
             $photoData["latitude"] = null;
             $photoData["longitude"] = null;
         }

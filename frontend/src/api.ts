@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 
 import { siteData, loginCredentialStore } from "./stores";
-import type { ApiResult, ApiOptions } from "./pozzo.type";
+import type { ApiResult, ApiOptions, FileUploadStatus } from "./pozzo.type";
 
 
 export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult> {
@@ -50,7 +50,7 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
 }
 
 // doin' it old-school with XHR so we can get progress reports
-export async function UploadFile(file: File, progressCallback: Function = null, finishedUploadCallback: Function = null): Promise<ApiResult> {
+export async function UploadFile(fileStatus: FileUploadStatus, progressCallback: Function = null, finishedUploadCallback: Function = null): Promise<ApiResult> {
     return new Promise((resolve, reject) => {
         if (get(loginCredentialStore).length == 0) {
             resolve({
@@ -60,6 +60,7 @@ export async function UploadFile(file: File, progressCallback: Function = null, 
             });
         }
 
+        const file = fileStatus.file;
         const url = `${get(siteData).apiUri}/upload`;
         const xhr = new XMLHttpRequest();
         const fd = new FormData();
@@ -119,6 +120,14 @@ export async function UploadFile(file: File, progressCallback: Function = null, 
 
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Authorization", `Bearer ${get(loginCredentialStore)}`);
+
+        const params = {
+            order: fileStatus.index
+        }
+        if (fileStatus.targetAlbum != null) {
+            params["albumID"] = fileStatus.targetAlbum;
+        }
+        fd.append("data", JSON.stringify(params));
 
         fd.append("photoUp", file);
         xhr.send(fd);

@@ -72,7 +72,8 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
-        $prepCommand = "CREATE TABLE IF NOT EXISTS photoMeta (";
+        $prepCommand =
+            "CREATE TABLE IF NOT EXISTS photoMeta (id INTEGER PRIMARY KEY, ";
         $fieldDescs = [];
         foreach (photoExifFields as $meta => $datums) {
             foreach ($datums as $field) {
@@ -233,7 +234,7 @@ class DB {
 
         $vals = [];
         $fieldList = [];
-        $prepCommand = "INSERT INTO photoMeta (";
+        $prepCommand = "INSERT INTO photoMeta (id, ";
         foreach (photoExifFields as $meta => $datums) {
             foreach ($datums as $field) {
                 if ($photoData[$meta . "_" . $field] != null) {
@@ -259,11 +260,12 @@ class DB {
         }
 
         $prepCommand .= implode(", ", $fieldList) . ") ";
-        $prepCommand .= "VALUES (?" . str_repeat(", ?", count($vals)-1) . ")";
+        $prepCommand .= "VALUES (?" . str_repeat(", ?", count($vals)) . ")";
 
         $statement = self::$pdb->prepare($prepCommand);
+        $statement->bindParam(1, $photoData["id"]);
         foreach ($vals as $i => $value) {
-            $statement->bindParam($i + 1, $value[0], $value[1]);
+            $statement->bindParam($i + 2, $value[0], $value[1]);
         }
         $statement->execute();
 
@@ -391,7 +393,7 @@ class DB {
         }
 
         $statement = self::$pdb->prepare(
-            "SELECT ordering FROM photos_albums WHERE album_id = ? ORDER BY ordering ASC"
+            "SELECT ordering FROM photos_albums WHERE album_id = ? ORDER BY ordering ASC",
         );
         $statement->bindParam(1, $albumID);
         $results = $statement->execute();
@@ -403,12 +405,10 @@ class DB {
             while (in_array($order, $indices)) {
                 $order += 1;
             }
-        }
-        else {
+        } else {
             if (count($indices) > 0) {
                 $order = max($indices) + 1;
-            }
-            else {
+            } else {
                 $order = 1;
             }
         }
