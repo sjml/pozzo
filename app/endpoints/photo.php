@@ -84,7 +84,7 @@ function copyPhoto() {
         return;
     }
 
-    $result = DB::AddPhotoToAlbum($photo["id"], $album["id"]);
+    $result = DB::AddPhotoToAlbum($photo["id"], $album["id"], null);
     if ($result) {
         output(["photoID" => $photo["id"], "albumID" => $album["id"]]);
     } else {

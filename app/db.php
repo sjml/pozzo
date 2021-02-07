@@ -214,7 +214,7 @@ class DB {
         return $ret;
     }
 
-    static function InsertPhoto($photoData) {
+    static function InsertPhoto($photoData, $albumID, $order) {
         $statement = self::$pdb->prepare(
             "INSERT INTO photos (title, hash, uniq, width, height, aspect, size, uploadTimeStamp, latitude, longitude) VALUES (?,?,?,?,?,?,?,date('now'),?,?)",
         );
@@ -274,10 +274,7 @@ class DB {
         $statement->bindParam(2, $photoData["tinyJPEG"], SQLITE3_TEXT);
         $statement->execute();
 
-        self::AddPhotoToAlbum(
-            $photoData["id"],
-            self::GetConfig("unsorted_album_index"),
-        );
+        self::AddPhotoToAlbum($photoData["id"], $albumID, $order);
 
         return $photoData["id"];
     }
@@ -388,24 +385,40 @@ class DB {
         return $albumData;
     }
 
-    static function AddPhotoToAlbum($photoID, $albumID) {
+    static function AddPhotoToAlbum($photoID, $albumID, $order) {
+        if ($albumID == null) {
+            $albumID = self::GetConfig("unsorted_album_index");
+        }
+
         $statement = self::$pdb->prepare(
             "SELECT ordering FROM photos_albums WHERE album_id = ? ORDER BY ordering ASC"
         );
         $statement->bindParam(1, $albumID);
         $results = $statement->execute();
-        $highest = 0;
+        $indices = [];
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-            $highest = $row["ordering"];
+            array_push($indices, intval($row["ordering"]));
         }
-        $orderIdx = $highest + 1;
+        if ($order != null) {
+            while (in_array($order, $indices)) {
+                $order += 1;
+            }
+        }
+        else {
+            if (count($indices) > 0) {
+                $order = max($indices) + 1;
+            }
+            else {
+                $order = 1;
+            }
+        }
 
         $statement = self::$pdb->prepare(
             "INSERT INTO photos_albums (photo_id, album_id, ordering) VALUES(?, ?, ?)",
         );
         $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
         $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
-        $statement->bindParam(3, $orderIdx, SQLITE3_INTEGER);
+        $statement->bindParam(3, $order, SQLITE3_INTEGER);
         try {
             $result = $statement->execute();
             if ($result == false) {
@@ -444,6 +457,9 @@ class DB {
             return $ret;
         }
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            unset($row["photo_id"]);
+            unset($row["album_id"]);
+            // intentionally leaving the ordering
             array_push($ret, $row);
         }
         return $ret;

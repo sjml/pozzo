@@ -17,6 +17,16 @@ $router->AddHandler("/$", ["upload"], true);
 $router->Route();
 
 function upload() {
+    $orderSlot = null;
+    $albumID = null;
+    $input = json_decode(file_get_contents("php://input"), true);
+    if ($input && array_key_exists("order")) {
+        $orderSlot = $input["order"];
+    }
+    if ($input && array_key_exists("albumID")) {
+        $orderSlot = $input["albumID"];
+    }
+
     $photoData = importImage($_FILES["photoUp"]["tmp_name"]);
     if ($photoData == null) {
         http_response_code(415);
@@ -26,7 +36,7 @@ function upload() {
     $photoData["title"] = $_FILES["photoUp"]["name"];
 
     try {
-        processImage($photoData);
+        processImage($photoData, $albumID, $orderSlot);
         unset($photoData["tinyJPEG"]);
 
         http_response_code(200);

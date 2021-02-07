@@ -99,7 +99,7 @@ function importImage($filePath) {
     return $photoData;
 }
 
-function processImage(&$photoData) {
+function processImage(&$photoData, $albumID, $order) {
     $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
 
     $img = new IMagick();
@@ -157,7 +157,7 @@ function processImage(&$photoData) {
 
     processExif($photoData, $origPath);
 
-    $photoData["id"] = DB::InsertPhoto($photoData);
+    $photoData["id"] = DB::InsertPhoto($photoData, $albumID, $order);
 }
 
 function _gpsToDegrees($val) {
