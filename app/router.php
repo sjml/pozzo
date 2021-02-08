@@ -41,10 +41,8 @@ class Router {
             if ($match) {
                 if ($handler["requireLogin"]) {
                     if ($_REQUEST["POZZO_AUTH"] != 1) {
-                        $status = 403;
                         $errData = [
                             "code" => $_REQUEST["POZZO_AUTH"],
-                            "message" => "403 / Forbidden",
                         ];
                         switch ($_REQUEST["POZZO_AUTH"]) {
                             case 0:
@@ -52,23 +50,27 @@ class Router {
                                 $errData["reason"] = "validation not performed";
                                 break;
                             case -1:
-                                $status = 400;
+                                $status = 401;
                                 $errData["reason"] = "missing auth headers";
                                 break;
                             case -2:
-                                $status = 400;
+                                $status = 401;
                                 $errData["reason"] = "missing bearer token";
                                 break;
                             case -3:
+                                $status = 403;
                                 $errData["reason"] = "expired";
                                 break;
                             case -4:
+                                $status = 403;
                                 $errData["reason"] = "beforeValid";
                                 break;
                             case -5:
+                                $status = 403;
                                 $errData["reason"] = "signatureInvalid";
                                 break;
                             default:
+                                $status = 500;
                                 $errData["reason"] = "unknown";
                                 break;
                         }

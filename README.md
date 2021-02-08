@@ -10,6 +10,8 @@ Goals:
 
 Non-goals:
 * Editing photos beyond giving titles, tags, and descriptions
+* Upload/edit interface from mobile
+    - viewing should be great on mobile, but any actions that require login are not prioritized, if indeed they function at all
 * Multi-user collaboration
 * Real-time displays (album gets updated elsewhere and it's pushed to your screen)
 * Handling immense numbers of photos or albums

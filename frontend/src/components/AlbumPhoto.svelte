@@ -11,44 +11,26 @@
     export let dims: any;
 
     let loaded = false;
-
     let isSelected = false;
-    function handleClick(evt: MouseEvent) {
-        if ($loginCredentialStore.length == 0) {
-            return;
-        }
-        if (!evt.metaKey) {
-            return;
-        }
-        const selIdx = $albumSelectionStore.indexOf(photoID);
-        if (selIdx != -1) {
-            isSelected = false;
-            $albumSelectionStore = $albumSelectionStore.filter(si => si != photoID);
-        }
-        else {
-            isSelected = true;
-            $albumSelectionStore = [...$albumSelectionStore, photoID];
-        }
-    }
-    function handleContextMenu(_: MouseEvent) {
-        if ($loginCredentialStore.length == 0) {
-            return;
-        }
-        if ($albumSelectionStore.length == 0) {
-            $albumSelectionStore = [photoID];
-        }
-    }
+    let isBeingDragged = false;
+    let styleString = "";
 
     $: isSelected = $albumSelectionStore.indexOf(photoID) >= 0
+    $: {
+        if (dims) {
+            styleString = `width: ${dims.width}px; height: ${dims.height}px; top: ${dims.top}px; left: ${dims.left}px;`;
+        }
+        else {
+
+        }
+    }
 </script>
 
 {#if photo && dims}
     <div
         class="albumPhoto"
         class:selected={isSelected}
-        style={`width: ${dims.width}px; height: ${dims.height}px; top: ${dims.top}px; left: ${dims.left}px;`}
-        on:click={handleClick}
-        on:contextmenu={handleContextMenu}
+        style={styleString}
     >
         {#if !loaded}
             <img class="preload"
@@ -83,7 +65,6 @@
 
     .selected {
         outline: 3px solid white;
-
     }
 
     .preload {
