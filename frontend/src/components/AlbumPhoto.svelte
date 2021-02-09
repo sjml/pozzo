@@ -2,38 +2,29 @@
     import { fade } from "svelte/transition";
 
     import type { Photo } from "../pozzo.type";
-    import { albumSelectionStore, loginCredentialStore } from "../stores";
+    import { albumSelectionStore, albumDragStore } from "../stores";
     import { GetImgPath } from "../util";
 
     export let photo: Photo;
-    export let photoID: number;
+    export let photoIdxInAlbum: number;
     export let size: string = "medium";
     export let dims: any;
 
     let loaded = false;
     let isSelected = false;
-    let isBeingDragged = false;
-    let styleString = "";
 
-    $: isSelected = $albumSelectionStore.indexOf(photoID) >= 0
-    $: {
-        if (dims) {
-            styleString = `width: ${dims.width}px; height: ${dims.height}px; top: ${dims.top}px; left: ${dims.left}px;`;
-        }
-        else {
 
-        }
-    }
+    $: isSelected = $albumSelectionStore.indexOf(photoIdxInAlbum) >= 0
 </script>
 
 {#if photo && dims}
     <div
         class="albumPhoto"
         class:selected={isSelected}
-        style={styleString}
-    >
+        >
         {#if !loaded}
             <img class="preload"
+                draggable="false"
                 out:fade="{{duration: 200}}"
                 alt="{photo.title}"
                 src="data:image/jpeg;base64,{photo.tinyJPEG}"
@@ -42,6 +33,7 @@
         {/if}
         <img on:load={() => loaded = true}
             alt="{photo.title}"
+            draggable="false"
             srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
             src="{GetImgPath(size, photo.hash, photo.uniq)}"
         />
@@ -50,9 +42,9 @@
 
 <style>
     .albumPhoto {
-        position: absolute;
-        cursor: pointer;
         overflow: hidden;
+        width: 100%;
+        height: 100%;
     }
 
     img {

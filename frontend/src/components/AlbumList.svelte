@@ -5,7 +5,7 @@
 
     import { RunApi } from "../api";
     import type { Album } from "../pozzo.type";
-    import { loginCredentialStore } from "../stores";
+    import { isLoggedInStore } from "../stores";
     import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
     import UploadZone from "./UploadZone.svelte";
 
@@ -31,10 +31,10 @@
         }
     }
 
-    $: getAlbumList($loginCredentialStore)
+    $: getAlbumList($isLoggedInStore)
 </script>
 
-{#if $loginCredentialStore.length > 0}
+{#if $isLoggedInStore}
     <UploadZone on:done={onUploadDone} />
 {/if}
 
@@ -48,7 +48,7 @@
 
     <div class="header">
         <h2>Albums</h2>
-        {#if $loginCredentialStore.length > 0}
+        {#if $isLoggedInStore}
             <div class="addAlbum" title="Add Album" on:click={() => addingNew = true}>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>

@@ -2,14 +2,15 @@
     import { onMount, onDestroy, setContext } from "svelte";
 
     import justifiedLayout from "justified-layout";
-    import { navigate, Link } from "svelte-routing";
+    import { navigate } from "svelte-routing";
 
     import { RunApi } from "../api";
     import type { Album, Photo } from "../pozzo.type";
+    import { GetImgPath } from "../util";
     import AlbumPhoto from "./AlbumPhoto.svelte";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
     import UploadZone from "./UploadZone.svelte";
-    import { loginCredentialStore, albumSelectionStore, currentAlbumStore } from "../stores";
+    import { isLoggedInStore, albumSelectionStore, currentAlbumStore, albumDragStore } from "../stores";
     import { albumContextMenuKey } from "../keys";
 
     export let identifier: number|string;
@@ -21,7 +22,6 @@
             authorize: true,
         });
         if (res.success) {
-            $albumSelectionStore = [];
             album = res.data;
         }
         else {
@@ -31,6 +31,20 @@
             else {
                 console.error(res);
             }
+        }
+    }
+
+    async function reorderAlbum(newOrder: number[]) {
+        const res = await RunApi(`/album/reorder/${identifier}`, {
+            params: {newOrdering: newOrder},
+            method: "POST",
+            authorize: true
+        });
+        if (res.success) {
+            // no-op; frontend already shows backend's reality
+        }
+        else {
+            console.error(res);
         }
     }
 
@@ -47,33 +61,63 @@
         });
     }
 
-    function handleKeydown(evt: KeyboardEvent) {
-        if ($loginCredentialStore.length == 0) {
+    // this is some ugly stuff, but don't anticipate needing to generalize further
+    function isEventMetaKeyPress(evt: KeyboardEvent) {
+        if (window.navigator.platform.startsWith("Mac")) {
+            return evt.key == "Meta";
+        }
+        else {
+            return evt.key == "Control";
+        }
+    }
+
+    function isMetaKeyDownForEvent(evt: (KeyboardEvent|MouseEvent)) {
+        if (window.navigator.platform.startsWith("Mac")) {
+            return evt.metaKey;
+        }
+        else {
+            return evt.ctrlKey;
+        }
+    }
+
+    function handleKeyUp(evt: KeyboardEvent) {
+        if (!$isLoggedInStore) {
             return;
+        }
+        if (isEventMetaKeyPress(evt)) {
+            isMetaKeyDown = false;
+        }
+    }
+
+    function handleKeyDown(evt: KeyboardEvent) {
+        if (!$isLoggedInStore) {
+            return;
+        }
+        if (isEventMetaKeyPress(evt)) {
+            isMetaKeyDown = true;
         }
         if (contextMenuVisible) {
-            evt.preventDefault();
             return;
         }
-        if (evt.key == "a" && evt.metaKey) {
+        if (evt.key == "a" && isMetaKeyDownForEvent(evt)) {
             $albumSelectionStore = [...Array(album.photos.length).keys()];
             evt.preventDefault();
         }
-        if (evt.key == "d" && evt.metaKey) {
+        if (evt.key == "d" && isMetaKeyDownForEvent(evt)) {
             $albumSelectionStore = [];
             evt.preventDefault();
         }
     }
 
     function handlePhotoClick(evt: MouseEvent, pi: number) {
-        if ($loginCredentialStore.length == 0) {
+        if (!$isLoggedInStore) {
             return;
         }
         if (contextMenuVisible) {
             contextMenuVisible = false;
             return;
         }
-        if (!evt.metaKey) {
+        if (!isMetaKeyDownForEvent(evt)) {
             return;
         }
         const selIdx = $albumSelectionStore.indexOf(pi);
@@ -86,7 +130,9 @@
     }
 
     let selectedPhotos: Photo[] = [];
-    $: selectedPhotos = $albumSelectionStore.map(pi => album.photos[pi]);
+    $: {
+        selectedPhotos = $albumSelectionStore.map(pi => album.photos[pi]);
+    }
 
     let contextMenuVisible = false;
     let clickLocation: number[] = [0, 0];
@@ -99,7 +145,7 @@
     function handlePhotoContextMenu(evt: MouseEvent, pi: number) {
         // so if nothing is selected we auto-select the thing under the mouse
         //    (does not preventDefault so the event still bubbles to the album's handler)
-        if ($loginCredentialStore.length == 0) {
+        if (!$isLoggedInStore) {
             return;
         }
         if ($albumSelectionStore.length == 0) {
@@ -107,7 +153,7 @@
         }
     }
     function handleContextMenu(evt: MouseEvent) {
-        if ($loginCredentialStore.length == 0) {
+        if (!$isLoggedInStore) {
             return;
         }
         evt.preventDefault();
@@ -122,13 +168,13 @@
     }
     function contextMenuExecuted(_: CustomEvent) {
         contextMenuVisible = false;
+        $albumSelectionStore = [];
         getAlbum(null);
     }
 
     let containerWidth: number;
     let album: Album = null;
     let layout = null;
-    $: calculateLayout(containerWidth);
     $: if (album) {calculateLayout(containerWidth);}
 
     onMount(async () => {
@@ -138,38 +184,101 @@
 
     onDestroy(() => {
         $currentAlbumStore = null;
+        $albumDragStore = null;
     });
 
-    let editMode = false;
+    let isMetaKeyDown = false;
 
-    $: getAlbum($loginCredentialStore)
+    // this drag-and-drop stuff is the least svelte-y of this whole project
+    //   I assume that could be fixed somehow, but it's not 100% obvious
+    //   started off using native drag-and-drop, but it's too inconsistent
+    //   across browsers :-/
+    let draggedPhoto: Photo = null;
+    let draggedPhotoSlot: HTMLDivElement = null;
+    let dragShiftX = 0;
+    let dragShiftY = 0;
+    function startDragPhoto(evt: DragEvent, pi: number) {
+        $albumSelectionStore = [];
+
+        $albumDragStore = album.photos[pi];
+
+        draggedPhoto = album.photos[pi];
+
+        draggedPhotoSlot = document.createElement("div") as HTMLDivElement;
+        draggedPhotoSlot.dataset.pidx = (evt.target as HTMLDivElement).dataset.pidx;
+        draggedPhotoSlot.style.position = "fixed";
+        draggedPhotoSlot.style.width  = "200px";
+        draggedPhotoSlot.style.height = "200px";
+        draggedPhotoSlot.style.display = "flex";
+        const img = new Image();
+        img.style.maxWidth  = "200px";
+        img.style.maxHeight = "200px";
+        img.style.margin = "auto";
+        img.src = GetImgPath("medium", draggedPhoto.hash, draggedPhoto.uniq);
+        draggedPhotoSlot.append(img);
+
+        dragShiftX = 100;
+        dragShiftY = 100;
+
+        document.body.append(draggedPhotoSlot);
+        draggedPhotoSlot.style.left = (evt.pageX - dragShiftX) + "px";
+        draggedPhotoSlot.style.top  = (evt.pageY - dragShiftY) + "px";
+    }
+
+    function handleWindowMouseMove(evt: MouseEvent) {
+        if (draggedPhotoSlot != null) {
+            draggedPhotoSlot.style.left = (evt.pageX - dragShiftX) + "px";
+            draggedPhotoSlot.style.top  = (evt.pageY - dragShiftY) + "px";
+
+            draggedPhotoSlot.style.display = "none";
+
+            const el = document.elementFromPoint(evt.clientX, evt.clientY);
+            const slot: HTMLDivElement = el.closest(".albumSlot");
+            if (slot != null && slot.dataset.pidx != draggedPhotoSlot.dataset.pidx) {
+                album.photos.splice(
+                    Number(slot.dataset.pidx), 0,
+                    album.photos.splice(Number(draggedPhotoSlot.dataset.pidx), 1)[0]
+                );
+                draggedPhotoSlot.dataset.pidx = slot.dataset.pidx;
+                calculateLayout(containerWidth);
+                album.photos = album.photos;
+            }
+            draggedPhotoSlot.style.display = "flex";
+        }
+    }
+
+    function handleWindowMouseUp(evt: MouseEvent) {
+        if (draggedPhotoSlot != null) {
+            // put it back in its place
+            draggedPhoto = null;
+            draggedPhotoSlot.remove();
+            draggedPhotoSlot = null;
+
+            const newOrder = album.photos.map((p) => p.id);
+            reorderAlbum(newOrder);
+        }
+    }
 </script>
 
 
 <svelte:window
-    on:keydown={handleKeydown}
+    on:keydown={handleKeyDown}
+    on:keyup={handleKeyUp}
+    on:mousemove={handleWindowMouseMove}
+    on:mouseup={handleWindowMouseUp}
 />
 
-
 {#if album}
-    {#if $loginCredentialStore.length > 0 && !editMode}
+    {#if $isLoggedInStore}
         <UploadZone on:done={() => getAlbum(null)} />
     {/if}
 
     <h2>{album.title}</h2>
 
-    {#if $loginCredentialStore.length > 0}
-        <div class="controls">
-            <div class="button reorder" class:on={editMode} on:click={() => editMode = !editMode}>
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-            </div>
-        </div>
-    {/if}
-
     <div class="albumPhotos"
             bind:clientWidth={containerWidth}
             on:contextmenu={handleContextMenu}
-            class:editMode={editMode}
+            class:selectionMode={isMetaKeyDown}
             style={`height: ${layout?.containerHeight || 0}px;`}
         >
         {#if contextMenuVisible}
@@ -181,12 +290,17 @@
         {#if layout}
             {#each album.photos as photo, pi}
                 <div class="albumSlot"
+                    style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
                     on:click={(evt) => handlePhotoClick(evt, pi)}
                     on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
+                    data-pidx={pi}
+                    draggable="true"
+                    on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
+                    class:dragged={draggedPhoto === photo}
                 >
                     <AlbumPhoto
                         photo={photo}
-                        photoID={pi}
+                        photoIdxInAlbum={pi}
                         size="medium"
                         dims={layout.boxes[pi]}
                     />
@@ -206,28 +320,22 @@
         margin-right: auto;
     }
 
-    .albumPhotos.editMode {
-        background-color: rgb(50, 53, 184);
-        outline: 4px solid rgb(50, 53, 184);
+    .albumSlot {
+        cursor: pointer;
+        position: absolute;
+    }
+
+    .albumSlot.dragged {
+        opacity: 0.4;
+    }
+
+    .albumPhotos.selectionMode .albumSlot {
+        cursor: default;
     }
 
     h2 {
         font-size: 3em;
         padding-left: 20px;
-    }
-
-    .controls {
-        padding-left: 60px;
-    }
-
-    .button {
-        width: 40px;
-        cursor: pointer;
-        padding: 5px;
-    }
-
-    .button.on {
-        background-color: rgb(50, 53, 184);
     }
 
 </style>

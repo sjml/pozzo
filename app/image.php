@@ -65,12 +65,10 @@ function getImagePath($sizeLabel, $hash, $uniq) {
         //   can trigger some adblockers
         if ($d == "ad") {
             array_push($dirs, "a_");
-        }
-        else {
+        } else {
             array_push($dirs, $d);
         }
     }
-
 
     $ret .= implode("/", $dirs);
     if (!is_dir($ret)) {

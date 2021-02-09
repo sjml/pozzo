@@ -7,6 +7,8 @@
 
 
 <div class="overlay"
+    on:mousedown|stopPropagation
+    on:mouseup|stopPropagation
     on:click|self={() => dispatch("clickedOutside")}
     transition:fade={{duration: 200}}
 >

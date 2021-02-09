@@ -2,17 +2,20 @@
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
 
-    import { loginCredentialStore } from "../stores";
+    import { isLoggedInStore } from "../stores";
     import FileUploadList from "./FileUploadList.svelte";
 
     let fileList: File[];
     const dispatch = createEventDispatcher();
 
     async function handleDrop(event: DragEvent) {
+        dragCount = 0;
         let filteringList = [...event.dataTransfer.files];
         filteringList = filteringList.filter(f => f.type == "image/jpeg");
+        if (filteringList.length == 0) {
+            return;
+        }
         fileList = filteringList;
-        dragCount = 0;
     }
 
     function onFinish() {
@@ -34,7 +37,7 @@
     on:dragleave|preventDefault={() => --dragCount }
     on:drop|preventDefault={handleDrop}
 />
-{#if (dragCount > 0 || fileList != null) && $loginCredentialStore.length > 0}
+{#if (dragCount > 0 || fileList != null) && $isLoggedInStore}
     {#if fileList}
         <div class="uploadZone">
             <FileUploadList

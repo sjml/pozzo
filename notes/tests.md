@@ -1,17 +1,23 @@
+Make a simple little Python test script that runs requests against the backend.
+Have it test looking for every possible return code from the endpoints.
+
+✅ indicates things that are implemented/possible in the system presently
+
 backend functionality tests
     ✅ reset site
-    can't upload without credentials
+    ✅ can't upload without credentials
     ✅ create user
     ✅ get credentials
     ✅ upload 10 pictures
-    should all be in unsorted
+    ✅ should all be in unsorted
     ✅ create new album
     ✅ move 5 pictures to that album
     ✅ create another new album (set to private)
-    move other 5 images to the private album
+    ✅ move other 5 images to the private album
     "unsorted" album is empty now
-    credentialed user can see album
-    non-credentialed cannot
+    ✅ credentialed user can see album
+    ✅ non-credentialed cannot
+    ✅ reorder images in album
     star images
     check that they are in starred list
     delete individual image

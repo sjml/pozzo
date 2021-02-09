@@ -130,7 +130,10 @@ function reorderAlbum() {
 
     foreach ($newOrdering as $pid) {
         if (!in_array($pid, $existingPids)) {
-            output(["message" => "Misplaced order index", "badIndex" => $pid], 400);
+            output(
+                ["message" => "Misplaced order index", "badIndex" => $pid],
+                400,
+            );
             return;
         }
     }

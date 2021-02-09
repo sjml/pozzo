@@ -1,16 +1,22 @@
 1. Reorder album
-    - frontend reorder ui
     - then make it so individual photo pages can navigate left/right if we're viewing through an album
         - then add exif w/map embed to picture pages
         - THEN album photo map
     - then remove individual image views -- can only see through an album
     - delete album UI
+    - https://www.php.net/manual/en/function.set-error-handler.php
+    - remember to take frontend
+    - restore: logging out on private album page triggers redirect
+        - albumList also has double-fetch
 2. Design pass
+    - play with forward/back navigation and make sure the router works the way it should
+    - organize script sections of component files; good lord
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
         - something simpler?
     - check for all console error statements and handle gracefully in UI
         - test bad responses for everything... broken file upload hangs the UI?
+        - also might need to add spinners for waiting on stuff
     - url thinks
         - image urls that aren't predictable? 
         - remove album numberic urls?
@@ -37,8 +43,11 @@
         - animation of stroke-width?
 3. editing titles and descriptions on photos/albums 
     - photos should record which user uploaded them
-4. Remove reset endpoint
+4. Backend pass
+    - remove reset endpoint
+    - make test suite
 5. Add admin endpoint (+frontend UI) to do reset and other such things?
+    - maybe add setup GUI? at least command-line script
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
 6. Video / live pictures?

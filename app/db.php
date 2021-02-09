@@ -468,7 +468,8 @@ class DB {
     static function ReorderAlbum($albumID, $newOrdering) {
         // there is almost certainly some clever SQL I could write to do this all
         //   in one statement...
-        $prepCommand = "UPDATE photos_albums SET ordering = ? WHERE photo_id = ? AND album_id = ?";
+        $prepCommand =
+            "UPDATE photos_albums SET ordering = ? WHERE photo_id = ? AND album_id = ?";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(3, $albumID, SQLITE3_INTEGER);
         foreach ($newOrdering as $i => $pid) {
