@@ -2,5 +2,6 @@ pozzo.DB
 samples/*
 public/img/*
 dist/*
+test/env/*
 
 .vscode/settings.json

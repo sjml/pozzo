@@ -2,7 +2,7 @@
     import { onMount, onDestroy, setContext } from "svelte";
 
     import justifiedLayout from "justified-layout";
-    import { navigate } from "svelte-routing";
+    import { Link, navigate } from "svelte-routing";
 
     import { RunApi } from "../api";
     import type { Album, Photo } from "../pozzo.type";
@@ -115,6 +115,7 @@
         }
         if (contextMenuVisible) {
             contextMenuVisible = false;
+            evt.preventDefault();
             return;
         }
         if (!isMetaKeyDownForEvent(evt)) {
@@ -127,6 +128,7 @@
         else {
             $albumSelectionStore = [...$albumSelectionStore, pi];
         }
+        evt.preventDefault();
     }
 
     let selectedPhotos: Photo[] = [];
@@ -210,6 +212,7 @@
         draggedPhotoSlot.style.width  = "200px";
         draggedPhotoSlot.style.height = "200px";
         draggedPhotoSlot.style.display = "flex";
+        draggedPhotoSlot.style.zIndex = "101";
         const img = new Image();
         img.style.maxWidth  = "200px";
         img.style.maxHeight = "200px";
@@ -258,6 +261,12 @@
             reorderAlbum(newOrder);
         }
     }
+
+    $: {
+        if (album && album.isPrivate && !$isLoggedInStore) {
+            navigate("/", {replace: true});
+        }
+    }
 </script>
 
 
@@ -289,22 +298,24 @@
         {/if}
         {#if layout}
             {#each album.photos as photo, pi}
-                <div class="albumSlot"
-                    style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
-                    on:click={(evt) => handlePhotoClick(evt, pi)}
-                    on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
-                    data-pidx={pi}
-                    draggable="true"
-                    on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
-                    class:dragged={draggedPhoto === photo}
-                >
-                    <AlbumPhoto
-                        photo={photo}
-                        photoIdxInAlbum={pi}
-                        size="medium"
-                        dims={layout.boxes[pi]}
-                    />
-                </div>
+                <Link to={`/album/${album.slug}/${album.photos[pi].id}`}>
+                    <div class="albumSlot"
+                        style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
+                        on:click={(evt) => handlePhotoClick(evt, pi)}
+                        on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
+                        data-pidx={pi}
+                        draggable="true"
+                        on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
+                        class:dragged={draggedPhoto === photo}
+                        class:selected={$albumSelectionStore.indexOf(pi) >= 0}
+                    >
+                        <AlbumPhoto
+                            photo={photo}
+                            size="medium"
+                            dims={layout.boxes[pi]}
+                        />
+                    </div>
+                </Link>
             {/each}
         {/if}
     </div>
@@ -323,6 +334,11 @@
     .albumSlot {
         cursor: pointer;
         position: absolute;
+        overflow: hidden;
+    }
+
+    .albumSlot.selected {
+        outline: 3px solid white;
     }
 
     .albumSlot.dragged {

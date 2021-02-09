@@ -2,25 +2,18 @@
     import { fade } from "svelte/transition";
 
     import type { Photo } from "../pozzo.type";
-    import { albumSelectionStore, albumDragStore } from "../stores";
     import { GetImgPath } from "../util";
 
     export let photo: Photo;
-    export let photoIdxInAlbum: number;
     export let size: string = "medium";
     export let dims: any;
 
     let loaded = false;
-    let isSelected = false;
-
-
-    $: isSelected = $albumSelectionStore.indexOf(photoIdxInAlbum) >= 0
 </script>
 
 {#if photo && dims}
     <div
         class="albumPhoto"
-        class:selected={isSelected}
         >
         {#if !loaded}
             <img class="preload"
@@ -53,10 +46,6 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-    }
-
-    .selected {
-        outline: 3px solid white;
     }
 
     .preload {

@@ -18,7 +18,7 @@
     </nav>
     <main>
         <Route path="album/:identifier" component={Album} />
-        <!-- <Route path="album/:albumIdentifier/:photoID" component={PhotoPage} /> -->
+        <Route path="album/:albumIdentifier/:photoID" component={PhotoPage} />
         <Route path="photo/:photoID" component={PhotoPage} />
         <Route component={AlbumList} />
     </main>

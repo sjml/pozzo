@@ -67,7 +67,7 @@ done
 # make a new private album
 $CURL \
   -H "Authorization: Bearer $jwt" \
-  -X POST --data '{"title": "testAlbum", "isPrivate": 1}' \
+  -X POST --data '{"title": "Test Album", "isPrivate": 1}' \
   $SERVER/api/album/new
 echo
 

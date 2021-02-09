@@ -57,7 +57,7 @@
     {#if albumList}
         {#each albumList as album}
             <div class="navAlbum">
-                <Link to={`album/${album.title}`}>
+                <Link to={`album/${album.slug}`}>
                     {album.title}
                 </Link>
             </div>

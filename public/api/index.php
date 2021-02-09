@@ -7,25 +7,20 @@ require_once __DIR__ . "/../../app/db.php";
 DB::Init();
 register_shutdown_function(["DB", "Cleanup"]);
 
-// if running the dev server, have to send an error header first and then correct
-//   once we know it's ok
-if ($_SERVER["SERVER_NAME"] == "0.0.0.0") {
-    register_shutdown_function(function () {
-        $error = error_get_last();
-        switch ($error["type"] ?? 0) {
-            case E_ERROR:
-            case E_PARSE:
-            case E_CORE_ERROR:
-            case E_COMPILE_ERROR:
-            case E_RECOVERABLE_ERROR:
-                http_response_code(500);
-                header("Content-Type: application/json");
-                echo json_encode(["error" => "server-side error"]);
-                break;
-        }
-    });
+
+function error_handler($errno, $errstr, $errfile, $errline) {
     http_response_code(500);
+    header("Content-Type: application/json");
+    echo json_encode([
+        "message" => "server-side error",
+        "code" => $errno,
+        "error" => $errstr,
+        "file" => $errfile,
+        "line" => $errline,
+    ]);
+    die();
 }
+set_error_handler("error_handler");
 
 $_REQUEST["POZZO_REQUEST"] = $_SERVER["REQUEST_URI"];
 $_REQUEST["POZZO_REQUEST"] = preg_replace(

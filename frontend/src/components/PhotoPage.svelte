@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, tick } from "svelte";
+    import { onMount } from "svelte";
     import { fade } from "svelte/transition";
 
     import type { Photo } from "../pozzo.type";
@@ -7,17 +7,17 @@
     import { GetImgPath } from "../util";
 
     async function getPhoto() {
-        const res = await RunApi(`/photo/view/${photoID}`, {
+        const pRes = await RunApi(`/photo/view/${photoID}`, {
             method: "POST",
             params: {
                 preview: 1
             }
         });
-        if (res.success) {
-            photo = res.data;
+        if (pRes.success) {
+            photo = pRes.data;
         }
         else {
-            console.error("Couldn't load photo.", res);
+            console.error("Couldn't load photo.", pRes);
         }
     }
 
@@ -30,13 +30,13 @@
 
     function calculateImageSize() {
         const displayAspect = boundsW / boundsH;
-        if (displayAspect > 1.0) {
-            // landscape display
+        if (displayAspect > photo.aspect) {
+            // display is narrower than photo
             photoH = boundsH;
             photoW = boundsH * photo.aspect;
         }
         else {
-            // portrait display
+            // display is wider than photo
             photoW = boundsW;
             photoH = boundsW / photo.aspect;
         }
@@ -84,10 +84,11 @@
         right: 0;
         display: flex;
         justify-content: center;
-        overflow: hidden;
+        align-items: center;
     }
 
     .doubleLoader {
+        overflow: hidden;
         position: relative;
     }
 

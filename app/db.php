@@ -1,5 +1,14 @@
 <?php
 
+// You can either see this file as a mess of copypasta or as a triumph of
+//   hand-crafted PHP/SQL bindings without needing to use an ORM.
+// ¿Por qué no los dos?
+
+require_once __DIR__ . "/../lib/slug-generator-1.1.1/src/SlugGeneratorInterface.php";
+require_once __DIR__ . "/../lib/slug-generator-1.1.1/src/SlugGenerator.php";
+require_once __DIR__ . "/../lib/slug-generator-1.1.1/src/SlugOptions.php";
+use Ausi\SlugGenerator\SlugGenerator;
+
 require_once __DIR__ . "/util.php";
 require_once __DIR__ . "/auth.php";
 require_once __DIR__ . "/image.php";
@@ -101,6 +110,7 @@ class DB {
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", title TEXT UNIQUE";
+        $prepCommand .= ", slug TEXT";
         $prepCommand .= ", description TEXT";
         $prepCommand .= ", isPrivate BOOLEAN";
         $prepCommand .= ")";
@@ -108,7 +118,7 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
-        $unsortedIdx = self::CreateAlbum("Unsorted");
+        $unsortedIdx = self::CreateAlbum("[unsorted]");
         self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
@@ -349,11 +359,16 @@ class DB {
         if (is_numeric($title)) {
             return -2;
         }
+
+        $sg = new SlugGenerator;
+        $slug = $sg->generate($title);
+
         $prepCommand =
-            "INSERT INTO albums(title, description, isPrivate) VALUES(?, '', ?)";
+            "INSERT INTO albums(title, slug, description, isPrivate) VALUES(?, ?, '', ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
-        $statement->bindParam(2, $isPrivate, SQLITE3_INTEGER);
+        $statement->bindParam(2, $slug, SQLITE3_TEXT);
+        $statement->bindParam(3, $isPrivate, SQLITE3_INTEGER);
         try {
             $result = $statement->execute();
             if (!$result) {
@@ -492,7 +507,7 @@ class DB {
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_INTEGER);
         } else {
-            $query = "SELECT * FROM albums WHERE title = ?";
+            $query = "SELECT * FROM albums WHERE slug = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_TEXT);
         }

@@ -10,7 +10,8 @@
         attemptingNewAlbum = true;
         const res = await RunApi("/album/new", {
             params: {
-                title: newAlbumNameField
+                title: newAlbumNameField,
+                isPrivate: isPrivate
             },
             method: "POST",
             authorize: true
@@ -36,6 +37,7 @@
 
     let attemptingNewAlbum: boolean = false;
     let newAlbumMessage: string = "";
+    let isPrivate: boolean = false;
 </script>
 
 <Overlay on:clickedOutside={() => dispatch("dismissed")}>
@@ -49,6 +51,12 @@
                     bind:value={newAlbumNameField}
                 />
             </label>
+            <div class="visibilityToggle">
+                <label>
+                    <input type="checkbox" bind:checked={isPrivate}>
+                    Private
+                </label>
+            </div>
             <button type="submit" disabled={attemptingNewAlbum || (newAlbumNameField.length <= 0)}>Create Album</button>
         </form>
         <div class="new-album-message">{newAlbumMessage}&nbsp;</div>
@@ -79,11 +87,11 @@
     }
 
     .new-album-prompt button {
-        margin-top: 4px;
+        margin-top: 15px;
         font-size: x-large;
     }
 
-    .new-album-prompt input {
+    .new-album-prompt input[type=text] {
         width: 100%;
         margin-top: 4px;
         margin-bottom: 10px;

@@ -40,6 +40,8 @@ export type Album = {
     id: number,
     title: string,
     description: string,
+    slug: string,
+    isPrivate: boolean,
     highestIndex: number,
     photos: Photo[]
 }

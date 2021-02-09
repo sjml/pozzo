@@ -4,12 +4,11 @@
         - THEN album photo map
     - then remove individual image views -- can only see through an album
     - delete album UI
-    - https://www.php.net/manual/en/function.set-error-handler.php
-    - remember to take frontend
-    - restore: logging out on private album page triggers redirect
-        - albumList also has double-fetch
+    - title/description editing for albums and pictures
 2. Design pass
     - play with forward/back navigation and make sure the router works the way it should
+    - add little notification toasts for when people get redirected/bounced
+    - see if we can not do the blurs if the images are already loaded?
     - organize script sections of component files; good lord
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??
@@ -21,6 +20,7 @@
         - image urls that aren't predictable? 
         - remove album numberic urls?
     - see about switching to stackblur for image loads
+    - try and sveltify the drag and drop a little bit
     - album previews
     - transitions between albums and stuff
     - class name consistency (kebab vs camel)
@@ -30,6 +30,7 @@
     - splash page
     - color choices
     - overall presentation
+    - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
     - dotted line for upload: https://kovart.github.io/dashed-border-generator/
     - icons: 
         - https://phosphoricons.com/
