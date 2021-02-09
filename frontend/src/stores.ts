@@ -29,6 +29,4 @@ export const siteData = readable<SiteConfig>(
 // TODO: this could maybe be context instead...
 export const userStoppedUploadScroll = writable<boolean>(false);
 
-export const albumSelectionStore = writable<number[]>([]);
-export const albumDragStore = writable<Photo>(null);
 export const currentAlbumStore = writable<Album>(null);

@@ -10,7 +10,7 @@
     import AlbumPhoto from "./AlbumPhoto.svelte";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
     import UploadZone from "./UploadZone.svelte";
-    import { isLoggedInStore, albumSelectionStore, currentAlbumStore, albumDragStore } from "../stores";
+    import { isLoggedInStore, currentAlbumStore } from "../stores";
     import { albumContextMenuKey } from "../keys";
 
     export let identifier: number|string;
@@ -100,11 +100,11 @@
             return;
         }
         if (evt.key == "a" && isMetaKeyDownForEvent(evt)) {
-            $albumSelectionStore = [...Array(album.photos.length).keys()];
+            albumSelectedIndices = [...Array(album.photos.length).keys()];
             evt.preventDefault();
         }
         if (evt.key == "d" && isMetaKeyDownForEvent(evt)) {
-            $albumSelectionStore = [];
+            albumSelectedIndices = [];
             evt.preventDefault();
         }
     }
@@ -121,19 +121,20 @@
         if (!isMetaKeyDownForEvent(evt)) {
             return;
         }
-        const selIdx = $albumSelectionStore.indexOf(pi);
+        const selIdx = albumSelectedIndices.indexOf(pi);
         if (selIdx != -1) {
-            $albumSelectionStore = $albumSelectionStore.filter(si => si != pi);
+            albumSelectedIndices = albumSelectedIndices.filter(si => si != pi);
         }
         else {
-            $albumSelectionStore = [...$albumSelectionStore, pi];
+            albumSelectedIndices = [...albumSelectedIndices, pi];
         }
         evt.preventDefault();
     }
 
+    let albumSelectedIndices: number[] = [];
     let selectedPhotos: Photo[] = [];
     $: {
-        selectedPhotos = $albumSelectionStore.map(pi => album.photos[pi]);
+        selectedPhotos = albumSelectedIndices.map(pi => album.photos[pi]);
     }
 
     let contextMenuVisible = false;
@@ -150,8 +151,8 @@
         if (!$isLoggedInStore) {
             return;
         }
-        if ($albumSelectionStore.length == 0) {
-            $albumSelectionStore = [pi];
+        if (albumSelectedIndices.length == 0) {
+            albumSelectedIndices = [pi];
         }
     }
     function handleContextMenu(evt: MouseEvent) {
@@ -170,7 +171,7 @@
     }
     function contextMenuExecuted(_: CustomEvent) {
         contextMenuVisible = false;
-        $albumSelectionStore = [];
+        albumSelectedIndices = [];
         getAlbum(null);
     }
 
@@ -186,7 +187,6 @@
 
     onDestroy(() => {
         $currentAlbumStore = null;
-        $albumDragStore = null;
     });
 
     let isMetaKeyDown = false;
@@ -200,9 +200,7 @@
     let dragShiftX = 0;
     let dragShiftY = 0;
     function startDragPhoto(evt: DragEvent, pi: number) {
-        $albumSelectionStore = [];
-
-        $albumDragStore = album.photos[pi];
+        albumSelectedIndices = [];
 
         draggedPhoto = album.photos[pi];
 
@@ -278,7 +276,7 @@
 />
 
 {#if album}
-    {#if $isLoggedInStore}
+    {#if $isLoggedInStore && draggedPhoto == null}
         <UploadZone on:done={() => getAlbum(null)} />
     {/if}
 
@@ -298,7 +296,6 @@
         {/if}
         {#if layout}
             {#each album.photos as photo, pi}
-                <Link to={`/album/${album.slug}/${album.photos[pi].id}`}>
                     <div class="albumSlot"
                         style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
                         on:click={(evt) => handlePhotoClick(evt, pi)}
@@ -307,15 +304,17 @@
                         draggable="true"
                         on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
                         class:dragged={draggedPhoto === photo}
-                        class:selected={$albumSelectionStore.indexOf(pi) >= 0}
+                        class:selected={albumSelectedIndices.indexOf(pi) >= 0}
                     >
-                        <AlbumPhoto
-                            photo={photo}
-                            size="medium"
-                            dims={layout.boxes[pi]}
-                        />
+                        <Link to={`/album/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})}>
+                            <AlbumPhoto
+                                photo={photo}
+                                size="medium"
+                                dims={layout.boxes[pi]}
+                            />
+                        </Link>
                     </div>
-                </Link>
+                <!-- </Link> -->
             {/each}
         {/if}
     </div>
