@@ -1,7 +1,6 @@
 1. Reorder album
-    - then make it so individual photo pages can navigate left/right if we're viewing through an album
-        - then add exif w/map embed to picture pages
-        - THEN album photo map
+    - then add exif w/map embed to picture pages
+    - THEN album photo map
     - then remove individual image views -- can only see through an album
     - delete album UI
     - title/description editing for albums and pictures
@@ -9,6 +8,10 @@
     - play with forward/back navigation and make sure the router works the way it should
     - add little notification toasts for when people get redirected/bounced
     - see if we can not do the blurs if the images are already loaded?
+    - navbar alignment is borked
+    - figure out an actual strategy for breadcrumbing the navbar
+    - can photo navigation just stay on the same component and update the url? 
+        - *should* be able to! that's the whole promise of this thing!
     - organize script sections of component files; good lord
     - need to add cache-busting :-/
         - https://github.com/posthtml/posthtml ??

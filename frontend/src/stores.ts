@@ -30,3 +30,7 @@ export const siteData = readable<SiteConfig>(
 export const userStoppedUploadScroll = writable<boolean>(false);
 
 export const currentAlbumStore = writable<Album>(null);
+
+// UGH this is super temp
+export const navBarBackLinkStore = writable<string>("");
+export const navBarBackTextStore = writable<string>("");

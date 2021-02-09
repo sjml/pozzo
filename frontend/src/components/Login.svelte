@@ -155,6 +155,7 @@
 <style>
     .login {
         padding: 10px 10px 5px 0px;
+        text-align: right;
     }
 
     .link {
