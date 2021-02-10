@@ -10,7 +10,7 @@
     import AlbumPhoto from "./AlbumPhoto.svelte";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
     import UploadZone from "./UploadZone.svelte";
-    import { isLoggedInStore, currentAlbumStore } from "../stores";
+    import { isLoggedInStore, frontendStateStore } from "../stores";
     import { albumContextMenuKey } from "../keys";
 
     export let identifier: number|string;
@@ -182,11 +182,11 @@
 
     onMount(async () => {
         await getAlbum(null);
-        $currentAlbumStore = album;
+        $frontendStateStore.currentAlbum = album;
     });
 
     onDestroy(() => {
-        $currentAlbumStore = null;
+        $frontendStateStore.currentAlbum = null;
     });
 
     let isMetaKeyDown = false;
@@ -275,13 +275,14 @@
     on:mouseup={handleWindowMouseUp}
 />
 
+<div class="album">
 {#if album}
     {#if $isLoggedInStore && draggedPhoto == null}
         <UploadZone on:done={() => getAlbum(null)} />
     {/if}
 
     <h2>{album.title}</h2>
-
+    <div class="tester"></div>
     <div class="albumPhotos"
             bind:clientWidth={containerWidth}
             on:contextmenu={handleContextMenu}
@@ -319,9 +320,12 @@
         {/if}
     </div>
 {/if}
-
+</div>
 
 <style>
+    .album {
+        width: 100%;
+    }
     .albumPhotos {
         position: relative;
         max-width: 95%;

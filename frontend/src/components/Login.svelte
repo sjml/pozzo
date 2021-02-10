@@ -4,7 +4,7 @@
     import Overlay from "./Overlay.svelte";
 
     import { RunApi } from '../api';
-    import { loginCredentialStore } from "../stores";
+    import { loginCredentialStore, isLoggedInStore } from "../stores";
 
     let updateTimeout: number = null;
     onMount(() => {
@@ -88,76 +88,69 @@
     }
 </script>
 
-<div class="login">
-    {#if $loginCredentialStore.length == 0}
-        {#if loginDisplayed}
-            <Overlay on:clickedOutside={() => loginDisplayed = false}>
-                <div class="login-prompt">
-                    <form on:submit|preventDefault={attemptLogin}>
-                        <label>
-                            User:
-                            <input type="text"
-                                disabled={attemptingLogin}
-                                bind:this={usernameInput}
-                                bind:value={usernameField}
-                            />
-                        </label>
-                        <label>
-                            Password:
-                            <input type="password"
-                                disabled={attemptingLogin}
-                                bind:value={passwordField}
-                            />
-                        </label>
-                        <button type="submit" disabled={attemptingLogin || !submitEnabled}>Log In</button>
-                    </form>
-                    <div class="login-message">{loginMessage}&nbsp;</div>
-                </div>
-            </Overlay>
-        {/if}
-        <div class="link" on:click={showLogin} title="Log In">
-            <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z">
-                </path>
-            </svg>
+{#if loginDisplayed}
+    <Overlay on:clickedOutside={() => loginDisplayed = false}>
+        <div class="login-prompt">
+            <form on:submit|preventDefault={attemptLogin}>
+                <label>
+                    User:
+                    <input type="text"
+                        disabled={attemptingLogin}
+                        bind:this={usernameInput}
+                        bind:value={usernameField}
+                    />
+                </label>
+                <label>
+                    Password:
+                    <input type="password"
+                        disabled={attemptingLogin}
+                        bind:value={passwordField}
+                    />
+                </label>
+                <button type="submit" disabled={attemptingLogin || !submitEnabled}>Log In</button>
+            </form>
+            <div class="login-message">{loginMessage}&nbsp;</div>
         </div>
-    {:else}
-        <div class="link" on:click={logout} title="Log Out">
-            <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                </path>
-            </svg>
-        </div>
-    {/if}
-</div>
+    </Overlay>
+{/if}
+{#if !$isLoggedInStore}
+    <div class="link" on:click={showLogin} title="Log In">
+        <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+            </path>
+        </svg>
+    </div>
+{:else}
+    <div class="link" on:click={logout} title="Log Out">
+        <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+            </path>
+        </svg>
+    </div>
+{/if}
 
 
 <style>
-    .login {
-        padding: 10px 10px 5px 0px;
-        text-align: right;
-    }
-
     .link {
         cursor: pointer;
     }

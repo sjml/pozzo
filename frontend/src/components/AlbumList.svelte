@@ -68,7 +68,7 @@
 <style>
     .albumList {
         padding-left: 30px;
-        margin-top: 4em;
+        margin-top: 1em;
     }
     h2 {
         margin: 0;

@@ -3,7 +3,7 @@
 
     import { HumanBytes } from "../util";
     import type { FileUploadStatus } from "../pozzo.type";
-    import { userStoppedUploadScroll } from "../stores";
+    import { frontendStateStore } from "../stores";
     import { UploadFile } from "../api";
 
     export let uploadStatus: FileUploadStatus;
@@ -16,7 +16,7 @@
         }
         uploadStatus.status = 1;
         statusString = "Uploading…";
-        if (!$userStoppedUploadScroll) {
+        if (!$frontendStateStore.userStoppedUploadScroll) {
             visibleDiv.scrollIntoView({
                 behavior: "smooth",
                 block: "center"

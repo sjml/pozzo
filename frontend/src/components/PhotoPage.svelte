@@ -1,9 +1,8 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { fade } from "svelte/transition";
     import { navigate } from "svelte-routing";
 
-    import { navBarBackLinkStore, navBarBackTextStore } from "../stores";
+    import { frontendStateStore } from "../stores";
     import type { Photo, Album } from "../pozzo.type";
     import { RunApi } from "../api";
     import { GetImgPath } from "../util";
@@ -45,13 +44,14 @@
     onMount(async () => {
         if (photo == null) {
             await getPhoto(photoID);
-            calculateImageSize(boundsW, boundsH);
         }
+        $frontendStateStore.photoToolsVisible = true;
     });
 
     onDestroy(() => {
-        $navBarBackLinkStore = "";
-        $navBarBackTextStore = "";
+        $frontendStateStore.backLink = "";
+        $frontendStateStore.backLinkText = "";
+        $frontendStateStore.photoToolsVisible = false;
     })
 
     function handleKeyDown(evt: KeyboardEvent) {
@@ -60,20 +60,6 @@
         }
         else if (evt.key == "ArrowRight" && nextPhotoIdx != -1) {
             navigate(`/album/${album.slug}/${album.photos[nextPhotoIdx].id}`);
-        }
-    }
-
-    function calculateImageSize(bw: number, bh: number) {
-        const displayAspect = bw / bh;
-        if (displayAspect > photo.aspect) {
-            // display is narrower than photo
-            photoH = bh;
-            photoW = bh * photo.aspect;
-        }
-        else {
-            // display is wider than photo
-            photoW = bw;
-            photoH = bw / photo.aspect;
         }
     }
 
@@ -97,7 +83,6 @@
         }
     }
 
-    $: if (photo) calculateImageSize(boundsW, boundsH)
     $: if (photo && album) findNeighbors(photo, album)
     $: getPhoto(photoID)
 
@@ -116,8 +101,8 @@
 
     $: {
         if (album) {
-            $navBarBackLinkStore = `/album/${album.slug}`;
-            $navBarBackTextStore = album.title;
+            $frontendStateStore.backLink = `/album/${album.slug}`;
+            $frontendStateStore.backLinkText = album.title;
         }
     }
 </script>
@@ -128,53 +113,44 @@
 
 {#if photo}
     <div class="fullPhoto" bind:clientWidth={boundsW} bind:clientHeight={boundsH}>
-        <div class="doubleLoader"
-            style={`width: ${photoW}px; height: ${photoH}px;`}
-        >
-            {#if !loaded}
-                <img class="preload"
-                    out:fade="{{duration: 200}}"
-                    alt="{photo.title}"
-                    src="data:image/jpeg;base64,{photo.tinyJPEG}"
-                    style={`width: ${photoW}px; height: ${photoH}px;`}
-                />
-            {/if}
+        <div class="doubleLoader">
+            <!-- this is where the preview image goes/went -->
             <img on:load={() => loaded = true}
                 alt="{photo.title}"
                 srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
                 src="{GetImgPath(size, photo.hash, photo.uniq)}"
-                style={`width: ${photoW}px; height: ${photoH}px;`}
             />
         </div>
     </div>
+    {#if $frontendStateStore.isMetadataOn}
+        <div class="metadata">
+            Metas datum!
+        </div>
+    {/if}
 {/if}
 
 <style>
     .fullPhoto {
-        position: absolute;
-        top: 3em;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        flex-grow: 1;
+        overflow: hidden;
     }
 
     .doubleLoader {
         overflow: hidden;
-        position: relative;
-    }
-
-    img {
         position: absolute;
         top: 0;
+        right: 0;
+        bottom: 0;
         left: 0;
     }
 
-    .preload {
-        filter: blur(0.8em);
-        transform: scale(1.2);
-        z-index: 100;
+    .metadata {
+        width: 300px;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
 </style>

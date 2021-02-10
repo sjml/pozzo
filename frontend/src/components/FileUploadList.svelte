@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
-    import { userStoppedUploadScroll, currentAlbumStore } from "../stores";
+    import { frontendStateStore } from "../stores";
     import type { FileUploadStatus } from "../pozzo.type";
     import FileUploader from "./FileUploader.svelte";
 
@@ -50,13 +50,13 @@
 
     let awaitingConfirmation = true;
     onMount(async () => {
-        $userStoppedUploadScroll = false;
+        $frontendStateStore.userStoppedUploadScroll = false;
 
         let targetAlbumID = null;
         let offset = 1;
-        if ($currentAlbumStore != null) {
-            targetAlbumID = $currentAlbumStore.id;
-            const existingIndices = $currentAlbumStore.photos.map((p) => p.ordering);
+        if ($frontendStateStore.currentAlbum != null) {
+            targetAlbumID = $frontendStateStore.currentAlbum.id;
+            const existingIndices = $frontendStateStore.currentAlbum.photos.map((p) => p.ordering);
             if (existingIndices.length == 0) {
                 offset = 1;
             }
@@ -97,7 +97,7 @@
 
         await tick();
         await new Promise(p => setTimeout(p, 400));
-        $userStoppedUploadScroll = false;
+        $frontendStateStore.userStoppedUploadScroll = false;
         queueUploads();
     }
 
@@ -106,7 +106,7 @@
 </script>
 
 
-<div class="fileUploadList" on:click={() => $userStoppedUploadScroll = true}>
+<div class="fileUploadList" on:click={() => $frontendStateStore.userStoppedUploadScroll = true}>
     {#if awaitingConfirmation}
         <div class="confirm">
             {#if failedUploadCount > 0}

@@ -3,6 +3,15 @@ export type SiteConfig = {
     apiUri: string,
 }
 
+export type FrontendState = {
+    photoToolsVisible: boolean,
+    backLinkText: string,
+    backLink: string,
+    isMetadataOn: boolean,
+    currentAlbum?: Album,
+    userStoppedUploadScroll: boolean,
+}
+
 export type ApiResult = {
     success: boolean,
     code: number,
