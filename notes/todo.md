@@ -5,6 +5,10 @@
     - delete album UI
     - title/description editing for albums and pictures
 2. Design pass
+    - blur back on image pages?
+    - add "no photos" notice to empty albums
+    - box-sizing: border-box;
+    - rotate image maybe needs to be a concession to the "no editing"
     - play with forward/back navigation and make sure the router works the way it should
     - add little notification toasts for when people get redirected/bounced
     - see if we can not do the blurs if the images are already loaded?

@@ -3,5 +3,6 @@ samples/*
 public/img/*
 dist/*
 test/env/*
+test/__pycache__/*
 
 .vscode/settings.json

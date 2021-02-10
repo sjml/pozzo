@@ -52,9 +52,9 @@ fi
 # upload some images
 pushd ../samples > /dev/null
 if [[ $FULL -eq 1 ]]; then
-  imgs=$(ls)
+  imgs=$(ls -p | grep -v '/$')
 else
-  imgs=$(ls | shuf -n 5)
+  imgs=$(ls -p | grep -v '/$' | shuf -n 5)
 fi
 popd > /dev/null
 for i in ${imgs[*]}; do
