@@ -1,66 +1,77 @@
-1. Design pass
-    - title/description editing for albums and pictures
-    - blur back on image pages?
-    - make buttons into their own component? 
-    - review reactive functions and make sure they're being used right
-        - probably not
-    - redo fullscreen to actually listen for events and make sure it's worked
-    - fix chattiness of album metadata
-    - add "no photos" notice to empty albums
-    - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
-    - find a nicer set of map tiles
-    - rotate image maybe needs to be a concession to the "no editing"
-    - play with forward/back navigation and make sure the router works the way it should
-    - add little notification toasts for when people get redirected/bounced
-    - see if we can not do the blurs if the images are already loaded?
-    - navbar alignment is borked
-    - figure out an actual strategy for breadcrumbing the navbar
-    - can photo navigation just stay on the same component and update the url? 
-        - *should* be able to! that's the whole promise of this thing!
-    - organize script sections of component files; good lord
-    - need to add cache-busting :-/
-        - https://github.com/posthtml/posthtml ??
-        - something simpler?
-    - check for all console error statements and handle gracefully in UI
-        - test bad responses for everything... broken file upload hangs the UI?
-        - also might need to add spinners for waiting on stuff
-    - url thinks
-        - image urls that aren't predictable? 
-        - remove album numberic urls?
-    - see about switching to stackblur for image loads
-    - try and sveltify the drag and drop a little bit
-    - album previews
-    - transitions between albums and stuff
-    - class name consistency (kebab vs camel)
-    - transition selection border appearance
-    - allow setting title, add pozzo branding note at bottom
-    - accessibility checks
-    - splash page
-    - color choices
-    - overall presentation
-    - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
-    - dotted line for upload: https://kovart.github.io/dashed-border-generator/
-    - icons: 
-        - https://phosphoricons.com/
-        - https://icons.getbootstrap.com/
-        - https://heroicons.dev/ +++
-        - https://forkaweso.me/Fork-Awesome/icons/
-        - etc.
-        - (using heroicons for now; will evaluated thoroughly later)
-    - also pick a few consistent sizes for icon usages
-        - rollover reactions?
-        - animation of stroke-width?
-    - delete album UI
+1. Frontend pass
+    - bugs
+        - got some false positive error reporting on bulk upload... investigate what's up
+            - more problematic was that I couldn't re-try :(
+    - requires backend support
+        - title/description editing for albums and pictures
+        - allow setting overall site title, add pozzo branding note at bottom
+        - rotate image maybe needs to be a concession to the "no editing"
+        - delete album UI
+        - bulk moving/deleting operations
+    - some research required
+        - need to add cache-busting :-/
+            - https://github.com/posthtml/posthtml ??
+            - something simpler?
+        - url thinks
+            - image urls that aren't predictable? 
+            - remove album numberic urls?
+        - blur back on image pages? (look at stackblur/canvas solution)
+        - see if we can not do the blurs if the images are already loaded?
+    - make it more svelte-y
+        - make buttons into their own component? 
+        - review reactive functions and make sure they're being used right
+            - probably not
+        - can photo navigation just stay on the same component and update the url? 
+            - *should* be able to! that's the whole promise of this thing!
+        - try and sveltify the drag and drop a little bit
+    - clean up hacks
+        - organize script sections of component files; good lord
+        - CSS class name consistency (kebab vs camel)
+        - fix chattiness of album metadata
+        - redo fullscreen to actually listen for events and make sure it's worked
+        - check for all console error statements and handle gracefully in UI
+            - test bad responses for everything... broken file upload hangs the UI?
+            - also might need to add spinners for waiting on stuff
+    - UX niceties
+        - link to download at original resolution
+            - add license display option? (site config)
+        - set map to not be pannable until it's been clicked
+            - most people just wanna scroll down
+        - find a nicer set of map tiles
+        - add "no photos" notice to empty albums
+        - album previews
+        - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
+        - add little notification toasts for when people get redirected/bounced
+        - figure out an actual strategy for breadcrumbing the navbar
+        - transitions between albums and stuff
+        - accessibility checks
+        - splash page
+        - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
+    - testing
+        - play with forward/back navigation and make sure the router works the way it should
+    - UI polish
+        - color choices
+            - centralize into global file, everyone else use variables
+        - also pick a few consistent sizes for icon usages
+            - rollover reactions?
+            - animation of stroke-width?
+        - navbar alignment is borked
+        - transition selection border appearance
+        - dotted line for upload: https://kovart.github.io/dashed-border-generator/
+        - swap icons to phosphor: 
 2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
     - limit length of text things (titles, descriptions)
     - remove reset endpoint
     - make test suite
-3. Add admin endpoint (+frontend UI) to do reset and other such things?
+3. Frontend caching
+    - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
+    - something-something web workers? BLERGH.
+4. Add admin endpoint (+frontend UI) to do reset and other such things?
     - maybe add setup GUI? at least command-line script
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-4. Video / live pictures?
+5. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 
@@ -87,8 +98,6 @@
 * robustify backend router:
     - handlers should be able to specify which methods they take
         - creation actions should return 201
-    - also, gzip should be enabled at the router level, which should probably
-      also have it's own output function
     - man.... maybe I should just use a library
     - might eventually want DB migrations, too, and at that point I don't know
       if I want to roll it myself..........
