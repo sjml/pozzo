@@ -135,6 +135,21 @@ function processImage(&$photoData, $albumID, $order) {
         //   which... not today.
         $img->setImageCompressionQuality(88);
 
+        // correct orientation directly
+        $orient = $img->getImageOrientation();
+        switch ($orient) {
+            case imagick::ORIENTATION_RIGHTTOP:
+                $img->rotateImage("#00000000", 90);
+                break;
+            case imagick::ORIENTATION_BOTTOMRIGHT:
+                $img->rotateImage("#00000000", 180);
+                break;
+            case imagick::ORIENTATION_LEFTBOTTOM:
+                $img->rotateImage("#00000000", 270);
+                break;
+        }
+        $img->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
+
         $profiles = $img->getImageProfiles("icc", true);
 
         $img->scaleImage($size["maxWidth"], $size["maxHeight"], true);

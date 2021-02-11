@@ -5,7 +5,6 @@
     - requires backend support
         - title/description editing for albums and pictures
         - allow setting overall site title, add pozzo branding note at bottom
-        - rotate image maybe needs to be a concession to the "no editing"
         - delete album UI
         - bulk moving/deleting operations
     - some research required
@@ -60,6 +59,7 @@
         - make sure the viewing experience on a mobile-sized screen is decent
 2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
+        - will also pull in keywords from photos.app export, which is something that should be supported in the backend (along with stars)
     - limit length of text things (titles, descriptions)
     - remove reset endpoint
     - make test suite
