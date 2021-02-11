@@ -16,7 +16,7 @@ mkdir $ROOT_DIR/dist/public
 pushd ./public > /dev/null
   copies=(*)
   for item in ${copies[@]}; do
-    if [[ $item = "img" ]]; then
+    if [[ $item = "photos" ]]; then
       continue
     fi
     cp -R $item $ROOT_DIR/dist/public

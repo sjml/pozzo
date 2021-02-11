@@ -1,6 +1,6 @@
 pozzo.DB
 samples/*
-public/img/*
+public/photos/*
 dist/*
 test/env/*
 test/__pycache__/*

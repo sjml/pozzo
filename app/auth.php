@@ -44,7 +44,7 @@ class Auth {
             }
         }
 
-        return 1;
+        return $value->data->id;
     }
 
     static function GenerateKey() {

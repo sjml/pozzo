@@ -73,9 +73,11 @@ class DB {
         $prepCommand .= ", width INTEGER, height INTEGER";
         $prepCommand .= ", aspect FLOAT";
         $prepCommand .= ", uploadTimeStamp DATETIME";
+        $prepCommand .= ", uploadedBy INTEGER";
         $prepCommand .= ", size INTEGER";
         $prepCommand .= ", latitude FLOAT";
         $prepCommand .= ", longitude FLOAT";
+        $prepCommand .= ", FOREIGN KEY(uploadedBy) REFERENCES users(id)";
 
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
@@ -227,7 +229,7 @@ class DB {
 
     static function InsertPhoto($photoData, $albumID, $order) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos (title, hash, uniq, width, height, aspect, size, uploadTimeStamp, latitude, longitude) VALUES (?,?,?,?,?,?,?,date('now'),?,?)",
+            "INSERT INTO photos (title, hash, uniq, width, height, aspect, size, uploadTimeStamp, uploadedBy, latitude, longitude) VALUES (?,?,?,?,?,?,?,datetime('now'),?,?,?)",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
@@ -236,8 +238,9 @@ class DB {
         $statement->bindParam(5, $photoData["height"], SQLITE3_INTEGER);
         $statement->bindParam(6, $photoData["aspect"], SQLITE3_FLOAT);
         $statement->bindParam(7, $photoData["size"], SQLITE3_INTEGER);
-        $statement->bindParam(8, $photoData["latitude"], SQLITE3_FLOAT);
-        $statement->bindParam(9, $photoData["longitude"], SQLITE3_FLOAT);
+        $statement->bindParam(8, $photoData["uploadedBy"], SQLITE3_INTEGER);
+        $statement->bindParam(9, $photoData["latitude"], SQLITE3_FLOAT);
+        $statement->bindParam(10, $photoData["longitude"], SQLITE3_FLOAT);
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
@@ -298,6 +301,17 @@ class DB {
             $query =
                 "SELECT * FROM photos INNER JOIN photoPreviews ON photos.id = photoPreviews.id WHERE photos.id = ?;";
         }
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $id, SQLITE3_INTEGER);
+        $results = $statement->execute();
+        if ($results == false) {
+            return null;
+        }
+        return $results->fetchArray(SQLITE3_ASSOC);
+    }
+
+    static function GetMeta($id) {
+        $query = "SELECT * FROM photoMeta WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $id, SQLITE3_INTEGER);
         $results = $statement->execute();
@@ -521,7 +535,7 @@ class DB {
             return false;
         }
 
-        if ($albumData["isPrivate"] && $_REQUEST["POZZO_AUTH"] != 1) {
+        if ($albumData["isPrivate"] && $_REQUEST["POZZO_AUTH"] <= 0) {
             return false;
         }
 

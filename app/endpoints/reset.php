@@ -12,7 +12,7 @@ $router->Route();
 
 function resetSite() {
     DB::Reset();
-    removeDir(__DIR__ . "/../../public/img");
+    removeDir(__DIR__ . "/../../public/photos");
 
     header("Content-Type: application/json");
     http_response_code(200);

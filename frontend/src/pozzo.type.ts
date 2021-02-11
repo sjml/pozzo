@@ -41,8 +41,11 @@ export type Photo = {
     height: number,
     aspect: number,
     size: number,
+    uploadTimeStamp: number,
     ordering?: number,
-    tinyJPEG: string,
+    latitude?: number,
+    longitude?: number,
+    tinyJPEG?: string,
 }
 
 export type Album = {

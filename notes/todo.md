@@ -1,13 +1,13 @@
 1. Reorder album
-    - then add exif w/map embed to picture pages
     - THEN album photo map
-    - then remove individual image views -- can only see through an album
+    - hook up full screen and photo navigation buttons
     - delete album UI
     - title/description editing for albums and pictures
 2. Design pass
     - blur back on image pages?
     - add "no photos" notice to empty albums
-    - box-sizing: border-box;
+    - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
+    - find a nicer set of map tiles
     - rotate image maybe needs to be a concession to the "no editing"
     - play with forward/back navigation and make sure the router works the way it should
     - add little notification toasts for when people get redirected/bounced
@@ -49,16 +49,15 @@
     - also pick a few consistent sizes for icon usages
         - rollover reactions?
         - animation of stroke-width?
-3. editing titles and descriptions on photos/albums 
-    - photos should record which user uploaded them
-4. Backend pass
+3. Backend pass
+    - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
     - remove reset endpoint
     - make test suite
-5. Add admin endpoint (+frontend UI) to do reset and other such things?
+4. Add admin endpoint (+frontend UI) to do reset and other such things?
     - maybe add setup GUI? at least command-line script
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-6. Video / live pictures?
+5. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 

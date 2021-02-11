@@ -15,6 +15,7 @@ $router = new Router();
 $router->AddHandler("/delete", ["deletePhoto"], true);
 $router->AddHandler("/copy", ["copyPhoto"], true);
 $router->AddHandler("/view", ["viewPhoto"]);
+$router->AddHandler("/meta", ["viewMeta"]);
 
 $router->Route();
 
@@ -36,6 +37,17 @@ function viewPhoto() {
     }
 
     output($photo);
+}
+
+function viewMeta() {
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
+    $meta = DB::GetMeta($identifier);
+    if ($meta == null) {
+        output(["message" => "Photo not found"], 404);
+        return;
+    }
+
+    output($meta);
 }
 
 function deletePhoto() {

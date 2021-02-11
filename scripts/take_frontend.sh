@@ -6,4 +6,4 @@ cd ../frontend
 npm run build
 cd ..
 rm -rf ./public/build
-cp -R ./frontend/public/build ./public
+cp -R ./frontend/public/* ./public

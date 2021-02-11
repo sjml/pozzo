@@ -10,7 +10,7 @@ class PozzoServer:
         baseDir = os.path.join(os.path.dirname(__file__), "..")
         self.baseURL = "0.0.0.0:8080"
         self.dbPath = os.path.join(baseDir, "pozzo.DB")
-        self.imgPath = os.path.join(baseDir, "public", "img")
+        self.imgPath = os.path.join(baseDir, "public", "photos")
         self.movedDB = False
         if os.path.exists(self.dbPath):
             self.movedDB = True

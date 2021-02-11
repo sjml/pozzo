@@ -40,7 +40,7 @@ class Router {
 
             if ($match) {
                 if ($handler["requireLogin"]) {
-                    if ($_REQUEST["POZZO_AUTH"] != 1) {
+                    if ($_REQUEST["POZZO_AUTH"] <= 0) {
                         $errData = [
                             "code" => $_REQUEST["POZZO_AUTH"],
                         ];

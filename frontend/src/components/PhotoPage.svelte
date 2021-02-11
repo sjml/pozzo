@@ -2,10 +2,13 @@
     import { onDestroy, onMount } from "svelte";
     import { navigate } from "svelte-routing";
 
+    import L from "leaflet";
+    import "leaflet/dist/leaflet.css";
+
     import { frontendStateStore } from "../stores";
     import type { Photo, Album } from "../pozzo.type";
     import { RunApi } from "../api";
-    import { GetImgPath } from "../util";
+    import { GetImgPath, HumanBytes, TimestampToDateString } from "../util";
 
     async function getPhoto(pid: number) {
         const pResPromise = RunApi(`/photo/view/${pid}`, {
@@ -15,18 +18,13 @@
             },
             authorize: true
         });
-        const aResPromise = RunApi(`/album/view/${albumSlug}`, {
-            method: "POST",
-            params: {
-                preview: 1,
-            },
-            authorize: true
-        })
+        const aResPromise = RunApi(`/album/view/${albumSlug}`);
         const pRes = await pResPromise;
         const aRes = await aResPromise;
 
         if (pRes.success) {
             photo = pRes.data;
+            photoMeta = null;
             loaded = false;
         }
         else {
@@ -38,6 +36,18 @@
         }
         else {
             console.error("Couldn't load album.", aRes);
+        }
+    }
+
+    async function getMetadata() {
+        const res = await RunApi(`/photo/meta/${photo.id}`, {
+            authorize: true
+        });
+        if (res.success) {
+            photoMeta = res.data;
+        }
+        else {
+            console.error("Couldn't load metadata.", res);
         }
     }
 
@@ -88,21 +98,61 @@
 
     export let photoID: number;
     export let photo: Photo;
+    let photoMeta: any = null;
+    let map: L.Map = null;
+    let mapMarker: L.Marker = null;
+    let mapDiv: HTMLDivElement = null;
     export let albumSlug: string;
     export let album: Album;
     export let nextPhotoIdx: number = -1;
     export let prevPhotoIdx: number = -1;
     const size = "large";
     let loaded = false;
-    let boundsW: number = 0;
-    let boundsH: number = 0;
-    let photoW: number = 0;
-    let photoH: number = 0;
 
     $: {
         if (album) {
             $frontendStateStore.backLink = `/album/${album.slug}`;
             $frontendStateStore.backLinkText = album.title;
+        }
+    }
+
+    $: {
+        if (photo && $frontendStateStore.isMetadataOn) {
+            if (photoMeta == null || photoMeta.id != photo.id) {
+                getMetadata();
+            }
+        }
+    }
+
+    $: {
+        if (mapDiv) {
+            if (map != null) {
+                map.setView([photo.latitude, photo.longitude], 16);
+                map.removeLayer(mapMarker);
+                mapMarker = L.marker([photo.latitude, photo.longitude])
+                mapMarker.addTo(map);
+            }
+            else {
+                L.Marker.prototype.options.icon = L.icon({
+                    iconUrl: "/img/marker-icon.png",
+                    iconRetinaUrl: "/img/marker-icon-2x.png",
+                    shadowUrl: "/img/marker-shadow.png",
+                    iconSize: [24,36],
+                    iconAnchor: [12,36]
+                });
+                map = L.map(mapDiv);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                map.setView([photo.latitude, photo.longitude], 16);
+                mapMarker = L.marker([photo.latitude, photo.longitude]);
+                mapMarker.addTo(map);
+            }
+        }
+        else {
+            map = null;
+            mapMarker = null;
         }
     }
 </script>
@@ -122,7 +172,24 @@
     </div>
     {#if $frontendStateStore.isMetadataOn}
         <div class="metadata">
-            Metas datum!
+            <!-- this could be made more data-driven, but for now, sticking with hand-crafted -->
+            <div class="title"><span class="label">Title:</span> {photo.title}</div>
+            <div><span class="label">Original: </span>{photo.width}×{photo.height} ({HumanBytes(photo.size)})</div>
+            <div><span class="label">Uploaded: </span>{photo.uploadTimeStamp}</div>
+            {#if photo.latitude && photo.longitude}
+                <div class="photoMap" bind:this={mapDiv}></div>
+            {/if}
+            {#if photoMeta}
+                {#if photoMeta.IFD0_Make}
+                    <div><span class="label">Make: </span>{photoMeta.IFD0_Make}</div>
+                {/if}
+                {#if photoMeta.IFD0_Model}
+                    <div><span class="label">Model: </span>{photoMeta.IFD0_Model}</div>
+                {/if}
+                {#if photoMeta.IFD0_DateTime}
+                    <div><span class="label">Taken: </span>{TimestampToDateString(photoMeta.IFD0_DateTime)}</div>
+                {/if}
+            {/if}
         </div>
     {/if}
 {/if}
@@ -134,6 +201,24 @@
 
     .metadata {
         width: 300px;
+        padding: 10px;
+        border-left: 1px solid rgb(58, 58, 58);
+    }
+
+    .title {
+        font-size: 120%;
+        margin-bottom: 10px;
+    }
+
+    .label {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .photoMap {
+        height: 250px;
+        margin: 10px 0px;
+        background-color: rgb(85, 85, 85);
     }
 
     img {

@@ -37,6 +37,7 @@ function upload() {
             return;
         }
         $photoData["title"] = $_FILES["photoUp"]["name"];
+        $photoData["uploadedBy"] = $_REQUEST["POZZO_AUTH"];
 
         processImage($photoData, $albumID, $orderSlot);
         unset($photoData["tinyJPEG"]);

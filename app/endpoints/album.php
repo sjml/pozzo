@@ -28,7 +28,7 @@ function output($obj, $code = 200) {
 }
 
 function albumList() {
-    $fetchPrivate = $_REQUEST["POZZO_AUTH"] == 1;
+    $fetchPrivate = $_REQUEST["POZZO_AUTH"] > 0;
     $albums = DB::GetAlbumList($fetchPrivate);
     output($albums);
 }

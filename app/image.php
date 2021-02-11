@@ -56,7 +56,7 @@ const photoExifFields = [
 ];
 
 function getImagePath($sizeLabel, $hash, $uniq) {
-    $ret = __DIR__ . "/../public/img/";
+    $ret = __DIR__ . "/../public/photos/";
     $rawDirs = str_split($hash, 2);
     $rawDirs = array_slice($rawDirs, 0, 3);
     $dirs = [];
