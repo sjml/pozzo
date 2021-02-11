@@ -315,7 +315,16 @@
                     iconSize: [24,36],
                     iconAnchor: [12,36]
                 });
-                map = L.map(mapDiv);
+                map = L.map(mapDiv, {
+                    zoomControl: false
+                });
+                map.dragging.disable();
+                map.touchZoom.disable();
+                map.doubleClickZoom.disable();
+                map.scrollWheelZoom.disable();
+                map.boxZoom.disable();
+                map.keyboard.disable();
+                if (map.tap) map.tap.disable();
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
@@ -337,6 +346,16 @@
             map = null;
             markers = [];
         }
+    }
+
+    function enableMapInteractions() {
+        map.dragging.enable();
+        map.touchZoom.enable();
+        map.doubleClickZoom.enable();
+        map.scrollWheelZoom.enable();
+        map.boxZoom.enable();
+        map.keyboard.enable();
+        if (map.tap) map.tap.enable();
     }
 
     $: {
@@ -378,7 +397,7 @@
         {/if}
     </div>
     {#if album.showMap}
-        <div class="albumMap" bind:this={mapDiv}></div>
+        <div class="albumMap" bind:this={mapDiv} on:click={enableMapInteractions}></div>
     {/if}
     <div class="albumPhotos"
             bind:clientWidth={containerWidth}

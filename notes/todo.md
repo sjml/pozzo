@@ -16,6 +16,9 @@
         - see if we can not do the blurs if the images are already loaded?
     - make it more svelte-y
         - make buttons into their own component? 
+        - make map into component
+            - enable/disable interactions
+            - adding markers, reacting, etc. 
         - review reactive functions and make sure they're being used right
             - probably not
         - can photo navigation just stay on the same component and update the url? 
@@ -32,8 +35,6 @@
     - UX niceties
         - link to download at original resolution
             - add license display option? (site config)
-        - set map to not be pannable until it's been clicked
-            - most people just wanna scroll down
         - find a nicer set of map tiles
             - also maybe SVG markers?
             - add photo preview popups?
@@ -46,8 +47,6 @@
         - accessibility checks
         - splash page
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
-    - testing
-        - play with forward/back navigation and make sure the router works the way it should
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
