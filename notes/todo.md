@@ -1,10 +1,13 @@
 1. Reorder album
     - THEN album photo map
+    - title/description editing for albums and pictures
     - hook up full screen and photo navigation buttons
     - delete album UI
-    - title/description editing for albums and pictures
 2. Design pass
     - blur back on image pages?
+    - make buttons into their own component? 
+    - review reactive functions and make sure they're being used right
+        - probably not
     - add "no photos" notice to empty albums
     - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
     - find a nicer set of map tiles
@@ -51,6 +54,7 @@
         - animation of stroke-width?
 3. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
+    - limit length of text things (titles, descriptions)
     - remove reset endpoint
     - make test suite
 4. Add admin endpoint (+frontend UI) to do reset and other such things?

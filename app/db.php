@@ -115,6 +115,7 @@ class DB {
         $prepCommand .= ", slug TEXT";
         $prepCommand .= ", description TEXT";
         $prepCommand .= ", isPrivate BOOLEAN";
+        $prepCommand .= ", showMap BOOLEAN";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -378,7 +379,7 @@ class DB {
         $slug = $sg->generate($title);
 
         $prepCommand =
-            "INSERT INTO albums(title, slug, description, isPrivate) VALUES(?, ?, '', ?)";
+            "INSERT INTO albums(title, slug, description, isPrivate, showMap) VALUES(?, ?, '', ?, 0)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $slug, SQLITE3_TEXT);
@@ -414,6 +415,24 @@ class DB {
         }
 
         return $albumData;
+    }
+
+    static function UpdateAlbumMeta($id, $title, $description, $isPrivate, $showMap) {
+        $query = "UPDATE albums SET title = ?, description = ?, isPrivate = ?, showMap = ? WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $title, SQLITE3_TEXT);
+        $statement->bindParam(2, $description, SQLITE3_TEXT);
+        $statement->bindParam(3, $isPrivate, SQLITE3_INTEGER);
+        $statement->bindParam(4, $showMap, SQLITE3_INTEGER);
+        $statement->bindParam(5, $id, SQLITE3_INTEGER);
+        try {
+            $result = $statement->execute();
+            if (!$result) {
+                return -1;
+            }
+        } catch (\Throwable $th) {
+            return -1;
+        }
     }
 
     static function AddPhotoToAlbum($photoID, $albumID, $order) {

@@ -16,8 +16,8 @@ $router->AddHandler("/new", ["newAlbum"], true);
 $router->AddHandler("/view", ["viewAlbum"]);
 $router->AddHandler("/remove", ["removePhoto"], true);
 $router->AddHandler("/delete", ["deleteAlbum"], true);
+$router->AddHandler("/edit", ["editMetadata"], true);
 $router->AddHandler("/reorder", ["reorderAlbum"], true);
-// $router->AddHandler("/edit", ["editAlbum"], true); // change album's title or description
 
 $router->Route();
 
@@ -65,6 +65,30 @@ function viewAlbum() {
     }
 
     output($album);
+}
+
+function editMetadata() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
+    $album = DB::FindAlbum($identifier, false);
+    if ($album == false) {
+        output(["message" => "Album not found"], 404);
+        return;
+    }
+
+    $title = array_key_exists("title", $input) ? $input["title"] : $album["title"];
+    $description = array_key_exists("description", $input) ? $input["description"] : $album["description"];
+    $isPrivate = array_key_exists("isPrivate", $input) ? $input["isPrivate"] : $album["isPrivate"];
+    $showMap = array_key_exists("showMap", $input) ? $input["showMap"] : $album["showMap"];
+
+    $result = DB::UpdateAlbumMeta($album["id"], $title, $description, $isPrivate, $showMap);
+
+    if ($result == -1) {
+        output(["message" => "Could not update metadata"], 400);
+        return;
+    }
+
+    output(["message" => "Metadata updated successfully"]);
 }
 
 function deleteAlbum() {

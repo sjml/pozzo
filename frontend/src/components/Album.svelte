@@ -1,6 +1,9 @@
 <script lang="ts">
     import { onMount, onDestroy, setContext } from "svelte";
 
+    import L from "leaflet";
+    import "leaflet/dist/leaflet.css";
+
     import justifiedLayout from "justified-layout";
     import { Link, navigate } from "svelte-routing";
 
@@ -31,6 +34,22 @@
             else {
                 console.error(res);
             }
+        }
+    }
+
+    async function updateMetaData(showMap: boolean) {
+        const res = await RunApi(`/album/edit/${identifier}`, {
+            params: {
+                showMap: showMap
+            },
+            method: "POST",
+            authorize: true
+        });
+        if (res.success) {
+            // no-op; frontend already shows backend's reality
+        }
+        else {
+            console.error(res);
         }
     }
 
@@ -265,6 +284,71 @@
             navigate("/", {replace: true});
         }
     }
+
+    let mapDiv: HTMLDivElement;
+    let map: L.Map;
+    let markers: L.Marker[] = [];
+    $: {
+        if (mapDiv) {
+            if (map != null) {
+                markers.forEach((marker) => {
+                    map.removeLayer(marker);
+                })
+
+                let coords = [];
+                album.photos.forEach((p) => {
+                    if (p.latitude != null && p.longitude != null) {
+                        const marker = L.marker([p.latitude, p.longitude]);
+                        marker.addTo(map);
+                        markers = [...markers, marker];
+                        coords = [...coords, [p.latitude, p.longitude]];
+                    }
+                });
+                const bounds = L.latLngBounds(coords);
+                map.fitBounds(bounds, {padding: [15, 15]});
+            }
+            else {
+                L.Marker.prototype.options.icon = L.icon({
+                    iconUrl: "/img/marker-icon.png",
+                    iconRetinaUrl: "/img/marker-icon-2x.png",
+                    shadowUrl: "/img/marker-shadow.png",
+                    iconSize: [24,36],
+                    iconAnchor: [12,36]
+                });
+                map = L.map(mapDiv);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                let coords = [];
+                album.photos.forEach((p) => {
+                    if (p.latitude != null && p.longitude != null) {
+                        const marker = L.marker([p.latitude, p.longitude]);
+                        marker.addTo(map);
+                        markers = [...markers, marker];
+                        coords = [...coords, [p.latitude, p.longitude]];
+                    }
+                });
+                const bounds = L.latLngBounds(coords);
+                map.fitBounds(bounds, {padding: [15, 15]});
+            }
+        }
+        else {
+            map = null;
+            markers = [];
+        }
+    }
+
+    $: {
+        // this is not how reactive functions should be working :-/
+        if (album && album.showMap) {
+            updateMetaData(album.showMap);
+        }
+        else if (album) {
+            updateMetaData(album.showMap);
+        }
+    }
+
 </script>
 
 
@@ -281,8 +365,19 @@
         <UploadZone on:done={() => getAlbum(null)} />
     {/if}
 
-    <h2>{album.title}</h2>
-    <div class="tester"></div>
+    <div class="titleRow">
+        <h2>{album.title}</h2>
+        <div class="spacer"></div>
+        <div class="button map"
+            class:toggled={album.showMap}
+            on:click={() => album.showMap = !album.showMap}
+        >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+        </div>
+    </div>
+    {#if album.showMap}
+        <div class="albumMap" bind:this={mapDiv}></div>
+    {/if}
     <div class="albumPhotos"
             bind:clientWidth={containerWidth}
             on:contextmenu={handleContextMenu}
@@ -351,9 +446,40 @@
         cursor: default;
     }
 
+    .titleRow {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-right: 30px;
+    }
+
     h2 {
         font-size: 3em;
         padding-left: 20px;
+    }
+
+    .spacer {
+        flex-grow: 1;
+    }
+
+    .button {
+        cursor: pointer;
+    }
+
+    .button.toggled {
+        color: rgb(62, 62, 218);
+    }
+
+    svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .albumMap {
+        height: 400px;
+        margin: 10px 0px;
+        width: 100%;
+        background-color: rgb(85, 85, 85);
     }
 
 </style>

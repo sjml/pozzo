@@ -54,6 +54,7 @@ export type Album = {
     description: string,
     slug: string,
     isPrivate: boolean,
+    showMap: boolean,
     highestIndex: number,
     photos: Photo[]
 }
