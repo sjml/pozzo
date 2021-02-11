@@ -19,8 +19,8 @@ function serve() {
   return {
     writeBundle() {
       if (server) return;
-      // server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-      let serverArgs = ['./scripts/server.js'];
+
+      let serverArgs = ['./scripts/devserver.js'];
       if (process.argv.includes("debug")) {
         serverArgs.push("debug");
       }
@@ -73,7 +73,7 @@ export default {
 			inlineSources: !production
 		}),
 
-    // In dev mode, call `npm run start` once
+    // In dev mode, run the dev server
     // the bundle has been generated
     !production && serve(),
 

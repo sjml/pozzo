@@ -54,7 +54,8 @@
 
 <style>
     nav {
-        width: 100%;
+        grid-row: 1;
+        grid-column: 1 / span 2;
 
         background-color: rgb(32, 32, 32);
         font-size: large;

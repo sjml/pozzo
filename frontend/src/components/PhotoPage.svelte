@@ -112,15 +112,13 @@
 />
 
 {#if photo}
-    <div class="fullPhoto" bind:clientWidth={boundsW} bind:clientHeight={boundsH}>
-        <div class="doubleLoader">
-            <!-- this is where the preview image goes/went -->
-            <img on:load={() => loaded = true}
-                alt="{photo.title}"
-                srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
-                src="{GetImgPath(size, photo.hash, photo.uniq)}"
-            />
-        </div>
+    <div class="fullPhoto">
+        <!-- this is where the preview image goes/went -->
+        <img on:load={() => loaded = true}
+            alt="{photo.title}"
+            srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
+            src="{GetImgPath(size, photo.hash, photo.uniq)}"
+        />
     </div>
     {#if $frontendStateStore.isMetadataOn}
         <div class="metadata">
@@ -131,17 +129,7 @@
 
 <style>
     .fullPhoto {
-        flex-grow: 1;
-        overflow: hidden;
-    }
-
-    .doubleLoader {
-        overflow: hidden;
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
+        position: relative;
     }
 
     .metadata {
@@ -149,8 +137,11 @@
     }
 
     img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+        position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
     }
 </style>

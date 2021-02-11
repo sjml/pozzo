@@ -297,25 +297,24 @@
         {/if}
         {#if layout}
             {#each album.photos as photo, pi}
-                    <div class="albumSlot"
-                        style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
-                        on:click={(evt) => handlePhotoClick(evt, pi)}
-                        on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
-                        data-pidx={pi}
-                        draggable="true"
-                        on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
-                        class:dragged={draggedPhoto === photo}
-                        class:selected={albumSelectedIndices.indexOf(pi) >= 0}
-                    >
-                        <Link to={`/album/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})}>
-                            <AlbumPhoto
-                                photo={photo}
-                                size="medium"
-                                dims={layout.boxes[pi]}
-                            />
-                        </Link>
-                    </div>
-                <!-- </Link> -->
+                <div class="albumSlot"
+                    style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
+                    on:click={(evt) => handlePhotoClick(evt, pi)}
+                    on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
+                    data-pidx={pi}
+                    draggable="true"
+                    on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
+                    class:dragged={draggedPhoto === photo}
+                    class:selected={albumSelectedIndices.indexOf(pi) >= 0}
+                >
+                    <Link to={`/album/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})}>
+                        <AlbumPhoto
+                            photo={photo}
+                            size="medium"
+                            dims={layout.boxes[pi]}
+                        />
+                    </Link>
+                </div>
             {/each}
         {/if}
     </div>

@@ -12,25 +12,22 @@
 <div class="container">
     <Router url={url}>
         <NavBar />
-        <main>
-            <Route path="album/:identifier" component={Album} />
-            <Route path="album/:albumSlug/:photoID" component={PhotoPage} />
-            <Route path="photo/:photoID" component={PhotoPage} />
-            <Route component={AlbumList} />
-        </main>
+
+        <Route path="album/:identifier" component={Album} />
+        <Route path="album/:albumSlug/:photoID" component={PhotoPage} />
+        <Route path="photo/:photoID" component={PhotoPage} />
+
+        <!-- default page shows list of albums -->
+        <Route component={AlbumList} />
     </Router>
 </div>
 
 <style>
     .container {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        min-height: 100vh;
-    }
+        height: 100vh;
 
-    main {
-        flex-grow: 2;
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto 1fr;
     }
 </style>
