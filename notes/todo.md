@@ -1,12 +1,10 @@
-1. Reorder album
-    - hook up full screen
-    - delete album UI
-2. Design pass
+1. Design pass
     - title/description editing for albums and pictures
     - blur back on image pages?
     - make buttons into their own component? 
     - review reactive functions and make sure they're being used right
         - probably not
+    - redo fullscreen to actually listen for events and make sure it's worked
     - fix chattiness of album metadata
     - add "no photos" notice to empty albums
     - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
@@ -52,16 +50,17 @@
     - also pick a few consistent sizes for icon usages
         - rollover reactions?
         - animation of stroke-width?
-3. Backend pass
+    - delete album UI
+2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
     - limit length of text things (titles, descriptions)
     - remove reset endpoint
     - make test suite
-4. Add admin endpoint (+frontend UI) to do reset and other such things?
+3. Add admin endpoint (+frontend UI) to do reset and other such things?
     - maybe add setup GUI? at least command-line script
     - Config endpoint to give site name, get img sizes, etc. for sure
         - some set at read-only (can't change sizes without reimporting everything, for instance)
-5. Video / live pictures?
+4. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 

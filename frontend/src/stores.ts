@@ -3,6 +3,7 @@ import type { FrontendState, SiteConfig, Album } from './pozzo.type';
 
 // glorified global variables? :-/
 export const frontendStateStore = writable<FrontendState>({
+    fullScreen: false,
     photoToolsVisible: false,
     backLinkText: "",
     backLink: "",

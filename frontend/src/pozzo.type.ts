@@ -4,6 +4,7 @@ export type SiteConfig = {
 }
 
 export type FrontendState = {
+    fullScreen: boolean,
     photoToolsVisible: boolean,
     backLinkText: string,
     backLink: string,
