@@ -1,13 +1,13 @@
 1. Reorder album
-    - THEN album photo map
-    - title/description editing for albums and pictures
-    - hook up full screen and photo navigation buttons
+    - hook up full screen
     - delete album UI
 2. Design pass
+    - title/description editing for albums and pictures
     - blur back on image pages?
     - make buttons into their own component? 
     - review reactive functions and make sure they're being used right
         - probably not
+    - fix chattiness of album metadata
     - add "no photos" notice to empty albums
     - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
     - find a nicer set of map tiles

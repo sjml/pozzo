@@ -7,6 +7,8 @@ export type FrontendState = {
     photoToolsVisible: boolean,
     backLinkText: string,
     backLink: string,
+    nextPhotoLink: string,
+    prevPhotoLink: string,
     isMetadataOn: boolean,
     currentAlbum?: Album,
     userStoppedUploadScroll: boolean,

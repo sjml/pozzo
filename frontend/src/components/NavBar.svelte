@@ -29,12 +29,28 @@
     <div class="spacer" />
 
     {#if $frontendStateStore.photoToolsVisible}
-        <div class="photoTools left">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path></svg>
-        </div>
-        <div class="photoTools right">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        </div>
+        {#if $frontendStateStore.prevPhotoLink.length == 0}
+            <div class="photoTools left disabled">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path></svg>
+            </div>
+        {:else}
+            <Link to={$frontendStateStore.prevPhotoLink}>
+                <div class="photoTools left">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path></svg>
+                </div>
+            </Link>
+        {/if}
+        {#if $frontendStateStore.nextPhotoLink.length == 0}
+            <div class="photoTools right disabled">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+        {:else}
+            <Link to={$frontendStateStore.nextPhotoLink}>
+                <div class="photoTools right">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </Link>
+        {/if}
         <div class="photoTools metadata"
             class:toggled={$frontendStateStore.isMetadataOn}
             on:click={() => $frontendStateStore.isMetadataOn = !$frontendStateStore.isMetadataOn}
@@ -103,6 +119,11 @@
 
     .photoTools.toggled {
         color: rgb(62, 62, 218);
+    }
+
+    .photoTools.disabled {
+        color: rgb(73, 73, 73);
+        cursor: default;
     }
 
     .photoTools svg {

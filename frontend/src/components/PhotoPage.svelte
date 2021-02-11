@@ -81,15 +81,19 @@
         }
         if (currIdx == 0) {
             prevPhotoIdx = -1;
+            $frontendStateStore.prevPhotoLink = "";
         }
         else {
             prevPhotoIdx = currIdx - 1;
+            $frontendStateStore.prevPhotoLink = `/album/${a.slug}/${a.photos[prevPhotoIdx].id}`;
         }
         if (currIdx == a.photos.length-1) {
             nextPhotoIdx = -1;
+            $frontendStateStore.nextPhotoLink = "";
         }
         else {
             nextPhotoIdx = currIdx + 1;
+            $frontendStateStore.nextPhotoLink = `/album/${a.slug}/${a.photos[nextPhotoIdx].id}`;
         }
     }
 

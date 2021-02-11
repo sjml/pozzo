@@ -6,6 +6,8 @@ export const frontendStateStore = writable<FrontendState>({
     photoToolsVisible: false,
     backLinkText: "",
     backLink: "",
+    nextPhotoLink: "",
+    prevPhotoLink: "",
     isMetadataOn: false,
     currentAlbum: null,
     userStoppedUploadScroll: false,
