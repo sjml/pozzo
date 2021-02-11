@@ -2,6 +2,7 @@
     - bugs
         - got some false positive error reporting on bulk upload... investigate what's up
             - more problematic was that I couldn't re-try :(
+        - clicking on photo with context menu open should close context menu
     - requires backend support
         - title/description editing for albums and pictures
         - allow setting overall site title, add pozzo branding note at bottom
@@ -55,7 +56,6 @@
         - navbar alignment is borked
         - transition selection border appearance
         - dotted line for upload: https://kovart.github.io/dashed-border-generator/
-        - swap icons to phosphor
         - make sure the viewing experience on a mobile-sized screen is decent
 2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
