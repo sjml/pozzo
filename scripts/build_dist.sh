@@ -13,12 +13,21 @@ for item in ${copies[@]}; do
 done
 
 mkdir $ROOT_DIR/dist/public
-pushd ./public > /dev/null
+pushd $ROOT_DIR/public > /dev/null
   copies=(*)
   for item in ${copies[@]}; do
     if [[ $item = "photos" ]]; then
       continue
     fi
     cp -R $item $ROOT_DIR/dist/public
+  done
+popd > /dev/null
+
+# probably a better way to cache-bust, but here we are
+pushd $ROOT_DIR/dist/public > /dev/null
+  busts=(/css/pozzo-global.css /build/bundle.css /build/bundle.js)
+  for b in ${busts[@]}; do
+    hash=$(md5 -q .$b)
+    sed -i '' -e "s:$b:$b?$hash:g" "./index.html"
   done
 popd > /dev/null

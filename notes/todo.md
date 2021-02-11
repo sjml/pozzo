@@ -9,9 +9,6 @@
         - delete album UI
         - bulk moving/deleting operations
     - some research required
-        - need to add cache-busting :-/
-            - https://github.com/posthtml/posthtml ??
-            - something simpler?
         - url thinks
             - image urls that aren't predictable? 
             - remove album numberic urls?
@@ -38,6 +35,8 @@
         - set map to not be pannable until it's been clicked
             - most people just wanna scroll down
         - find a nicer set of map tiles
+            - also maybe SVG markers?
+            - add photo preview popups?
         - add "no photos" notice to empty albums
         - album previews
         - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
@@ -58,7 +57,8 @@
         - navbar alignment is borked
         - transition selection border appearance
         - dotted line for upload: https://kovart.github.io/dashed-border-generator/
-        - swap icons to phosphor: 
+        - swap icons to phosphor
+        - make sure the viewing experience on a mobile-sized screen is decent
 2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
     - limit length of text things (titles, descriptions)
