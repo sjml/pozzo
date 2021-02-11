@@ -34,8 +34,7 @@
             - test bad responses for everything... broken file upload hangs the UI?
             - also might need to add spinners for waiting on stuff
     - UX niceties
-        - link to download at original resolution
-            - add license display option? (site config)
+        - add license display option? (site config)
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
         - album previews

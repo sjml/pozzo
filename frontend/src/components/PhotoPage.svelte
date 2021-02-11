@@ -180,6 +180,12 @@
             <div class="title"><span class="label">Title:</span> {photo.title}</div>
             <div><span class="label">Original: </span>{photo.width}×{photo.height} ({HumanBytes(photo.size)})</div>
             <div><span class="label">Uploaded: </span>{photo.uploadTimeStamp}</div>
+            <div class="dlOrig">
+                <a href="/api/photo/orig/{photo.id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
+                    Download Original
+                </a>
+            </div>
             {#if photo.latitude && photo.longitude}
                 <div class="photoMap" bind:this={mapDiv}></div>
             {/if}
@@ -217,6 +223,21 @@
     .label {
         font-weight: bold;
         margin-right: 10px;
+    }
+
+    .dlOrig {
+        margin-top: 10px;
+    }
+
+    .dlOrig a {
+        display: flex;
+        align-items: center;
+    }
+
+    svg {
+        width: 30px;
+        height: 30px;
+        margin-right: 15px;
     }
 
     .photoMap {

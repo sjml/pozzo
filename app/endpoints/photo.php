@@ -15,6 +15,7 @@ $router = new Router();
 $router->AddHandler("/delete", ["deletePhoto"], true);
 $router->AddHandler("/copy", ["copyPhoto"], true);
 $router->AddHandler("/view", ["viewPhoto"]);
+$router->AddHandler("/orig", ["downloadOrig"]);
 $router->AddHandler("/meta", ["viewMeta"]);
 
 $router->Route();
@@ -37,6 +38,25 @@ function viewPhoto() {
     }
 
     output($photo);
+}
+
+function downloadOrig() {
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
+    $photo = DB::GetPhoto($identifier);
+    if ($photo == null) {
+        output(["message" => "Photo not found"], 404);
+        return;
+    }
+
+    $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"]);
+
+    header("Content-Description: File Transfer");
+    header("Content-Type: application/octet-stream");
+    header("Content-Disposition: attachment; filename=\"" . $photo["title"] . ".jpg\"");
+    header("Expires: 0");
+    header("Cache-Control: must-revalidate");
+    header("Content-Length: " . filesize($filePath));
+    readfile($filePath);
 }
 
 function viewMeta() {
