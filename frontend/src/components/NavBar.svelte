@@ -132,7 +132,7 @@
     }
 
     .photoTools.toggled {
-        color: rgb(62, 62, 218);
+        color: rgb(101, 101, 252);
     }
 
     .photoTools.disabled {

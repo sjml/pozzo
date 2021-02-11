@@ -304,8 +304,10 @@
                         coords = [...coords, [p.latitude, p.longitude]];
                     }
                 });
-                const bounds = L.latLngBounds(coords);
-                map.fitBounds(bounds, {padding: [15, 15]});
+                if (coords.length > 0) {
+                    const bounds = L.latLngBounds(coords);
+                    map.fitBounds(bounds, {padding: [15, 15]});
+                }
             }
             else {
                 L.Marker.prototype.options.icon = L.icon({
@@ -316,8 +318,11 @@
                     iconAnchor: [12,36]
                 });
                 map = L.map(mapDiv, {
-                    zoomControl: false
+                    zoomControl: false,
                 });
+                map.attributionControl.setPrefix("");
+                // L.control.attribution({
+                // }).addTo(map);
                 map.dragging.disable();
                 map.touchZoom.disable();
                 map.doubleClickZoom.disable();
@@ -325,8 +330,8 @@
                 map.boxZoom.disable();
                 map.keyboard.disable();
                 if (map.tap) map.tap.disable();
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+                    attribution: "Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors | Tiles &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
                 }).addTo(map);
 
                 let coords = [];
@@ -338,8 +343,10 @@
                         coords = [...coords, [p.latitude, p.longitude]];
                     }
                 });
-                const bounds = L.latLngBounds(coords);
-                map.fitBounds(bounds, {padding: [15, 15]});
+                if (coords.length > 0) {
+                    const bounds = L.latLngBounds(coords);
+                    map.fitBounds(bounds, {padding: [15, 15]});
+                }
             }
         }
         else {
@@ -387,7 +394,7 @@
     <div class="titleRow">
         <h2>{album.title}</h2>
         <div class="spacer"></div>
-        {#if $isLoggedInStore}
+        {#if $isLoggedInStore && album.photos.length > 0}
             <div class="button map"
                 class:toggled={album.showMap}
                 on:click={() => album.showMap = !album.showMap}
@@ -395,7 +402,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>            </div>
         {/if}
     </div>
-    {#if album.showMap}
+    {#if album.showMap && album.photos.length > 0}
         <div class="albumMap" bind:this={mapDiv} on:click={enableMapInteractions}></div>
     {/if}
     <div class="albumPhotos"
@@ -409,6 +416,9 @@
                 currentAlbum={album}
                 on:done={contextMenuExecuted}
             />
+        {/if}
+        {#if album.photos.length == 0}
+            <div>(No photos in this album… yet.)</div>
         {/if}
         {#if layout}
             {#each album.photos as photo, pi}
@@ -487,7 +497,7 @@
     }
 
     .button.toggled {
-        color: rgb(62, 62, 218);
+        color: rgb(101, 101, 252);
     }
 
     svg {

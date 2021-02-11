@@ -19,6 +19,7 @@
         - make map into component
             - enable/disable interactions
             - adding markers, reacting, etc. 
+            - have the button only show if there are photos w/coordinates
         - review reactive functions and make sure they're being used right
             - probably not
         - can photo navigation just stay on the same component and update the url? 
@@ -35,14 +36,11 @@
     - UX niceties
         - link to download at original resolution
             - add license display option? (site config)
-        - find a nicer set of map tiles
-            - also maybe SVG markers?
-            - add photo preview popups?
-        - add "no photos" notice to empty albums
+        - maybe SVG markers?
+        - add photo preview popups? or at least something when you click?
         - album previews
         - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
         - add little notification toasts for when people get redirected/bounced
-        - figure out an actual strategy for breadcrumbing the navbar
         - transitions between albums and stuff
         - accessibility checks
         - splash page
@@ -53,9 +51,7 @@
         - also pick a few consistent sizes for icon usages
             - rollover reactions?
             - animation of stroke-width?
-        - navbar alignment is borked
         - transition selection border appearance
-        - dotted line for upload: https://kovart.github.io/dashed-border-generator/
         - make sure the viewing experience on a mobile-sized screen is decent
 2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
