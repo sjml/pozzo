@@ -16,10 +16,10 @@
     import { isLoggedInStore, frontendStateStore } from "../stores";
     import { albumContextMenuKey } from "../keys";
 
-    export let identifier: number|string;
+    export let albumSlug: number|string;
 
     async function getAlbum(_) {
-        const res = await RunApi(`/album/view/${identifier}`, {
+        const res = await RunApi(`/album/view/${albumSlug}`, {
             params: {previews: 1},
             method: "POST",
             authorize: true,
@@ -38,7 +38,7 @@
     }
 
     async function updateMetaData(showMap: boolean) {
-        const res = await RunApi(`/album/edit/${identifier}`, {
+        const res = await RunApi(`/album/edit/${albumSlug}`, {
             params: {
                 showMap: showMap
             },
@@ -54,7 +54,7 @@
     }
 
     async function reorderAlbum(newOrder: number[]) {
-        const res = await RunApi(`/album/reorder/${identifier}`, {
+        const res = await RunApi(`/album/reorder/${albumSlug}`, {
             params: {newOrdering: newOrder},
             method: "POST",
             authorize: true
@@ -321,8 +321,6 @@
                     zoomControl: false,
                 });
                 map.attributionControl.setPrefix("");
-                // L.control.attribution({
-                // }).addTo(map);
                 map.dragging.disable();
                 map.touchZoom.disable();
                 map.doubleClickZoom.disable();
@@ -432,7 +430,7 @@
                     class:dragged={draggedPhoto === photo}
                     class:selected={albumSelectedIndices.indexOf(pi) >= 0}
                 >
-                    <Link to={`/album/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})}>
+                    <Link to={`/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})}>
                         <AlbumPhoto
                             photo={photo}
                             size="medium"

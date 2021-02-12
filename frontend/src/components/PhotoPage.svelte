@@ -66,10 +66,10 @@
 
     function handleKeyDown(evt: KeyboardEvent) {
         if (evt.key == "ArrowLeft" && prevPhotoIdx != -1) {
-            navigate(`/album/${album.slug}/${album.photos[prevPhotoIdx].id}`);
+            navigate(`/${album.slug}/${album.photos[prevPhotoIdx].id}`);
         }
         else if (evt.key == "ArrowRight" && nextPhotoIdx != -1) {
-            navigate(`/album/${album.slug}/${album.photos[nextPhotoIdx].id}`);
+            navigate(`/${album.slug}/${album.photos[nextPhotoIdx].id}`);
         }
     }
 
@@ -85,7 +85,7 @@
         }
         else {
             prevPhotoIdx = currIdx - 1;
-            $frontendStateStore.prevPhotoLink = `/album/${a.slug}/${a.photos[prevPhotoIdx].id}`;
+            $frontendStateStore.prevPhotoLink = `/${a.slug}/${a.photos[prevPhotoIdx].id}`;
         }
         if (currIdx == a.photos.length-1) {
             nextPhotoIdx = -1;
@@ -93,7 +93,7 @@
         }
         else {
             nextPhotoIdx = currIdx + 1;
-            $frontendStateStore.nextPhotoLink = `/album/${a.slug}/${a.photos[nextPhotoIdx].id}`;
+            $frontendStateStore.nextPhotoLink = `/${a.slug}/${a.photos[nextPhotoIdx].id}`;
         }
     }
 
@@ -115,7 +115,7 @@
 
     $: {
         if (album) {
-            $frontendStateStore.backLink = `/album/${album.slug}`;
+            $frontendStateStore.backLink = `/${album.slug}`;
             $frontendStateStore.backLinkText = album.title;
         }
     }
@@ -144,9 +144,12 @@
                     iconSize: [24,36],
                     iconAnchor: [12,36]
                 });
-                map = L.map(mapDiv);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                map = L.map(mapDiv, {
+                    zoomControl: false,
+                });
+                map.attributionControl.setPrefix("");
+                L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+                    attribution: "Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors | Tiles &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
                 }).addTo(map);
 
                 map.setView([photo.latitude, photo.longitude], 16);

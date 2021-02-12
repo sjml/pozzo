@@ -3,17 +3,21 @@
         - got some false positive error reporting on bulk upload... investigate what's up
             - more problematic was that I couldn't re-try :(
         - clicking on photo with context menu open should close context menu
+        - upload to album, let photos render, then click back to main screen -- double
     - requires backend support
         - title/description editing for albums and pictures
         - allow setting overall site title, add pozzo branding note at bottom
         - delete album UI
         - bulk moving/deleting operations
+        - store original filename on photos
+        - album ordering
     - some research required
         - url thinks
             - image urls that aren't predictable? 
             - remove album numberic urls?
         - blur back on image pages? (look at stackblur/canvas solution)
         - see if we can not do the blurs if the images are already loaded?
+        - look at video import, if it's easy
     - make it more svelte-y
         - make buttons into their own component? 
         - make map into component
@@ -32,11 +36,13 @@
         - redo fullscreen to actually listen for events and make sure it's worked
         - check for all console error statements and handle gracefully in UI
             - test bad responses for everything... broken file upload hangs the UI?
-            - also might need to add spinners for waiting on stuff
     - UX niceties
+        - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
+        - marker clusters on map (also increase padding but maybe to non-integer?)
+            - maybe SVG markers?
+            - add photo preview popups? or at least something when you click?
         - add license display option? (site config)
-        - maybe SVG markers?
-        - add photo preview popups? or at least something when you click?
+        - toggle privacy option
         - album previews
         - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
         - add little notification toasts for when people get redirected/bounced
@@ -57,7 +63,7 @@
         - will also pull in keywords from photos.app export, which is something that should be supported in the backend (along with stars)
     - limit length of text things (titles, descriptions)
     - remove reset endpoint
-    - make test suite
+    - complete test suite
 3. Frontend caching
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
     - something-something web workers? BLERGH.
@@ -89,12 +95,6 @@
         * maybe webp would be good? (would have to compile webp + imagemagick + imagick.so + maybe PHP on Dreamhost.... lotta annoyance there)
         * lighthouse tests with 85% quality and considers anything higher "optimizable"
             - not sure I want to make that tradeoff though........
-* robustify backend router:
-    - handlers should be able to specify which methods they take
-        - creation actions should return 201
-    - man.... maybe I should just use a library
-    - might eventually want DB migrations, too, and at that point I don't know
-      if I want to roll it myself..........
 * sweep through API responses and make sure there's some consistency
     - "error" vs "message", response codes, JSON schema, etc.
     - add index actions to each endpoint to explain what they can do?

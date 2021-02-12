@@ -27,4 +27,4 @@ The PHP code is very slapdash. There is no ORM, so `db.php` has lots of copypast
 
 All in all, it should run reasonably fast, though. 
 
-Secure? Need to do a pass on that kind of thing. 
+And if you're curious: [Andrea Pozzo, SJ](https://en.wikipedia.org/wiki/Andrea_Pozzo)

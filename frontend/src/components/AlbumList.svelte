@@ -27,7 +27,7 @@
 
     function onUploadDone(evt: CustomEvent) {
         if (evt.detail.numFiles > 0) {
-            navigate("/album/Unsorted");
+            navigate("/Unsorted");
         }
     }
 
@@ -57,7 +57,7 @@
     {#if albumList}
         {#each albumList as album}
             <div class="navAlbum">
-                <Link to={`album/${album.slug}`}>
+                <Link to={`/${album.slug}`}>
                     {album.title}
                 </Link>
             </div>

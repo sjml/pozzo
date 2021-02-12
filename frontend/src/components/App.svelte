@@ -27,9 +27,8 @@
     <Router url={url}>
         <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
 
-        <Route path="album/:identifier" component={Album} />
-        <Route path="album/:albumSlug/:photoID" component={PhotoPage} />
-        <Route path="photo/:photoID" component={PhotoPage} />
+        <Route path=":albumSlug" component={Album} />
+        <Route path=":albumSlug/:photoID" component={PhotoPage} />
 
         <!-- default page shows list of albums -->
         <Route component={AlbumList} />
