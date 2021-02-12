@@ -1,13 +1,12 @@
 <script lang="ts">
-    let collapsed = false;
-
     import { createEventDispatcher } from "svelte";
-
     import { Link } from "svelte-routing";
+
     import { frontendStateStore } from "../stores";
     import Login from "./Login.svelte";
 
     const dispatch = createEventDispatcher();
+    let collapsed = false;
 </script>
 
 
@@ -89,20 +88,19 @@
 
         background-color: rgb(32, 32, 32);
         font-size: large;
-
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
         -webkit-touch-callout: none;
           -webkit-user-select: none;
               -ms-user-select: none;
                   user-select: none;
 
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 
     nav.collapsed {
         height: 5px;
+
         background-color: rgb(71, 71, 71);
     }
 
@@ -116,13 +114,16 @@
 
     .homeLink {
         margin: 5px;
+
         font-weight: bolder;
         font-size: 1.4em;
     }
     .backLink {
         margin: auto;
         height: 100%;
+
         font-size: 1.1em;
+
         display: flex;
         align-items: center;
     }

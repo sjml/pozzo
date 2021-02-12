@@ -35,16 +35,18 @@
 
 <style>
     .albumPhoto {
-        overflow: hidden;
         width: 100%;
         height: 100%;
+
+        overflow: hidden;
     }
 
     img {
         position: absolute;
-        top: 0;
         width: 100%;
         height: 100%;
+        top: 0;
+
         object-fit: cover;
     }
 

@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { Router, Route, Link } from "svelte-routing";
+    import { Router, Route } from "svelte-routing";
 
+    import { frontendStateStore } from "../stores";
     import NavBar from "./NavBar.svelte";
     import Album from "./Album.svelte";
     import AlbumList from "./AlbumList.svelte";
     import PhotoPage from "./PhotoPage.svelte";
-    import { frontendStateStore } from "../stores";
 
     export let url = "";
 

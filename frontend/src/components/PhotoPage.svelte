@@ -5,10 +5,38 @@
     import L from "leaflet";
     import "leaflet/dist/leaflet.css";
 
-    import { frontendStateStore } from "../stores";
     import type { Photo, Album } from "../pozzo.type";
     import { RunApi } from "../api";
+    import { frontendStateStore } from "../stores";
     import { GetImgPath, HumanBytes, TimestampToDateString } from "../util";
+
+
+    const size = "large";
+
+    export let photoID: number;
+    export let photo: Photo;
+    export let albumSlug: string;
+    export let album: Album;
+    export let nextPhotoIdx: number = -1;
+    export let prevPhotoIdx: number = -1;
+
+
+    onMount(async () => {
+        if (photo == null) {
+            await getPhoto(photoID);
+        }
+        $frontendStateStore.photoToolsVisible = true;
+    });
+
+    onDestroy(() => {
+        $frontendStateStore.backLink = "";
+        $frontendStateStore.backLinkText = "";
+        $frontendStateStore.photoToolsVisible = false;
+    });
+
+
+    let photoMeta: any = null;
+    let loaded = false;
 
     async function getPhoto(pid: number) {
         const pResPromise = RunApi(`/photo/view/${pid}`, {
@@ -51,27 +79,16 @@
         }
     }
 
-    onMount(async () => {
-        if (photo == null) {
-            await getPhoto(photoID);
-        }
-        $frontendStateStore.photoToolsVisible = true;
-    });
+    $: getPhoto(photoID)
 
-    onDestroy(() => {
-        $frontendStateStore.backLink = "";
-        $frontendStateStore.backLinkText = "";
-        $frontendStateStore.photoToolsVisible = false;
-    })
-
-    function handleKeyDown(evt: KeyboardEvent) {
-        if (evt.key == "ArrowLeft" && prevPhotoIdx != -1) {
-            navigate(`/${album.slug}/${album.photos[prevPhotoIdx].id}`);
-        }
-        else if (evt.key == "ArrowRight" && nextPhotoIdx != -1) {
-            navigate(`/${album.slug}/${album.photos[nextPhotoIdx].id}`);
+    $: {
+        if (photo && $frontendStateStore.isMetadataOn) {
+            if (photoMeta == null || photoMeta.id != photo.id) {
+                getMetadata();
+            }
         }
     }
+
 
     function findNeighbors(p: Photo, a: Album) {
         const currIdx = a.photos.findIndex((ap) => ap.id == p.id);
@@ -97,21 +114,14 @@
         }
     }
 
-    $: if (photo && album) findNeighbors(photo, album)
-    $: getPhoto(photoID)
-
-    export let photoID: number;
-    export let photo: Photo;
-    let photoMeta: any = null;
-    let map: L.Map = null;
-    let mapMarker: L.Marker = null;
-    let mapDiv: HTMLDivElement = null;
-    export let albumSlug: string;
-    export let album: Album;
-    export let nextPhotoIdx: number = -1;
-    export let prevPhotoIdx: number = -1;
-    const size = "large";
-    let loaded = false;
+    function handleKeyDown(evt: KeyboardEvent) {
+        if (evt.key == "ArrowLeft" && prevPhotoIdx != -1) {
+            navigate(`/${album.slug}/${album.photos[prevPhotoIdx].id}`);
+        }
+        else if (evt.key == "ArrowRight" && nextPhotoIdx != -1) {
+            navigate(`/${album.slug}/${album.photos[nextPhotoIdx].id}`);
+        }
+    }
 
     $: {
         if (album) {
@@ -120,13 +130,12 @@
         }
     }
 
-    $: {
-        if (photo && $frontendStateStore.isMetadataOn) {
-            if (photoMeta == null || photoMeta.id != photo.id) {
-                getMetadata();
-            }
-        }
-    }
+    $: if (photo && album) findNeighbors(photo, album)
+
+
+    let map: L.Map = null;
+    let mapMarker: L.Marker = null;
+    let mapDiv: HTMLDivElement = null;
 
     $: {
         if (mapDiv) {
@@ -214,18 +223,21 @@
 
     .metadata {
         width: 300px;
+
         padding: 10px;
         border-left: 1px solid rgb(58, 58, 58);
     }
 
     .title {
-        font-size: 120%;
         margin-bottom: 10px;
+
+        font-size: 120%;
     }
 
     .label {
-        font-weight: bold;
         margin-right: 10px;
+
+        font-weight: bold;
     }
 
     .dlOrig {
@@ -240,21 +252,24 @@
     svg {
         width: 30px;
         height: 30px;
+
         margin-right: 15px;
     }
 
     .photoMap {
         height: 250px;
         margin: 10px 0px;
+
         background-color: rgb(85, 85, 85);
     }
 
     img {
         position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            object-fit: contain;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+
+        object-fit: contain;
     }
 </style>

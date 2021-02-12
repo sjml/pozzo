@@ -1,15 +1,48 @@
 <script lang="ts">
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
-    import { frontendStateStore } from "../stores";
     import type { FileUploadStatus } from "../pozzo.type";
+    import { frontendStateStore } from "../stores";
     import FileUploader from "./FileUploader.svelte";
+
+    const dispatch = createEventDispatcher();
+    const MAX_UPLOADS = 4;
 
     export let fileList: File[];
 
+    onMount(async () => {
+        $frontendStateStore.userStoppedUploadScroll = false;
+
+        let targetAlbumID = null;
+        let offset = 1;
+        if ($frontendStateStore.currentAlbum != null) {
+            targetAlbumID = $frontendStateStore.currentAlbum.id;
+            const existingIndices = $frontendStateStore.currentAlbum.photos.map((p) => p.ordering);
+            if (existingIndices.length == 0) {
+                offset = 1;
+            }
+            else {
+                offset = Math.max(...existingIndices) + 1;
+            }
+        }
+
+        uploadStatuses = fileList.map((f, i) => {
+            return {
+                file: f,
+                status: 0,
+                index: i+offset,
+                targetAlbum: targetAlbumID
+            };
+        });
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("beforeunload", befUn);
+    });
+
+
     let uploadStatuses: FileUploadStatus[];
 
-    const MAX_UPLOADS = 4;
     let uploadStackPointer = 0;
     let currentUploadCount = 0;
     function queueUploads() {
@@ -48,36 +81,6 @@
         awaitingConfirmation = true;
     }
 
-    let awaitingConfirmation = true;
-    onMount(async () => {
-        $frontendStateStore.userStoppedUploadScroll = false;
-
-        let targetAlbumID = null;
-        let offset = 1;
-        if ($frontendStateStore.currentAlbum != null) {
-            targetAlbumID = $frontendStateStore.currentAlbum.id;
-            const existingIndices = $frontendStateStore.currentAlbum.photos.map((p) => p.ordering);
-            if (existingIndices.length == 0) {
-                offset = 1;
-            }
-            else {
-                offset = Math.max(...existingIndices) + 1;
-            }
-        }
-
-        uploadStatuses = fileList.map((f, i) => {
-            return {
-                file: f,
-                status: 0,
-                index: i+offset,
-                targetAlbum: targetAlbumID
-            };
-        });
-    });
-
-    onDestroy(() => {
-        window.removeEventListener("beforeunload", befUn);
-    });
 
     function befUn(event: BeforeUnloadEvent) {
         event.preventDefault();
@@ -85,6 +88,7 @@
         return "...";
     }
 
+    let awaitingConfirmation = true;
     async function start() {
         window.addEventListener("beforeunload", befUn);
         failedUploadCount = 0;
@@ -100,9 +104,6 @@
         $frontendStateStore.userStoppedUploadScroll = false;
         queueUploads();
     }
-
-    const dispatch = createEventDispatcher();
-
 </script>
 
 
@@ -142,38 +143,44 @@
 
 <style>
     .fileUploadList {
-        border: 1px solid rgb(119, 119, 119);
-        border-radius: 6px;
-
         width: 450px;
         min-width: 215px;
         max-height: 85vh;
-        overflow-y: scroll;
         margin: auto;
+
+        border: 1px solid rgb(119, 119, 119);
+        border-radius: 6px;
+        overflow-y: scroll;
         pointer-events: all;
     }
 
     .confirm {
-        font-size: x-large;
         padding: 10px;
+        font-size: x-large;
         text-align: center;
         background-color: rgb(66, 66, 66);
     }
 
     .yesno {
+        margin: 10px 0px;
+
         font-size: large;
+
         display: flex;
         justify-content: center;
-        margin: 10px 0px;
     }
+
     .yes, .no {
         margin-left: 30px;
         margin-right: 30px;
+
         cursor: pointer;
+
         display: flex;
         flex-direction: column;
         align-items: center;
     }
+
     .yesno svg {
         width: 40px;
     }

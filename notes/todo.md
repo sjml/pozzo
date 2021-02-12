@@ -4,6 +4,7 @@
             - more problematic was that I couldn't re-try :(
         - clicking on photo with context menu open should close context menu
         - upload to album, let photos render, then click back to main screen -- double
+        - uploading to remote, never get the "processing" statust
     - requires backend support
         - title/description editing for albums and pictures
         - allow setting overall site title, add pozzo branding note at bottom
@@ -30,8 +31,6 @@
             - *should* be able to! that's the whole promise of this thing!
         - try and sveltify the drag and drop a little bit
     - clean up hacks
-        - organize script sections of component files; good lord
-        - CSS class name consistency (kebab vs camel)
         - fix chattiness of album metadata
         - redo fullscreen to actually listen for events and make sure it's worked
         - check for all console error statements and handle gracefully in UI

@@ -1,10 +1,24 @@
 <script lang="ts">
     import { createEventDispatcher, onMount, tick } from "svelte";
 
-    import Overlay from "./Overlay.svelte";
     import { RunApi } from "../api";
+    import Overlay from "./Overlay.svelte";
 
     const dispatch = createEventDispatcher();
+
+    let newAlbumNameInput: HTMLInputElement = null;
+    let newAlbumNameField: string = "";
+
+    let attemptingNewAlbum: boolean = false;
+    let newAlbumMessage: string = "";
+    let isPrivate: boolean = false;
+
+    onMount(async () => {
+        newAlbumNameField = "";
+        newAlbumMessage = "";
+        await tick();
+        newAlbumNameInput.focus();
+    });
 
     async function attemptNewAlbum() {
         attemptingNewAlbum = true;
@@ -24,24 +38,11 @@
         }
         attemptingNewAlbum = false;
     }
-
-    onMount(async () => {
-        newAlbumNameField = "";
-        newAlbumMessage = "";
-        await tick();
-        newAlbumNameInput.focus();
-    });
-
-    let newAlbumNameInput: HTMLInputElement = null;
-    let newAlbumNameField: string = "";
-
-    let attemptingNewAlbum: boolean = false;
-    let newAlbumMessage: string = "";
-    let isPrivate: boolean = false;
 </script>
 
+
 <Overlay on:clickedOutside={() => dispatch("dismissed")}>
-    <div class="new-album-prompt">
+    <div class="newAlbumPrompt">
         <form on:submit|preventDefault={attemptNewAlbum}>
             <label>
                 Album Name:
@@ -65,15 +66,15 @@
 
 
 <style>
-        .new-album-prompt {
+    .newAlbumPrompt {
+        margin: 10px;
+
         background-image: linear-gradient(
             rgb(99, 99, 99),
             rgb(56, 56, 56)
         );
         border: 1px solid rgb(119, 119, 119);
         border-radius: 6px;
-
-        margin: 10px;
         padding: 50px;
         max-width: 400px;;
 
@@ -81,25 +82,28 @@
         flex-wrap: wrap;
     }
 
-    .new-album-prompt label {
+    .newAlbumPrompt label {
         width: 100%;
         margin-top: 5px;
     }
 
-    .new-album-prompt button {
+    .newAlbumPrompt button {
         margin-top: 15px;
+
         font-size: x-large;
     }
 
-    .new-album-prompt input[type=text] {
+    .newAlbumPrompt input[type=text] {
         width: 100%;
         margin-top: 4px;
         margin-bottom: 10px;
+
         font-size: x-large;
     }
 
-    .new-album-prompt .new-album-message {
+    .newAlbumPrompt .new-album-message {
         width: 100%;
+
         font-size: xx-large;
         text-align: center;
         color: rgb(179, 0, 0);

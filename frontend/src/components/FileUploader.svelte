@@ -1,15 +1,35 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
 
-    import { HumanBytes } from "../util";
     import type { FileUploadStatus } from "../pozzo.type";
     import { frontendStateStore } from "../stores";
     import { UploadFile } from "../api";
+    import { HumanBytes } from "../util";
+
+
+    const dispatch = createEventDispatcher();
 
     export let uploadStatus: FileUploadStatus;
 
+
+    let previewSrc = null;
+    let previewAlt = "";
+    let progressBar: HTMLProgressElement;
+    onMount(async () => {
+        uploadStatus.startUploadCallback = () => startUpload();
+        progressBar.value = 0;
+
+        const fr = new FileReader();
+        fr.readAsDataURL(uploadStatus.file);
+        fr.onloadend = () => {
+            previewSrc = fr.result;
+            previewAlt = uploadStatus.file.name;
+        };
+    });
+
+
     let visibleDiv: HTMLDivElement;
-    const dispatch = createEventDispatcher();
+    let statusString: string = "Pending…";
     export async function startUpload() {
         if (uploadStatus.status > 0) {
             return;
@@ -42,31 +62,13 @@
             uploadStatus.status = 3;
             dispatch("fileUploadFailed");
         }
-
     }
-
-    onMount(async () => {
-        uploadStatus.startUploadCallback = () => startUpload();
-        progressBar.value = 0;
-
-        const fr = new FileReader();
-        fr.readAsDataURL(uploadStatus.file);
-        fr.onloadend = () => {
-            previewSrc = fr.result;
-            previewAlt = uploadStatus.file.name;
-        };
-    });
 
     $: {
         if (progressBar && uploadStatus.status == 0) {
             progressBar.value = 0
         };
     }
-
-    let previewSrc = null;
-    let previewAlt = "";
-    let progressBar: HTMLProgressElement;
-    let statusString: string = "Pending…";
 </script>
 
 
@@ -90,13 +92,12 @@
 
 <style>
     .fileUploader {
+        padding: 10px 20px;
         background-image: linear-gradient(
             rgb(99, 99, 99),
             rgb(56, 56, 56)
         );
-
         border-top: 1px solid black;
-        padding: 10px 20px;
 
         display: flex;
         flex-direction: column;
@@ -108,14 +109,16 @@
     }
 
     .meta {
+        margin-right: 10px;
+
         overflow: hidden;
         white-space: nowrap;
-        margin-right: 10px;
     }
 
     .preview {
         width: 75px;
         height: 75px;
+
         display: flex;
     }
 

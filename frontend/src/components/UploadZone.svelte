@@ -8,6 +8,8 @@
     let fileList: File[];
     const dispatch = createEventDispatcher();
 
+
+    let dragCount = 0;
     async function handleDrop(event: DragEvent) {
         dragCount = 0;
         let filteringList = [...event.dataTransfer.files];
@@ -18,6 +20,7 @@
         fileList = filteringList;
     }
 
+
     function onFinish() {
         dispatch("done", {numFiles: fileList.length});
         fileList = null;
@@ -27,8 +30,6 @@
         fileList = null;
         dispatch("done", {numFiles: 0});
     }
-
-    let dragCount = 0;
 </script>
 
 <svelte:window
@@ -66,21 +67,26 @@
         right: 0;
         bottom: 0;
         left: 0;
+
         z-index: 400;
-        display: flex;
         pointer-events: none;
+
+        display: flex;
     }
     .dragIndicator {
-        background-image: radial-gradient(ellipse, rgba(0,0,0,0) 50%, rgb(121, 121, 121) 120%);
-        opacity: 0.5;
         width: 100%;
         height: 100%;
+
+        background-image: radial-gradient(ellipse, rgba(0,0,0,0) 50%, rgb(121, 121, 121) 120%);
+        opacity: 0.5;
+
         display: flex;
     }
     .dragIndicatorOutline {
         width: 95%;
         height: 95%;
         margin: auto;
+
         border: 10px dashed rgb(255, 255, 255);
         border-radius: 30px;
     }

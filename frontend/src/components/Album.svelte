@@ -1,22 +1,35 @@
 <script lang="ts">
     import { onMount, onDestroy, setContext } from "svelte";
+    import { Link, navigate } from "svelte-routing";
 
+    import justifiedLayout from "justified-layout";
     import L from "leaflet";
     import "leaflet/dist/leaflet.css";
 
-    import justifiedLayout from "justified-layout";
-    import { Link, navigate } from "svelte-routing";
-
-    import { RunApi } from "../api";
     import type { Album, Photo } from "../pozzo.type";
+    import { isLoggedInStore, frontendStateStore } from "../stores";
+    import { albumContextMenuKey } from "../keys";
+    import { RunApi } from "../api";
     import { GetImgPath } from "../util";
     import AlbumPhoto from "./AlbumPhoto.svelte";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
     import UploadZone from "./UploadZone.svelte";
-    import { isLoggedInStore, frontendStateStore } from "../stores";
-    import { albumContextMenuKey } from "../keys";
+
 
     export let albumSlug: number|string;
+
+
+    onMount(async () => {
+        await getAlbum(null);
+        $frontendStateStore.currentAlbum = album;
+    });
+
+    onDestroy(() => {
+        $frontendStateStore.currentAlbum = null;
+    });
+
+
+    let album: Album = null;
 
     async function getAlbum(_) {
         const res = await RunApi(`/album/view/${albumSlug}`, {
@@ -67,6 +80,26 @@
         }
     }
 
+    $: {
+        if (album && album.isPrivate && !$isLoggedInStore) {
+            navigate("/", {replace: true});
+        }
+    }
+
+    $: {
+        // this is not how reactive functions should be working :-/
+        if (album && album.showMap) {
+            updateMetaData(album.showMap);
+        }
+        else if (album) {
+            updateMetaData(album.showMap);
+        }
+    }
+
+
+    let containerWidth: number;
+    let layout = null;
+
     function calculateLayout(width: number) {
         if (!width || !album) {
             return; // initial loads; don't worry yet
@@ -79,6 +112,13 @@
             widowLayoutStyle: "center",
         });
     }
+
+    $: if (album) {calculateLayout(containerWidth);}
+
+
+    let albumSelectedIndices: number[] = [];
+    let selectedPhotos: Photo[] = [];
+    let isMetaKeyDown = false;
 
     // this is some ugly stuff, but don't anticipate needing to generalize further
     function isEventMetaKeyPress(evt: KeyboardEvent) {
@@ -150,19 +190,18 @@
         evt.preventDefault();
     }
 
-    let albumSelectedIndices: number[] = [];
-    let selectedPhotos: Photo[] = [];
     $: {
         selectedPhotos = albumSelectedIndices.map(pi => album.photos[pi]);
     }
 
+
     let contextMenuVisible = false;
     let clickLocation: number[] = [0, 0];
+
     setContext(albumContextMenuKey, {
         clickLocation: clickLocation,
         getSelectedPhotos: () => selectedPhotos
     });
-
 
     function handlePhotoContextMenu(evt: MouseEvent, pi: number) {
         // so if nothing is selected we auto-select the thing under the mouse
@@ -194,21 +233,6 @@
         getAlbum(null);
     }
 
-    let containerWidth: number;
-    let album: Album = null;
-    let layout = null;
-    $: if (album) {calculateLayout(containerWidth);}
-
-    onMount(async () => {
-        await getAlbum(null);
-        $frontendStateStore.currentAlbum = album;
-    });
-
-    onDestroy(() => {
-        $frontendStateStore.currentAlbum = null;
-    });
-
-    let isMetaKeyDown = false;
 
     // this drag-and-drop stuff is the least svelte-y of this whole project
     //   I assume that could be fixed somehow, but it's not 100% obvious
@@ -279,11 +303,6 @@
         }
     }
 
-    $: {
-        if (album && album.isPrivate && !$isLoggedInStore) {
-            navigate("/", {replace: true});
-        }
-    }
 
     let mapDiv: HTMLDivElement;
     let map: L.Map;
@@ -362,17 +381,6 @@
         map.keyboard.enable();
         if (map.tap) map.tap.enable();
     }
-
-    $: {
-        // this is not how reactive functions should be working :-/
-        if (album && album.showMap) {
-            updateMetaData(album.showMap);
-        }
-        else if (album) {
-            updateMetaData(album.showMap);
-        }
-    }
-
 </script>
 
 
@@ -448,6 +456,7 @@
     .album {
         width: 100%;
     }
+
     .albumPhotos {
         position: relative;
         max-width: 95%;
@@ -457,8 +466,9 @@
     }
 
     .albumSlot {
-        cursor: pointer;
         position: absolute;
+
+        cursor: pointer;
         overflow: hidden;
     }
 
@@ -475,15 +485,16 @@
     }
 
     .titleRow {
+        margin-right: 30px;
+
         display: flex;
         align-items: baseline;
         justify-content: space-between;
-        margin-right: 30px;
     }
 
     h2 {
-        font-size: 3em;
         padding-left: 20px;
+        font-size: 3em;
     }
 
     .spacer {
@@ -505,9 +516,9 @@
 
     .albumMap {
         height: 400px;
-        margin: 10px 0px;
         width: 100%;
+        margin: 10px 0px;
+
         background-color: rgb(85, 85, 85);
     }
-
 </style>

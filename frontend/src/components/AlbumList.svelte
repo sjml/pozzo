@@ -1,14 +1,22 @@
 <script lang="ts">
     import { onMount } from "svelte";
-
     import { Link, navigate } from "svelte-routing";
 
-    import { RunApi } from "../api";
+
     import type { Album } from "../pozzo.type";
     import { isLoggedInStore } from "../stores";
+    import { RunApi } from "../api";
     import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
     import UploadZone from "./UploadZone.svelte";
 
+
+    onMount(() => {
+        getAlbumList(null);
+    });
+
+
+    let albumList: Album[];
+    let addingNew = false;
     async function getAlbumList(_) {
         const res = await RunApi("/album/list", {authorize: true});
         if (res.success) {
@@ -18,20 +26,15 @@
             console.error(res);
         }
     }
-    let albumList: Album[];
-    let addingNew = false;
 
-    onMount(() => {
-        getAlbumList(null);
-    });
+    $: getAlbumList($isLoggedInStore)
+
 
     function onUploadDone(evt: CustomEvent) {
         if (evt.detail.numFiles > 0) {
             navigate("/Unsorted");
         }
     }
-
-    $: getAlbumList($isLoggedInStore)
 </script>
 
 {#if $isLoggedInStore}
@@ -67,14 +70,18 @@
 
 <style>
     .albumList {
-        padding-left: 30px;
         margin-top: 1em;
+
+        padding-left: 30px;
     }
+
     h2 {
         margin: 0;
     }
+
     .navAlbum {
         margin: 10px;
+
         cursor: pointer;
     }
 
@@ -82,10 +89,13 @@
         display: flex;
         align-items: center;
     }
+
     .addAlbum {
         width: 30px;
         margin-left: 10px;
+
         cursor: pointer;
+
         display: flex;
     }
 </style>

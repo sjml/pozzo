@@ -1,12 +1,11 @@
 <script lang="ts">
     import { tick, onMount } from "svelte";
 
-    import Overlay from "./Overlay.svelte";
-
     import { RunApi } from '../api';
     import { loginCredentialStore, isLoggedInStore } from "../stores";
+    import Overlay from "./Overlay.svelte";
 
-    let updateTimeout: number = null;
+
     onMount(() => {
         if ($loginCredentialStore.length == 0) {
             return;
@@ -14,6 +13,8 @@
         checkLogin();
     });
 
+
+    let updateTimeout: number = null;
     async function checkLogin() {
         const res = await RunApi("/login/check", {
             authorize: true,
@@ -43,6 +44,7 @@
         $loginCredentialStore = "";
     }
 
+
     let loginDisplayed: boolean = false;
     let usernameInput: HTMLInputElement;
     async function showLogin() {
@@ -53,6 +55,7 @@
         await tick();
         usernameInput.focus();
     }
+
 
     let attemptingLogin: boolean = false;
     let usernameField: string = "";
@@ -77,6 +80,7 @@
         attemptingLogin = false;
     }
 
+
     let submitEnabled: boolean = false;
     $: {
         if (usernameField.length > 0 && passwordField.length > 0) {
@@ -90,7 +94,7 @@
 
 {#if loginDisplayed}
     <Overlay on:clickedOutside={() => loginDisplayed = false}>
-        <div class="login-prompt">
+        <div class="loginPrompt">
             <form on:submit|preventDefault={attemptLogin}>
                 <label>
                     User:
@@ -109,7 +113,7 @@
                 </label>
                 <button type="submit" disabled={attemptingLogin || !submitEnabled}>Log In</button>
             </form>
-            <div class="login-message">{loginMessage}&nbsp;</div>
+            <div class="loginMessage">{loginMessage}&nbsp;</div>
         </div>
     </Overlay>
 {/if}
@@ -127,16 +131,23 @@
 <style>
     .link {
         cursor: pointer;
+
         display: flex;
     }
+
     .link svg {
         width: 30px;
     }
+
     .link:hover {
         text-decoration: underline;
     }
 
-    .login-prompt {
+    .loginPrompt {
+        margin: 10px;
+        max-width: 400px;
+
+        padding: 50px;
         background-image: linear-gradient(
             rgb(99, 99, 99),
             rgb(56, 56, 56)
@@ -144,33 +155,33 @@
         border: 1px solid rgb(119, 119, 119);
         border-radius: 6px;
 
-        margin: 10px;
-        padding: 50px;
-        max-width: 400px;;
-
         display: flex;
         flex-wrap: wrap;
     }
 
-    .login-prompt label {
+    .loginPrompt label {
         width: 100%;
+
         margin-top: 5px;
     }
 
-    .login-prompt button {
+    .loginPrompt button {
         margin-top: 4px;
+
         font-size: x-large;
     }
 
-    .login-prompt input {
+    .loginPrompt input {
         width: 100%;
         margin-top: 4px;
         margin-bottom: 10px;
+
         font-size: x-large;
     }
 
-    .login-prompt .login-message {
+    .loginPrompt .loginMessage {
         width: 100%;
+
         font-size: xx-large;
         text-align: center;
         color: rgb(179, 0, 0);
