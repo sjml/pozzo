@@ -27,6 +27,9 @@ function serve() {
       if (process.argv.includes("no_front")) {
         serverArgs.push("no_front");
       }
+      if (process.argv.includes("slow")) {
+        serverArgs.push("slow");
+      }
       server = require('child_process').spawn('node', serverArgs, {
         stdio: ['ignore', 'inherit', 'inherit'],
         shell: true

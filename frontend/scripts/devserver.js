@@ -1,13 +1,14 @@
 const polka = require("polka");
 const sirv = require("sirv");
 const proxy = require("http-proxy-middleware");
-const compress = require('compression');
-const colors = require('kleur');
+const compress = require("compression");
+const colors = require("kleur");
 
 
 
 const debug = process.argv.includes("debug");
 const noFront = process.argv.includes("no_front");
+const runSlow = process.argv.includes("slow")
 
 
 function displayCode(statusCode) {
@@ -102,10 +103,41 @@ const static   = wrapStatic("  Static", "../public", {dev: true, single: true});
 
 
 
+function randomNormal() {
+  // random value with normal distribution
+  let u = 0, v = 0;
+  while (u == 0) u = Math.random();
+  while (v == 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  num = num / 10.0 + 0.5;
+  if (num > 1 || num < 0) {
+    return randomNormal();
+  }
+  return num;
+}
+
+function slow(req, res, next) {
+  const delay = 1000;
+  const variance = 400;
+
+
+  const rand = randomNormal();
+  const min = Math.ceil(delay - variance);
+  const max = Math.floor(delay + variance);
+  const wait = Math.floor(rand * (max - min + 1)) + min;
+
+  setTimeout(next, wait);
+}
+
+
+
 const port = 3000;
 let devServer = polka();
 
 devServer = devServer.use(compress());
+if (runSlow) {
+  devServer = devServer.use(slow);
+}
 devServer = devServer.use(php);
 if (!noFront) {
   devServer = devServer.use(frontend);
