@@ -176,6 +176,19 @@ function processImage(&$photoData, $albumID, $order) {
     $img->setOption("jpeg:size", "32x32");
     $img->readImage($origPath);
     $img->scaleImage(32, 32, true);
+    $orient = $img->getImageOrientation();
+    switch ($orient) {
+        case imagick::ORIENTATION_RIGHTTOP:
+            $img->rotateImage("#00000000", 90);
+            break;
+        case imagick::ORIENTATION_BOTTOMRIGHT:
+            $img->rotateImage("#00000000", 180);
+            break;
+        case imagick::ORIENTATION_LEFTBOTTOM:
+            $img->rotateImage("#00000000", 270);
+            break;
+    }
+    $img->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
     $img->stripImage();
     $img->setCompressionQuality(40);
     $img->setImageFormat("jpeg");

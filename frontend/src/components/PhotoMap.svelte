@@ -75,7 +75,9 @@
             if (p.latitude != null && p.longitude != null) {
                 return p;
             }
+            return null;
         });
+        placedPhotos = placedPhotos.filter(p => p !== null);
         let coords = placedPhotos.map((p) => {
             return L.latLng(p.latitude, p.longitude);
         });

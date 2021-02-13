@@ -24,6 +24,7 @@
             - test bad responses for everything... broken file upload hangs the UI?
         - see if EditableLayout can be generalized so albumlist and album can share it
     - UX niceties
+        - change title as we navigate around
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
         - marker clusters on map (also increase padding but maybe to non-integer?)
             - maybe SVG markers?
