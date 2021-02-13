@@ -50,15 +50,15 @@
         }
     }
 
-    async function updateMetaData(showMap: boolean, isPrivate: boolean) {
-        if (showMap == null || isPrivate == null) {
+    async function updateMetaData() {
+        if (album.showMap == null || album.isPrivate == null) {
             // probably just initial load
             return;
         }
         const res = await RunApi(`/album/edit/${albumSlug}`, {
             params: {
-                showMap: showMap,
-                isPrivate: isPrivate
+                showMap: album.showMap,
+                isPrivate: album.isPrivate
             },
             method: "POST",
             authorize: true
@@ -70,9 +70,6 @@
             console.error(res);
         }
     }
-
-    $: updateMetaData(album?.showMap, album?.isPrivate)
-
 
     async function reorderAlbum(newOrder: number[]) {
         const res = await RunApi(`/album/reorder/${albumSlug}`, {
@@ -271,12 +268,12 @@
 
     <div class="titleRow">
         <h2>{album.title}</h2>
-        {#if $isLoggedInStore && album.photos.length > 0}
+        {#if $isLoggedInStore}
             <div class="spacer"></div>
             <Button
                 margin="0 0 0 10px"
                 title={album.isPrivate ? "Make Public" : "Make Private"}
-                on:click={() => album.isPrivate = !album.isPrivate}
+                on:click={() => {album.isPrivate = !album.isPrivate; updateMetaData();}}
             >
                 {#if !album.isPrivate}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M128,55.99219C48,55.99219,16,128,16,128s32,71.99219,112,71.99219S240,128,240,128,208,55.99219,128,55.99219Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="128" cy="128" r="32" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle></svg>
@@ -284,14 +281,16 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="201.14971" y1="127.30467" x2="223.95961" y2="166.81257" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="154.18201" y1="149.26298" x2="161.29573" y2="189.60689" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="101.72972" y1="149.24366" x2="94.61483" y2="189.59423" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="54.80859" y1="127.27241" x2="31.88882" y2="166.97062" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M31.99943,104.87509C48.81193,125.68556,79.63353,152,128,152c48.36629,0,79.18784-26.31424,96.00039-47.12468" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
                 {/if}
             </Button>
-            <Button
-                margin="0 0 0 10px"
-                isToggled={album.showMap}
-                title={`${album.showMap ? "Hide" : "Show"} Map`}
-                on:click={() => album.showMap = !album.showMap}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
-            </Button>
+            {#if album.photos.length > 0}
+                <Button
+                    margin="0 0 0 10px"
+                    isToggled={album.showMap}
+                    title={`${album.showMap ? "Hide" : "Show"} Map`}
+                    on:click={() => {album.showMap = !album.showMap; updateMetaData();}}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
+                </Button>
+            {/if}
         {/if}
     </div>
 
@@ -301,7 +300,7 @@
         </div>
     {/if}
 
-    {#if $isLoggedInStore && album.photos.length > 0}
+    {#if $isLoggedInStore && album.photos.length > 1}
         <div class="reorderButton" class:toggled={editing}>
             <Button
                 margin="0 0 0 10px"

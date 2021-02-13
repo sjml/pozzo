@@ -1,6 +1,9 @@
 
 export type SiteConfig = {
     apiUri: string,
+    siteTitle: string|boolean,
+    formats: string[],
+    sizes: any[]
 }
 
 export type FrontendState = {

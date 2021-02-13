@@ -11,6 +11,7 @@
     import { GetImgPath } from "../util";
     import { RunApi } from "../api";
     import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
+    import AlbumPhoto from "./AlbumPhoto.svelte";
     import UploadZone from "./UploadZone.svelte";
     import Button from "./Button.svelte";
 
@@ -119,7 +120,7 @@
         {/if}
     </div>
 
-    {#if $isLoggedInStore && albumList?.length > 0}
+    {#if $isLoggedInStore && albumList?.length > 1}
         <div class="reorderButton" class:toggled={editing}>
             <Button
                 margin="0 0 0 10px"
@@ -153,7 +154,9 @@
                     >
                         {#if album.coverPhoto >= 0}
                             <img
-                                src={GetImgPath("medium", album.coverHash, album.coverUniq)} alt={album.title}
+                                alt={album.title}
+                                srcset="{GetImgPath("medium", album.coverHash, album.coverUniq)}, {`${GetImgPath("medium2x", album.coverHash, album.coverUniq)} 2x`}"
+                                src="{GetImgPath("medium", album.coverHash, album.coverUniq)}"
                             />
                         {/if}
                         <div class="albumTitle">
@@ -173,8 +176,9 @@
                         </div>
                         {#if album.coverPhoto >= 0}
                             <img
-                                src={GetImgPath("medium", album.coverHash, album.coverUniq)} alt={album.title}
-                                width="{layout.boxes[ai].width}px" height="{layout.boxes[ai].height}px"
+                                alt={album.title}
+                                srcset="{GetImgPath("medium", album.coverHash, album.coverUniq)}, {`${GetImgPath("medium2x", album.coverHash, album.coverUniq)} 2x`}"
+                                src="{GetImgPath("medium", album.coverHash, album.coverUniq)}"
                             />
                         {/if}
                     </div>

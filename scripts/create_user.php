@@ -26,5 +26,5 @@ $result = DB::CreateUser($userName, $pw1);
 if ($result == false) {
     echo "\nERROR: Could not create user. :( \n";
 }
-echo "\nUser " . $userName . " created with id: " . $result . ".\n";
+echo "\nUser " . $userName . " created with id: " . $result["id"] . ".\n";
 

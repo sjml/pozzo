@@ -1,5 +1,16 @@
 import { writable, readable } from 'svelte/store';
-import type { FrontendState, SiteConfig, Album } from './pozzo.type';
+import type { FrontendState, SiteConfig } from './pozzo.type';
+
+export const siteData = writable<SiteConfig>(
+    {
+        // defaults
+        apiUri: `${location.origin}/api`,
+        formats: [],
+        siteTitle: false,
+        sizes: []
+    }
+);
+
 
 // glorified global variables? :-/
 export const frontendStateStore = writable<FrontendState>({
@@ -28,14 +39,3 @@ loginCredentialStore.subscribe(value => {
     }
 });
 
-
-export const siteData = readable<SiteConfig>(
-    {
-        // defaults
-        apiUri: `${location.origin}/api`
-    },
-    (set) => {
-        // do the fetch for remote config here and call
-        //   set() with the completed SiteConfig object
-    }
-);

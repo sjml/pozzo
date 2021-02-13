@@ -4,12 +4,12 @@
             - more problematic was that I couldn't re-try :(
         - clicking on photo with context menu open should close context menu
         - upload to album, let photos render, then click back to main screen -- double
-        - uploading to remote, never get the "processing" statust
+        - uploading to remote, never get the "processing" status
         - file uploader gets stuck behind map
+        - making new album and signing out should refresh album list (does locally, but not remote? blergh.)
     - requires backend support
         - title/description editing for albums and pictures
-        - allow setting overall site title, add pozzo branding note at bottom
-        - delete album UI
+        - album list context menu (delete / dissolve)
         - bulk moving/deleting operations
     - some research required
         - url thinks
@@ -52,11 +52,7 @@
 3. Frontend caching
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
     - something-something web workers? BLERGH.
-4. Add admin endpoint (+frontend UI) to do reset and other such things?
-    - maybe add setup GUI? at least command-line script
-    - Config endpoint to give site name, get img sizes, etc. for sure
-        - some set at read-only (can't change sizes without reimporting everything, for instance)
-5. Video / live pictures?
+4. Video / live pictures?
     - let backend tell frontend what type of media it will accept
     - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 

@@ -157,7 +157,7 @@ class DB {
         } catch (\Throwable $th) {
             return false;
         }
-        return self::$pdb->lastInsertRowID();
+        return ["id" => self::$pdb->lastInsertRowID(), "name" => $user];
     }
 
     static function GetUser($username, $includePWH = false) {

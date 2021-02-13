@@ -41,6 +41,14 @@ $router->AddHandler("/index", [
     "require",
     __DIR__ . "/../../app/endpoints/index.php",
 ]);
+$router->AddHandler("/info", [
+    "require",
+    __DIR__ . "/../../app/endpoints/info.php",
+]);
+$router->AddHandler("/setup", [
+    "require",
+    __DIR__ . "/../../app/endpoints/setup.php",
+]);
 $router->AddHandler("/login", [
     "require",
     __DIR__ . "/../../app/endpoints/login.php",
@@ -52,10 +60,6 @@ $router->AddHandler("/album", [
 $router->AddHandler("/photo", [
     "require",
     __DIR__ . "/../../app/endpoints/photo.php",
-]);
-$router->AddHandler("/list", [
-    "require",
-    __DIR__ . "/../../app/endpoints/list.php",
 ]);
 $router->AddHandler("/reset", [
     "require",

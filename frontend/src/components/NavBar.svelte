@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import { Link } from "svelte-routing";
 
-    import { frontendStateStore } from "../stores";
+    import { frontendStateStore, siteData } from "../stores";
     import Login from "./Login.svelte";
     import Button from "./Button.svelte";
 
@@ -17,7 +17,7 @@
 >
     <div class="homeLink">
         <Link to="/">
-            Pozzo
+            {$siteData.siteTitle || "Pozzo"}
         </Link>
     </div>
 
