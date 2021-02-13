@@ -188,7 +188,7 @@ function processImage(&$photoData, $albumID, $order) {
 
     processExif($photoData, $origPath);
 
-    $photoData["id"] = DB::InsertPhoto($photoData, $albumID, $order);
+    $photoData["id"] = DB::InsertPhoto($photoData, $photoData["title"], $albumID, $order);
 }
 
 function _gpsToDegrees($val) {

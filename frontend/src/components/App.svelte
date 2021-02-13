@@ -9,11 +9,9 @@
 
     export let url = "";
 
-    let mainContainer: HTMLDivElement;
-
     function setFullscreen(on: boolean) {
         if (on) {
-            mainContainer.requestFullscreen();
+            document.documentElement.requestFullscreen();
             $frontendStateStore.fullScreen = true;
         }
         else {
@@ -23,12 +21,12 @@
     }
 </script>
 
-<div class="container" bind:this={mainContainer}>
+<div class="container">
     <Router url={url}>
         <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
 
-        <Route path=":albumSlug" component={Album} />
-        <Route path=":albumSlug/:photoID" component={PhotoPage} />
+        <Route path="/:albumSlug/:photoID" component={PhotoPage} />
+        <Route path="/:albumSlug" component={Album} />
 
         <!-- default page shows list of albums -->
         <Route component={AlbumList} />

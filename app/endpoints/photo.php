@@ -52,7 +52,7 @@ function downloadOrig() {
 
     header("Content-Description: File Transfer");
     header("Content-Type: application/octet-stream");
-    header("Content-Disposition: attachment; filename=\"" . $photo["title"] . ".jpg\"");
+    header("Content-Disposition: attachment; filename=\"" . $photo["originalFilename"] . "\"");
     header("Expires: 0");
     header("Cache-Control: must-revalidate");
     header("Content-Length: " . filesize($filePath));

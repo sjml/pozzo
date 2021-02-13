@@ -58,6 +58,10 @@ export type Album = {
     slug: string,
     isPrivate: boolean,
     showMap: boolean,
+    coverPhoto: number,
+    coverHash?: string,
+    coverUniq?: string,
+    coverAspect?: number,
     highestIndex: number,
     photos: Photo[]
 }

@@ -2,14 +2,12 @@
     import { onDestroy, onMount } from "svelte";
     import { navigate } from "svelte-routing";
 
-    import L from "leaflet";
-    import "leaflet/dist/leaflet.css";
-
     import type { Photo, Album } from "../pozzo.type";
     import { RunApi } from "../api";
     import { frontendStateStore } from "../stores";
     import { GetImgPath, HumanBytes, TimestampToDateString } from "../util";
-
+    import Button from "./Button.svelte";
+    import PhotoMap from "./PhotoMap.svelte";
 
     const size = "large";
 
@@ -46,7 +44,9 @@
             },
             authorize: true
         });
-        const aResPromise = RunApi(`/album/view/${albumSlug}`);
+        const aResPromise = RunApi(`/album/view/${albumSlug}`, {
+            authorize: true
+        });
         const pRes = await pResPromise;
         const aRes = await aResPromise;
 
@@ -131,46 +131,6 @@
     }
 
     $: if (photo && album) findNeighbors(photo, album)
-
-
-    let map: L.Map = null;
-    let mapMarker: L.Marker = null;
-    let mapDiv: HTMLDivElement = null;
-
-    $: {
-        if (mapDiv) {
-            if (map != null) {
-                map.setView([photo.latitude, photo.longitude], 16);
-                map.removeLayer(mapMarker);
-                mapMarker = L.marker([photo.latitude, photo.longitude])
-                mapMarker.addTo(map);
-            }
-            else {
-                L.Marker.prototype.options.icon = L.icon({
-                    iconUrl: "/img/marker-icon.png",
-                    iconRetinaUrl: "/img/marker-icon-2x.png",
-                    shadowUrl: "/img/marker-shadow.png",
-                    iconSize: [24,36],
-                    iconAnchor: [12,36]
-                });
-                map = L.map(mapDiv, {
-                    zoomControl: false,
-                });
-                map.attributionControl.setPrefix("");
-                L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-                    attribution: "Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors | Tiles &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-                }).addTo(map);
-
-                map.setView([photo.latitude, photo.longitude], 16);
-                mapMarker = L.marker([photo.latitude, photo.longitude]);
-                mapMarker.addTo(map);
-            }
-        }
-        else {
-            map = null;
-            mapMarker = null;
-        }
-    }
 </script>
 
 <svelte:window
@@ -194,12 +154,16 @@
             <div><span class="label">Uploaded: </span>{photo.uploadTimeStamp}</div>
             <div class="dlOrig">
                 <a href="/api/photo/orig/{photo.id}">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-                    Download Original
+                    <Button margin="0 10px 0 0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
+                        <div>Download Original</div>
+                    </Button>
                 </a>
             </div>
             {#if photo.latitude && photo.longitude}
-                <div class="photoMap" bind:this={mapDiv}></div>
+                <div class="photoMap">
+                    <PhotoMap photos={[photo]} />
+                </div>
             {/if}
             {#if photoMeta}
                 {#if photoMeta.IFD0_Make}
@@ -259,8 +223,6 @@
     .photoMap {
         height: 250px;
         margin: 10px 0px;
-
-        background-color: rgb(85, 85, 85);
     }
 
     img {

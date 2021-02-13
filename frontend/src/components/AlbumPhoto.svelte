@@ -18,6 +18,7 @@
         {#if !loaded}
             <img class="preload"
                 draggable="false"
+                on:dragstart|preventDefault={() => {}}
                 out:fade="{{duration: 200}}"
                 alt="{photo.title}"
                 src="data:image/jpeg;base64,{photo.tinyJPEG}"
@@ -27,6 +28,7 @@
         <img on:load={() => loaded = true}
             alt="{photo.title}"
             draggable="false"
+            on:dragstart|preventDefault={() => {}}
             srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
             src="{GetImgPath(size, photo.hash, photo.uniq)}"
         />

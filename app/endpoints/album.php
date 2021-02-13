@@ -17,6 +17,7 @@ $router->AddHandler("/view", ["viewAlbum"]);
 $router->AddHandler("/remove", ["removePhoto"], true);
 $router->AddHandler("/delete", ["deleteAlbum"], true);
 $router->AddHandler("/edit", ["editMetadata"], true);
+$router->AddHandler("/reorderList", ["reorderAlbumList"], true);
 $router->AddHandler("/reorder", ["reorderAlbum"], true);
 
 $router->Route();
@@ -80,8 +81,9 @@ function editMetadata() {
     $description = array_key_exists("description", $input) ? $input["description"] : $album["description"];
     $isPrivate = array_key_exists("isPrivate", $input) ? $input["isPrivate"] : $album["isPrivate"];
     $showMap = array_key_exists("showMap", $input) ? $input["showMap"] : $album["showMap"];
+    $coverPhoto = array_key_exists("coverPhoto", $input) ? $input["coverPhoto"] : $album["coverPhoto"];
 
-    $result = DB::UpdateAlbumMeta($album["id"], $title, $description, $isPrivate, $showMap);
+    $result = DB::UpdateAlbumMeta($album["id"], $title, $description, $isPrivate, $showMap, $coverPhoto);
 
     if ($result == -1) {
         output(["message" => "Could not update metadata"], 400);
@@ -170,4 +172,47 @@ function reorderAlbum() {
 
     $result = DB::ReorderAlbum($album["id"], $newOrdering);
     output(["message" => "Reordered album"]);
+}
+
+function reorderAlbumList() {
+    $input = json_decode(file_get_contents("php://input"), true);
+
+    if (!isset($input["newOrdering"]) || !is_array($input["newOrdering"])) {
+        output(["message" => "Invalid or missing parameter 'ordering'"], 400);
+        return;
+    }
+    $newOrdering = $input["newOrdering"];
+
+    $fetchPrivate = $_REQUEST["POZZO_AUTH"] > 0;
+    $albumList = DB::GetAlbumList($fetchPrivate);
+
+
+    $existingAids = [];
+    foreach ($albumList as $album) {
+        array_push($existingAids, $album["id"]);
+    }
+
+    if (count($existingAids) != count($newOrdering)) {
+        output(["message" => "Miscount of ordering data"], 400);
+        return;
+    }
+
+    foreach ($newOrdering as $aid) {
+        if (!in_array($aid, $existingAids)) {
+            output(
+                ["message" => "Misplaced order index", "badIndex" => $aid],
+                400,
+            );
+            return;
+        }
+    }
+
+    $unique = array_unique($newOrdering);
+    if (count($unique) != count($newOrdering)) {
+        output(["message" => "Non-unique indices"], 400);
+        return;
+    }
+
+    $result = DB::ReorderAlbumList($newOrdering);
+    output(["message" => "Reordered album lists"]);
 }

@@ -1,19 +1,19 @@
 <script lang="ts">
-    import { onMount, onDestroy, setContext } from "svelte";
+    import { onMount, onDestroy, setContext, tick } from "svelte";
     import { Link, navigate } from "svelte-routing";
 
     import justifiedLayout from "justified-layout";
-    import L from "leaflet";
-    import "leaflet/dist/leaflet.css";
 
     import type { Album, Photo } from "../pozzo.type";
     import { isLoggedInStore, frontendStateStore } from "../stores";
     import { albumContextMenuKey } from "../keys";
     import { RunApi } from "../api";
-    import { GetImgPath } from "../util";
     import AlbumPhoto from "./AlbumPhoto.svelte";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
     import UploadZone from "./UploadZone.svelte";
+    import Button from "./Button.svelte";
+    import PhotoMap from "./PhotoMap.svelte";
+    import EditableLayout from "./EditableLayout.svelte";
 
 
     export let albumSlug: number|string;
@@ -50,10 +50,15 @@
         }
     }
 
-    async function updateMetaData(showMap: boolean) {
+    async function updateMetaData(showMap: boolean, isPrivate: boolean) {
+        if (showMap == null || isPrivate == null) {
+            // probably just initial load
+            return;
+        }
         const res = await RunApi(`/album/edit/${albumSlug}`, {
             params: {
-                showMap: showMap
+                showMap: showMap,
+                isPrivate: isPrivate
             },
             method: "POST",
             authorize: true
@@ -65,6 +70,9 @@
             console.error(res);
         }
     }
+
+    $: updateMetaData(album?.showMap, album?.isPrivate)
+
 
     async function reorderAlbum(newOrder: number[]) {
         const res = await RunApi(`/album/reorder/${albumSlug}`, {
@@ -86,16 +94,6 @@
         }
     }
 
-    $: {
-        // this is not how reactive functions should be working :-/
-        if (album && album.showMap) {
-            updateMetaData(album.showMap);
-        }
-        else if (album) {
-            updateMetaData(album.showMap);
-        }
-    }
-
 
     let containerWidth: number;
     let layout = null;
@@ -113,7 +111,7 @@
         });
     }
 
-    $: if (album) {calculateLayout(containerWidth);}
+    $: if (album) calculateLayout(containerWidth)
 
 
     let albumSelectedIndices: number[] = [];
@@ -174,6 +172,10 @@
         }
         if (contextMenuVisible) {
             contextMenuVisible = false;
+            if (forcedSingleSelection) {
+                forcedSingleSelection = false;
+                albumSelectedIndices = [];
+            }
             evt.preventDefault();
             return;
         }
@@ -197,13 +199,14 @@
 
     let contextMenuVisible = false;
     let clickLocation: number[] = [0, 0];
+    let forcedSingleSelection = false;
 
     setContext(albumContextMenuKey, {
         clickLocation: clickLocation,
         getSelectedPhotos: () => selectedPhotos
     });
 
-    function handlePhotoContextMenu(evt: MouseEvent, pi: number) {
+    async function handlePhotoContextMenu(evt: MouseEvent, pi: number) {
         // so if nothing is selected we auto-select the thing under the mouse
         //    (does not preventDefault so the event still bubbles to the album's handler)
         if (!$isLoggedInStore) {
@@ -211,8 +214,10 @@
         }
         if (albumSelectedIndices.length == 0) {
             albumSelectedIndices = [pi];
+            forcedSingleSelection = true;
         }
     }
+
     function handleContextMenu(evt: MouseEvent) {
         if (!$isLoggedInStore) {
             return;
@@ -220,6 +225,10 @@
         evt.preventDefault();
         if (contextMenuVisible) {
             contextMenuVisible = false;
+            if (forcedSingleSelection) {
+                forcedSingleSelection = false;
+                albumSelectedIndices = [];
+            }
         }
         else {
             clickLocation[0] = evt.clientX;
@@ -227,228 +236,127 @@
             contextMenuVisible = true;
         }
     }
+
     function contextMenuExecuted(_: CustomEvent) {
         contextMenuVisible = false;
+        if (forcedSingleSelection) {
+            forcedSingleSelection = false;
+            albumSelectedIndices = [];
+        }
         albumSelectedIndices = [];
         getAlbum(null);
     }
 
 
-    // this drag-and-drop stuff is the least svelte-y of this whole project
-    //   I assume that could be fixed somehow, but it's not 100% obvious
-    //   started off using native drag-and-drop, but it's too inconsistent
-    //   across browsers :-/
-    let draggedPhoto: Photo = null;
-    let draggedPhotoSlot: HTMLDivElement = null;
-    let dragShiftX = 0;
-    let dragShiftY = 0;
-    function startDragPhoto(evt: DragEvent, pi: number) {
-        albumSelectedIndices = [];
+    let editing: boolean = false;
 
-        draggedPhoto = album.photos[pi];
-
-        draggedPhotoSlot = document.createElement("div") as HTMLDivElement;
-        draggedPhotoSlot.dataset.pidx = (evt.target as HTMLDivElement).dataset.pidx;
-        draggedPhotoSlot.style.position = "fixed";
-        draggedPhotoSlot.style.width  = "200px";
-        draggedPhotoSlot.style.height = "200px";
-        draggedPhotoSlot.style.display = "flex";
-        draggedPhotoSlot.style.zIndex = "101";
-        const img = new Image();
-        img.style.maxWidth  = "200px";
-        img.style.maxHeight = "200px";
-        img.style.margin = "auto";
-        img.src = GetImgPath("medium", draggedPhoto.hash, draggedPhoto.uniq);
-        draggedPhotoSlot.append(img);
-
-        dragShiftX = 100;
-        dragShiftY = 100;
-
-        document.body.append(draggedPhotoSlot);
-        draggedPhotoSlot.style.left = (evt.pageX - dragShiftX) + "px";
-        draggedPhotoSlot.style.top  = (evt.pageY - dragShiftY) + "px";
+    function handleAlbumReorder(evt: CustomEvent) {
+        album.photos = evt.detail.newOrder;
+        reorderAlbum(album.photos.map(p => p.id));
     }
 
-    function handleWindowMouseMove(evt: MouseEvent) {
-        if (draggedPhotoSlot != null) {
-            draggedPhotoSlot.style.left = (evt.pageX - dragShiftX) + "px";
-            draggedPhotoSlot.style.top  = (evt.pageY - dragShiftY) + "px";
-
-            draggedPhotoSlot.style.display = "none";
-
-            const el = document.elementFromPoint(evt.clientX, evt.clientY);
-            const slot: HTMLDivElement = el.closest(".albumSlot");
-            if (slot != null && slot.dataset.pidx != draggedPhotoSlot.dataset.pidx) {
-                album.photos.splice(
-                    Number(slot.dataset.pidx), 0,
-                    album.photos.splice(Number(draggedPhotoSlot.dataset.pidx), 1)[0]
-                );
-                draggedPhotoSlot.dataset.pidx = slot.dataset.pidx;
-                calculateLayout(containerWidth);
-                album.photos = album.photos;
-            }
-            draggedPhotoSlot.style.display = "flex";
-        }
-    }
-
-    function handleWindowMouseUp(evt: MouseEvent) {
-        if (draggedPhotoSlot != null) {
-            // put it back in its place
-            draggedPhoto = null;
-            draggedPhotoSlot.remove();
-            draggedPhotoSlot = null;
-
-            const newOrder = album.photos.map((p) => p.id);
-            reorderAlbum(newOrder);
-        }
-    }
-
-
-    let mapDiv: HTMLDivElement;
-    let map: L.Map;
-    let markers: L.Marker[] = [];
-    $: {
-        if (mapDiv) {
-            if (map != null) {
-                markers.forEach((marker) => {
-                    map.removeLayer(marker);
-                })
-
-                let coords = [];
-                album.photos.forEach((p) => {
-                    if (p.latitude != null && p.longitude != null) {
-                        const marker = L.marker([p.latitude, p.longitude]);
-                        marker.addTo(map);
-                        markers = [...markers, marker];
-                        coords = [...coords, [p.latitude, p.longitude]];
-                    }
-                });
-                if (coords.length > 0) {
-                    const bounds = L.latLngBounds(coords);
-                    map.fitBounds(bounds, {padding: [15, 15]});
-                }
-            }
-            else {
-                L.Marker.prototype.options.icon = L.icon({
-                    iconUrl: "/img/marker-icon.png",
-                    iconRetinaUrl: "/img/marker-icon-2x.png",
-                    shadowUrl: "/img/marker-shadow.png",
-                    iconSize: [24,36],
-                    iconAnchor: [12,36]
-                });
-                map = L.map(mapDiv, {
-                    zoomControl: false,
-                });
-                map.attributionControl.setPrefix("");
-                map.dragging.disable();
-                map.touchZoom.disable();
-                map.doubleClickZoom.disable();
-                map.scrollWheelZoom.disable();
-                map.boxZoom.disable();
-                map.keyboard.disable();
-                if (map.tap) map.tap.disable();
-                L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-                    attribution: "Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors | Tiles &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-                }).addTo(map);
-
-                let coords = [];
-                album.photos.forEach((p) => {
-                    if (p.latitude != null && p.longitude != null) {
-                        const marker = L.marker([p.latitude, p.longitude]);
-                        marker.addTo(map);
-                        markers = [...markers, marker];
-                        coords = [...coords, [p.latitude, p.longitude]];
-                    }
-                });
-                if (coords.length > 0) {
-                    const bounds = L.latLngBounds(coords);
-                    map.fitBounds(bounds, {padding: [15, 15]});
-                }
-            }
-        }
-        else {
-            map = null;
-            markers = [];
-        }
-    }
-
-    function enableMapInteractions() {
-        map.dragging.enable();
-        map.touchZoom.enable();
-        map.doubleClickZoom.enable();
-        map.scrollWheelZoom.enable();
-        map.boxZoom.enable();
-        map.keyboard.enable();
-        if (map.tap) map.tap.enable();
-    }
 </script>
 
 
 <svelte:window
     on:keydown={handleKeyDown}
     on:keyup={handleKeyUp}
-    on:mousemove={handleWindowMouseMove}
-    on:mouseup={handleWindowMouseUp}
 />
 
 <div class="album">
 {#if album}
-    {#if $isLoggedInStore && draggedPhoto == null}
+    {#if $isLoggedInStore && !editing}
         <UploadZone on:done={() => getAlbum(null)} />
     {/if}
 
     <div class="titleRow">
         <h2>{album.title}</h2>
-        <div class="spacer"></div>
         {#if $isLoggedInStore && album.photos.length > 0}
-            <div class="button map"
-                class:toggled={album.showMap}
+            <div class="spacer"></div>
+            <Button
+                margin="0 0 0 10px"
+                title={album.isPrivate ? "Make Public" : "Make Private"}
+                on:click={() => album.isPrivate = !album.isPrivate}
+            >
+                {#if !album.isPrivate}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M128,55.99219C48,55.99219,16,128,16,128s32,71.99219,112,71.99219S240,128,240,128,208,55.99219,128,55.99219Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="128" cy="128" r="32" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle></svg>
+                {:else}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="201.14971" y1="127.30467" x2="223.95961" y2="166.81257" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="154.18201" y1="149.26298" x2="161.29573" y2="189.60689" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="101.72972" y1="149.24366" x2="94.61483" y2="189.59423" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="54.80859" y1="127.27241" x2="31.88882" y2="166.97062" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M31.99943,104.87509C48.81193,125.68556,79.63353,152,128,152c48.36629,0,79.18784-26.31424,96.00039-47.12468" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
+                {/if}
+            </Button>
+            <Button
+                margin="0 0 0 10px"
+                isToggled={album.showMap}
+                title={`${album.showMap ? "Hide" : "Show"} Map`}
                 on:click={() => album.showMap = !album.showMap}
             >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>            </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
+            </Button>
         {/if}
     </div>
+
     {#if album.showMap && album.photos.length > 0}
-        <div class="albumMap" bind:this={mapDiv} on:click={enableMapInteractions}></div>
+        <div class="albumMap">
+            <PhotoMap photos={album.photos} />
+        </div>
     {/if}
-    <div class="albumPhotos"
-            bind:clientWidth={containerWidth}
-            on:contextmenu={handleContextMenu}
-            class:selectionMode={isMetaKeyDown}
-            style={`height: ${layout?.containerHeight || 0}px;`}
-        >
-        {#if contextMenuVisible}
-            <PhotoContextMenu
-                currentAlbum={album}
-                on:done={contextMenuExecuted}
-            />
-        {/if}
-        {#if album.photos.length == 0}
-            <div>(No photos in this album… yet.)</div>
-        {/if}
-        {#if layout}
-            {#each album.photos as photo, pi}
-                <div class="albumSlot"
-                    style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
-                    on:click={(evt) => handlePhotoClick(evt, pi)}
-                    on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
-                    data-pidx={pi}
-                    draggable="true"
-                    on:dragstart|preventDefault={(evt) => startDragPhoto(evt, pi)}
-                    class:dragged={draggedPhoto === photo}
-                    class:selected={albumSelectedIndices.indexOf(pi) >= 0}
-                >
-                    <Link to={`/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})}>
-                        <AlbumPhoto
-                            photo={photo}
-                            size="medium"
-                            dims={layout.boxes[pi]}
-                        />
+
+    {#if $isLoggedInStore && album.photos.length > 0}
+        <div class="reorderButton" class:toggled={editing}>
+            <Button
+                margin="0 0 0 10px"
+                on:click={() => {editing = !editing}}
+                title={`${editing ? "Exit" : "Enter"} Edit Mode`}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="192 144 224 176 192 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="32" y1="176" x2="224" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="64 112 32 80 64 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="224.00006" y1="80" x2="32.00006" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
+            </Button>
+        </div>
+    {/if}
+
+    {#if editing}
+        <EditableLayout
+            photoList={album.photos}
+            on:reordered={handleAlbumReorder}
+        />
+    {:else}
+        <div class="albumPhotos"
+                bind:clientWidth={containerWidth}
+                on:contextmenu={handleContextMenu}
+                class:selectionMode={isMetaKeyDown}
+                style={`height: ${layout?.containerHeight || 0}px;`}
+            >
+            {#if contextMenuVisible}
+                <PhotoContextMenu
+                    currentAlbum={album}
+                    on:done={contextMenuExecuted}
+                />
+            {/if}
+
+            {#if album.photos.length == 0}
+                <div>(No photos in this album… yet.)</div>
+            {/if}
+
+            {#if layout}
+                {#each album.photos as photo, pi}
+                    <Link to={`/${album.slug}/${album.photos[pi].id}`} getProps={() => ({draggable: false})} >
+                        <div class="albumSlot"
+                            style={`top: ${layout.boxes[pi].top}px; left: ${layout.boxes[pi].left}px; width: ${layout.boxes[pi].width}px; height: ${layout.boxes[pi].height}px;`}
+                            on:click={(evt) => handlePhotoClick(evt, pi)}
+                            on:contextmenu={(evt) => handlePhotoContextMenu(evt, pi)}
+                            class:selected={albumSelectedIndices.indexOf(pi) >= 0}
+                        >
+                            <AlbumPhoto
+                                photo={photo}
+                                size="medium"
+                                dims={layout.boxes[pi]}
+                            />
+                        </div>
                     </Link>
-                </div>
-            {/each}
-        {/if}
-    </div>
+                {/each}
+            {/if}
+
+        </div>
+    {/if}
 {/if}
 </div>
 
@@ -476,10 +384,6 @@
         outline: 3px solid white;
     }
 
-    .albumSlot.dragged {
-        opacity: 0.4;
-    }
-
     .albumPhotos.selectionMode .albumSlot {
         cursor: default;
     }
@@ -489,24 +393,15 @@
 
         display: flex;
         align-items: baseline;
-        justify-content: space-between;
-    }
-
-    h2 {
-        padding-left: 20px;
-        font-size: 3em;
     }
 
     .spacer {
         flex-grow: 1;
     }
 
-    .button {
-        cursor: pointer;
-    }
-
-    .button.toggled {
-        color: rgb(101, 101, 252);
+    h2 {
+        padding-left: 20px;
+        font-size: 3em;
     }
 
     svg {
@@ -518,7 +413,16 @@
         height: 400px;
         width: 100%;
         margin: 10px 0px;
+    }
 
-        background-color: rgb(85, 85, 85);
+    .reorderButton {
+        margin-left: 30px;
+        max-width: 50px;
+
+        padding: 10px 0 5px 0;
+    }
+
+    .reorderButton.toggled {
+        background-color: rgb(101, 101, 252);
     }
 </style>

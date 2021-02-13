@@ -4,6 +4,7 @@
     import { RunApi } from '../api';
     import { loginCredentialStore, isLoggedInStore } from "../stores";
     import Overlay from "./Overlay.svelte";
+    import Button from "./Button.svelte";
 
 
     onMount(() => {
@@ -118,31 +119,17 @@
     </Overlay>
 {/if}
 {#if !$isLoggedInStore}
-    <div class="link" on:click={showLogin} title="Log In">
+    <Button on:click={showLogin} title="Log In">
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><circle cx="128" cy="120" r="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><path d="M63.79905,199.37405a72.02812,72.02812,0,0,1,128.40177-.00026" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-    </div>
+    </Button>
 {:else}
-    <div class="link" on:click={logout} title="Log Out">
+    <Button on:click={logout} title="Log Out">
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="174.029 86 216.029 128 174.029 170" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="104" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M120,216H48a8,8,0,0,1-8-8V48a8,8,0,0,1,8-8h72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-    </div>
+    </Button>
 {/if}
 
 
 <style>
-    .link {
-        cursor: pointer;
-
-        display: flex;
-    }
-
-    .link svg {
-        width: 30px;
-    }
-
-    .link:hover {
-        text-decoration: underline;
-    }
-
     .loginPrompt {
         margin: 10px;
         max-width: 400px;

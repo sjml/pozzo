@@ -4,6 +4,7 @@
     import type { FileUploadStatus } from "../pozzo.type";
     import { frontendStateStore } from "../stores";
     import FileUploader from "./FileUploader.svelte";
+    import Button from "./Button.svelte";
 
     const dispatch = createEventDispatcher();
     const MAX_UPLOADS = 4;
@@ -117,14 +118,24 @@
                 Upload {fileList.length} image{(fileList.length == 1) ? "" : "s"}?
             {/if}
             <div class="yesno">
-                <div class="yes" on:click={start}>
+                <Button
+                    title="Upload"
+                    isBig={true}
+                    margin="0 30px"
+                    on:click={start}
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><polyline points="94.059 121.941 128 88 161.941 121.941" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="168" x2="128" y2="88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
                     Upload
-                </div>
-                <div class="no" on:click={() => dispatch("dismissed")}>
+                </Button>
+                <Button
+                    title="Cancel"
+                    isBig={true}
+                    margin="0 30px"
+                    on:click={() => dispatch("dismissed")}
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><line x1="160" y1="96" x2="96" y2="160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="160" y1="160" x2="96" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
                     Cancel
-                </div>
+                </Button>
             </div>
         </div>
     {/if}
@@ -168,20 +179,5 @@
 
         display: flex;
         justify-content: center;
-    }
-
-    .yes, .no {
-        margin-left: 30px;
-        margin-right: 30px;
-
-        cursor: pointer;
-
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .yesno svg {
-        width: 40px;
     }
 </style>

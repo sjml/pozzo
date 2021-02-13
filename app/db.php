@@ -67,6 +67,7 @@ class DB {
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", originalFilename TEXT";
         $prepCommand .= ", title TEXT";
         $prepCommand .= ", hash TEXT";
         $prepCommand .= ", uniq TEXT";
@@ -113,8 +114,10 @@ class DB {
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", title TEXT UNIQUE";
         $prepCommand .= ", slug TEXT";
-        $prepCommand .= ", description TEXT";
         $prepCommand .= ", isPrivate BOOLEAN";
+        $prepCommand .= ", description TEXT";
+        $prepCommand .= ", ordering INTEGER";
+        $prepCommand .= ", coverPhoto INTEGER";
         $prepCommand .= ", showMap BOOLEAN";
         $prepCommand .= ")";
 
@@ -228,20 +231,21 @@ class DB {
         return $ret;
     }
 
-    static function InsertPhoto($photoData, $albumID, $order) {
+    static function InsertPhoto($photoData, $originalFilename, $albumID, $order) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos (title, hash, uniq, width, height, aspect, size, uploadTimeStamp, uploadedBy, latitude, longitude) VALUES (?,?,?,?,?,?,?,datetime('now'),?,?,?)",
+            "INSERT INTO photos (title, originalFilename, hash, uniq, width, height, aspect, size, uploadTimeStamp, uploadedBy, latitude, longitude) VALUES (?,?,?,?,?,?,?,?,datetime('now'),?,?,?)",
         );
         $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
-        $statement->bindParam(2, $photoData["hash"], SQLITE3_TEXT);
-        $statement->bindParam(3, $photoData["uniq"], SQLITE3_TEXT);
-        $statement->bindParam(4, $photoData["width"], SQLITE3_INTEGER);
-        $statement->bindParam(5, $photoData["height"], SQLITE3_INTEGER);
-        $statement->bindParam(6, $photoData["aspect"], SQLITE3_FLOAT);
-        $statement->bindParam(7, $photoData["size"], SQLITE3_INTEGER);
-        $statement->bindParam(8, $photoData["uploadedBy"], SQLITE3_INTEGER);
-        $statement->bindParam(9, $photoData["latitude"], SQLITE3_FLOAT);
-        $statement->bindParam(10, $photoData["longitude"], SQLITE3_FLOAT);
+        $statement->bindParam(2, $originalFilename, SQLITE3_TEXT);
+        $statement->bindParam(3, $photoData["hash"], SQLITE3_TEXT);
+        $statement->bindParam(4, $photoData["uniq"], SQLITE3_TEXT);
+        $statement->bindParam(5, $photoData["width"], SQLITE3_INTEGER);
+        $statement->bindParam(6, $photoData["height"], SQLITE3_INTEGER);
+        $statement->bindParam(7, $photoData["aspect"], SQLITE3_FLOAT);
+        $statement->bindParam(8, $photoData["size"], SQLITE3_INTEGER);
+        $statement->bindParam(9, $photoData["uploadedBy"], SQLITE3_INTEGER);
+        $statement->bindParam(10, $photoData["latitude"], SQLITE3_FLOAT);
+        $statement->bindParam(11, $photoData["longitude"], SQLITE3_FLOAT);
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
@@ -333,6 +337,11 @@ class DB {
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
+        $query = "UPDATE albums SET coverPhoto = -1 WHERE coverPhoto = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
         $query = "DELETE FROM photoPreviews WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
@@ -355,10 +364,16 @@ class DB {
     }
 
     static function GetAlbumList($includePrivate = false) {
-        $prepCommand = "SELECT * FROM albums";
+        $prepCommand = "SELECT albums.*";
+        $prepCommand .= ", COALESCE(photos.hash, null) as coverHash";
+        $prepCommand .= ", COALESCE(photos.uniq, null) as coverUniq";
+        $prepCommand .= ", COALESCE(photos.aspect, null) as coverAspect";
+        $prepCommand .= " FROM albums";
+        $prepCommand .= " LEFT OUTER JOIN photos ON photos.id = albums.coverPhoto";
         if (!$includePrivate) {
             $prepCommand .= " WHERE isPrivate != 1";
         }
+        $prepCommand .= " ORDER BY ordering ASC, id ASC";
         $statement = self::$pdb->prepare($prepCommand);
         $results = $statement->execute();
 
@@ -370,6 +385,21 @@ class DB {
         return $ret;
     }
 
+    static function ReorderAlbumList($newOrdering) {
+        // see note on ReorderAlbum function; it also applies here...
+        $prepCommand =
+            "UPDATE albums SET ordering = ? WHERE id = ?";
+        $statement = self::$pdb->prepare($prepCommand);
+        foreach ($newOrdering as $i => $aid) {
+            $orderIdx = $i + 1; // PHP gets cranky passing arithmetic results directly :-/
+            $statement->bindParam(1, $orderIdx, SQLITE3_INTEGER);
+            $statement->bindParam(2, $aid, SQLITE3_INTEGER);
+            $statement->execute();
+            $statement->reset();
+        }
+        return true;
+    }
+
     static function CreateAlbum($title, $isPrivate = false) {
         if (is_numeric($title)) {
             return -2;
@@ -379,7 +409,7 @@ class DB {
         $slug = $sg->generate($title);
 
         $prepCommand =
-            "INSERT INTO albums(title, slug, description, isPrivate, showMap) VALUES(?, ?, '', ?, 0)";
+            "INSERT INTO albums(title, slug, description, isPrivate, showMap, coverPhoto) VALUES(?, ?, '', ?, 0, -1)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $slug, SQLITE3_TEXT);
@@ -392,7 +422,21 @@ class DB {
         } catch (\Throwable $th) {
             return -1;
         }
-        return self::$pdb->lastInsertRowID();
+        $id = self::$pdb->lastInsertRowID();
+
+        self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
+        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM albums;");
+        if ($order == null) {
+            $order = 0;
+        }
+        $order += 1;
+        $statement = self::$pdb->prepare("UPDATE albums SET ordering = ? WHERE id = ?");
+        $statement->bindParam(1, $order, SQLITE3_INTEGER);
+        $statement->bindParam(2, $id, SQLITE3_INTEGER);
+        $statement->execute();
+        self::$pdb->exec("COMMIT TRANSACTION;");
+
+        return $id;
     }
 
     static function DeleteAlbum($id) {
@@ -417,14 +461,15 @@ class DB {
         return $albumData;
     }
 
-    static function UpdateAlbumMeta($id, $title, $description, $isPrivate, $showMap) {
-        $query = "UPDATE albums SET title = ?, description = ?, isPrivate = ?, showMap = ? WHERE id = ?";
+    static function UpdateAlbumMeta($id, $title, $description, $isPrivate, $showMap, $coverPhoto) {
+        $query = "UPDATE albums SET title = ?, description = ?, isPrivate = ?, showMap = ?, coverPhoto = ? WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $description, SQLITE3_TEXT);
         $statement->bindParam(3, $isPrivate, SQLITE3_INTEGER);
         $statement->bindParam(4, $showMap, SQLITE3_INTEGER);
-        $statement->bindParam(5, $id, SQLITE3_INTEGER);
+        $statement->bindParam(5, $coverPhoto, SQLITE3_INTEGER);
+        $statement->bindParam(6, $id, SQLITE3_INTEGER);
         try {
             $result = $statement->execute();
             if (!$result) {
@@ -479,6 +524,18 @@ class DB {
     }
 
     static function RemovePhotoFromAlbum($photoID, $albumID) {
+        $query = "SELECT coverPhoto FROM albums WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+        $result = $statement->execute();
+        $coverPhotoID = $result->fetchArray(SQLITE3_ASSOC)["coverPhoto"];
+        if ($coverPhotoID == $photoID) {
+            $query = "UPDATE albums SET coverPhoto = -1 WHERE id = ?";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+            $statement->execute();
+        }
+
         $query =
             "DELETE FROM photos_albums WHERE (photo_id = ? AND album_id = ?)";
         $statement = self::$pdb->prepare($query);

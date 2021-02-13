@@ -5,13 +5,12 @@
         - clicking on photo with context menu open should close context menu
         - upload to album, let photos render, then click back to main screen -- double
         - uploading to remote, never get the "processing" statust
+        - file uploader gets stuck behind map
     - requires backend support
         - title/description editing for albums and pictures
         - allow setting overall site title, add pozzo branding note at bottom
         - delete album UI
         - bulk moving/deleting operations
-        - store original filename on photos
-        - album ordering
     - some research required
         - url thinks
             - image urls that aren't predictable? 
@@ -19,47 +18,34 @@
         - blur back on image pages? (look at stackblur/canvas solution)
         - see if we can not do the blurs if the images are already loaded?
         - look at video import, if it's easy
-    - make it more svelte-y
-        - make buttons into their own component? 
-        - make map into component
-            - enable/disable interactions
-            - adding markers, reacting, etc. 
-            - have the button only show if there are photos w/coordinates
-        - review reactive functions and make sure they're being used right
-            - probably not
-        - can photo navigation just stay on the same component and update the url? 
-            - *should* be able to! that's the whole promise of this thing!
-        - try and sveltify the drag and drop a little bit
     - clean up hacks
-        - fix chattiness of album metadata
         - redo fullscreen to actually listen for events and make sure it's worked
         - check for all console error statements and handle gracefully in UI
             - test bad responses for everything... broken file upload hangs the UI?
+        - see if EditableLayout can be generalized so albumlist and album can share it
     - UX niceties
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
         - marker clusters on map (also increase padding but maybe to non-integer?)
             - maybe SVG markers?
             - add photo preview popups? or at least something when you click?
         - add license display option? (site config)
-        - toggle privacy option
-        - album previews
         - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
         - add little notification toasts for when people get redirected/bounced
         - transitions between albums and stuff
         - accessibility checks
-        - splash page
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
-        - also pick a few consistent sizes for icon usages
-            - rollover reactions?
-            - animation of stroke-width?
+        - style scrollbars
+        - pick a font (playing with Montserrat for now since it matches the map tiles)
         - transition selection border appearance
         - make sure the viewing experience on a mobile-sized screen is decent
+        - https://github.com/rikschennink/fitty
 2. Backend pass
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
         - will also pull in keywords from photos.app export, which is something that should be supported in the backend (along with stars)
+        - note: once we've added a third library, it's time to properly set up composer
     - limit length of text things (titles, descriptions)
     - remove reset endpoint
     - complete test suite
