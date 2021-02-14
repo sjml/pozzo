@@ -257,6 +257,8 @@
 
     async function toggleEditing() {
         if (!editing) {
+            rawTitle = album.title;
+            rawDesc = album.description;
             editing = true;
         }
         else {
@@ -285,7 +287,7 @@
 
     <div class="titleRow">
         {#if editing}
-            <h2 contenteditable="true" class="editing" bind:innerHTML={rawTitle}>{album.title}</h2>
+            <h2 contenteditable="true" class="editing" bind:innerHTML={rawTitle}></h2>
         {:else}
             <h2>{album.title}</h2>
         {/if}
@@ -324,12 +326,7 @@
     </div>
 
     {#if editing}
-        <div class="description editing"
-            contenteditable="true"
-            bind:innerHTML={rawDesc}
-        >
-            {album.description}
-        </div>
+        <textarea cols="500" rows="10" class="description editing" bind:value={rawDesc}></textarea>
     {:else}
         <div class="description"
         >
