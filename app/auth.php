@@ -1,11 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/JWT.php";
-require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/ExpiredException.php";
-require_once __DIR__ .
-    "/../lib/php-jwt-5.2.0/src/SignatureInvalidException.php";
-require_once __DIR__ . "/../lib/php-jwt-5.2.0/src/BeforeValidException.php";
-use Firebase\JWT\JWT;
+use \Firebase\JWT\JWT;
 
 class Auth {
     static function GetJWT() {

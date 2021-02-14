@@ -22,6 +22,8 @@
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
         - 404
+        - cmd-A and D should be deactivated while editing album pages
+        - title updates on photo pages
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
@@ -30,7 +32,6 @@
         - https://github.com/rikschennink/fitty
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
         - will also pull in keywords from photos.app export, which is something that should be supported in the backend (along with stars)
-        - note: once we've added a third PHP library, it might be time to properly set up composer
 
 1. Frontend pass
     - clean up hacks

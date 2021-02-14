@@ -480,6 +480,10 @@
         padding: 5px 20px;
     }
 
+    .description :global(a) {
+        text-decoration: underline;
+    }
+
     .description.editing {
         background-color: white;
         color: black;

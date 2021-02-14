@@ -4,10 +4,7 @@
 //   hand-crafted PHP/SQL bindings without needing to use an ORM.
 // ¿Por qué no los dos?
 
-require_once __DIR__ . "/../lib/slug-generator-1.1.1/src/SlugGeneratorInterface.php";
-require_once __DIR__ . "/../lib/slug-generator-1.1.1/src/SlugGenerator.php";
-require_once __DIR__ . "/../lib/slug-generator-1.1.1/src/SlugOptions.php";
-use Ausi\SlugGenerator\SlugGenerator;
+use \Ausi\SlugGenerator\SlugGenerator;
 
 require_once __DIR__ . "/util.php";
 require_once __DIR__ . "/auth.php";

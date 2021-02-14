@@ -4,5 +4,7 @@ public/photos/*
 dist/*
 test/env/*
 test/__pycache__/*
+composer.phar
+/vendor/*
 
 .vscode/settings.json

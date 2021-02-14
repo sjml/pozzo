@@ -7,10 +7,17 @@ ROOT_DIR=$(pwd)
 rm -rf $ROOT_DIR/dist
 mkdir $ROOT_DIR/dist
 
-copies=(app lib scripts LICENSE README.md)
+copies=(app scripts LICENSE README.md)
 for item in ${copies[@]}; do
   cp -R $item $ROOT_DIR/dist
 done
+
+cp $ROOT_DIR/composer.json $ROOT_DIR/dist
+cp $ROOT_DIR/composer.lock $ROOT_DIR/dist
+pushd $ROOT_DIR/dist > /dev/null
+  composer install
+popd > /dev/null
+rm $ROOT_DIR/dist/composer.json $ROOT_DIR/dist/composer.lock
 
 mkdir $ROOT_DIR/dist/public
 pushd $ROOT_DIR/public > /dev/null
