@@ -12,7 +12,9 @@
 
     export let url = "";
 
-    onMount(async () => {
+    onMount(setup);
+
+    async function setup() {
         const res = await RunApi("/info");
         if (res.success) {
             $siteData.siteTitle = res.data.siteTitle;
@@ -28,7 +30,7 @@
         else {
             console.error(res);
         }
-    });
+    }
 
     function setFullscreen(on: boolean) {
         if (on) {

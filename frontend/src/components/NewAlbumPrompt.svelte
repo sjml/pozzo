@@ -13,12 +13,14 @@
     let newAlbumMessage: string = "";
     let isPrivate: boolean = false;
 
-    onMount(async () => {
+    onMount(setup);
+
+    async function setup() {
         newAlbumNameField = "";
         newAlbumMessage = "";
         await tick();
         newAlbumNameInput.focus();
-    });
+    }
 
     async function attemptNewAlbum() {
         attemptingNewAlbum = true;

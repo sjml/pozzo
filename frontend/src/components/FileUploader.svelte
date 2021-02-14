@@ -15,7 +15,7 @@
     let previewSrc = null;
     let previewAlt = "";
     let progressBar: HTMLProgressElement;
-    onMount(async () => {
+    onMount(() => {
         uploadStatus.startUploadCallback = () => startUpload();
         progressBar.value = 0;
 

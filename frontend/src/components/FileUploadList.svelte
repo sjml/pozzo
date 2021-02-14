@@ -11,7 +11,7 @@
 
     export let fileList: File[];
 
-    onMount(async () => {
+    onMount(() => {
         $frontendStateStore.userStoppedUploadScroll = false;
 
         let targetAlbumID = null;

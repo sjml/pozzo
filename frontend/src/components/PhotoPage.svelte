@@ -19,10 +19,7 @@
     export let prevPhotoIdx: number = -1;
 
 
-    onMount(async () => {
-        if (photo == null) {
-            await getPhoto(photoID);
-        }
+    onMount(() => {
         $frontendStateStore.photoToolsVisible = true;
     });
 
@@ -34,9 +31,8 @@
 
 
     let photoMeta: any = null;
-    let loaded = false;
 
-    async function getPhoto(pid: number) {
+    async function getPhoto(pid: number): Promise<Photo> {
         const pResPromise = RunApi(`/photo/view/${pid}`, {
             method: "POST",
             params: {
@@ -50,20 +46,21 @@
         const pRes = await pResPromise;
         const aRes = await aResPromise;
 
-        if (pRes.success) {
-            photo = pRes.data;
-            photoMeta = null;
-            loaded = false;
-        }
-        else {
-            console.error("Couldn't load photo.", pRes);
-        }
-
         if (aRes.success) {
             album = aRes.data;
         }
         else {
             console.error("Couldn't load album.", aRes);
+        }
+
+        if (pRes.success) {
+            photoMeta = null;
+            photo = pRes.data;
+            return photo;
+        }
+        else {
+            console.error("Couldn't load photo.", pRes);
+            return null;
         }
     }
 
@@ -78,8 +75,6 @@
             console.error("Couldn't load metadata.", res);
         }
     }
-
-    $: getPhoto(photoID)
 
     $: {
         if (photo && $frontendStateStore.isMetadataOn) {
@@ -137,10 +132,11 @@
     on:keydown={handleKeyDown}
 />
 
-{#if photo}
+{#await getPhoto(photoID)}
+    Loading…
+{:then photo}
     <div class="fullPhoto">
-        <!-- this is where the preview image goes/went -->
-        <img on:load={() => loaded = true}
+        <img
             alt="{photo.title}"
             srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
             src="{GetImgPath(size, photo.hash, photo.uniq)}"
@@ -178,7 +174,7 @@
             {/if}
         </div>
     {/if}
-{/if}
+{/await}
 
 <style>
     .fullPhoto {

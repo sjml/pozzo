@@ -19,19 +19,15 @@
     export let albumSlug: number|string;
 
 
-    onMount(async () => {
-        await getAlbum(null);
-        $frontendStateStore.currentAlbum = album;
-    });
-
     onDestroy(() => {
         $frontendStateStore.currentAlbum = null;
     });
+    $: $frontendStateStore.currentAlbum = album;
 
 
     let album: Album = null;
 
-    async function getAlbum(_) {
+    async function getAlbum(): Promise<Album> {
         const res = await RunApi(`/album/view/${albumSlug}`, {
             params: {previews: 1},
             method: "POST",
@@ -39,6 +35,7 @@
         });
         if (res.success) {
             album = res.data;
+            return album;
         }
         else {
             if (res.code == 404) {
@@ -47,6 +44,7 @@
             else {
                 console.error(res);
             }
+            return null;
         }
     }
 
@@ -241,7 +239,7 @@
             albumSelectedIndices = [];
         }
         albumSelectedIndices = [];
-        getAlbum(null);
+        getAlbum();
     }
 
 
@@ -261,9 +259,11 @@
 />
 
 <div class="album">
-{#if album}
+{#await getAlbum()}
+    Loading…
+{:then album}
     {#if $isLoggedInStore && !editing}
-        <UploadZone on:done={() => getAlbum(null)} />
+        <UploadZone on:done={() => getAlbum()} />
     {/if}
 
     <div class="titleRow">
@@ -356,7 +356,7 @@
 
         </div>
     {/if}
-{/if}
+{/await}
 </div>
 
 <style>
