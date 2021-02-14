@@ -2,7 +2,6 @@
     - got some false positive error reporting on bulk upload... investigate what's up
         - more problematic was that I couldn't re-try :(
     - clicking on photo with context menu open should close context menu
-    - upload to album, let photos render, then click back to main screen -- double
     - uploading to remote, never get the "processing" status
     - file uploader gets stuck behind map
     - making new album and signing out should refresh album list (does locally, but not remote? blergh.)
