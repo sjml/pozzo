@@ -1,6 +1,6 @@
 <?php
 
-use \Firebase\JWT\JWT;
+use Firebase\JWT\JWT;
 
 class Auth {
     static function GetJWT() {
@@ -34,6 +34,8 @@ class Auth {
                 return -4;
             } elseif ($value == -3) {
                 return -5;
+            } elseif ($value == -4) {
+                return -6;
             } else {
                 return $value;
             }
@@ -78,6 +80,8 @@ class Auth {
             return -2;
         } catch (\Firebase\JWT\SignatureInvalidException $th) {
             return -3;
+        } catch (\UnexpectedValueException $th) {
+            return -4;
         } catch (\Throwable $th) {
             return -128;
         }

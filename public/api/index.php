@@ -9,7 +9,6 @@ require_once __DIR__ . "/../../app/db.php";
 DB::Init();
 register_shutdown_function(["DB", "Cleanup"]);
 
-
 function error_handler($errno, $errstr, $errfile, $errline) {
     http_response_code(500);
     header("Content-Type: application/json");

@@ -7,6 +7,7 @@
     - making new album and signing out should refresh album list (does locally, but not remote? blergh.)
     - deleting and uploading new photo to album will insert it in the gap
     - race if you move photos while they're still loading
+        - album probably needs to be rebuilt -- it's a hodgepodge right now
 
 0. Before starting actual use
     - requires backend support
@@ -22,7 +23,6 @@
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
         - 404
-        - cmd-A and D should be deactivated while editing album pages
         - title updates on photo pages
     - UI polish
         - color choices
@@ -32,6 +32,7 @@
         - https://github.com/rikschennink/fitty
     - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
         - will also pull in keywords from photos.app export, which is something that should be supported in the backend (along with stars)
+        - while looking at ingest again, consider image sizes
 
 1. Frontend pass
     - clean up hacks

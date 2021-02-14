@@ -52,7 +52,11 @@ function downloadOrig() {
 
     header("Content-Description: File Transfer");
     header("Content-Type: application/octet-stream");
-    header("Content-Disposition: attachment; filename=\"" . $photo["originalFilename"] . "\"");
+    header(
+        "Content-Disposition: attachment; filename=\"" .
+            $photo["originalFilename"] .
+            "\"",
+    );
     header("Expires: 0");
     header("Cache-Control: must-revalidate");
     header("Content-Length: " . filesize($filePath));
@@ -105,12 +109,28 @@ function copyPhoto() {
     $statuses = [];
     $numErrors = 0;
     foreach ($input["copies"] as $copyInst) {
-        $result = DB::AddPhotoToAlbum($copyInst["photoID"], $copyInst["albumID"], null);
+        $result = DB::AddPhotoToAlbum(
+            $copyInst["photoID"],
+            $copyInst["albumID"],
+            null,
+        );
         if ($result) {
-            array_push($statuses, ["photoID" => $copyInst["photoID"], "albumID" => $copyInst["albumID"], "success" => true]);
+            array_push($statuses, [
+                "photoID" => $copyInst["photoID"],
+                "albumID" => $copyInst["albumID"],
+                "success" => true,
+            ]);
         } else {
-            array_push($statuses, ["photoID" => $copyInst["photoID"], "albumID" => $copyInst["albumID"], "success" => false]);
+            array_push($statuses, [
+                "photoID" => $copyInst["photoID"],
+                "albumID" => $copyInst["albumID"],
+                "success" => false,
+            ]);
         }
     }
-    output(["message" => "Operation complete.", "numErrors" => $numErrors, "statuses" => $statuses]);
+    output([
+        "message" => "Operation complete.",
+        "numErrors" => $numErrors,
+        "statuses" => $statuses,
+    ]);
 }

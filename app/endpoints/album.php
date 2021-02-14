@@ -77,13 +77,30 @@ function editMetadata() {
         return;
     }
 
-    $title = array_key_exists("title", $input) ? $input["title"] : $album["title"];
-    $description = array_key_exists("description", $input) ? $input["description"] : $album["description"];
-    $isPrivate = array_key_exists("isPrivate", $input) ? $input["isPrivate"] : $album["isPrivate"];
-    $showMap = array_key_exists("showMap", $input) ? $input["showMap"] : $album["showMap"];
-    $coverPhoto = array_key_exists("coverPhoto", $input) ? $input["coverPhoto"] : $album["coverPhoto"];
+    $title = array_key_exists("title", $input)
+        ? $input["title"]
+        : $album["title"];
+    $description = array_key_exists("description", $input)
+        ? $input["description"]
+        : $album["description"];
+    $isPrivate = array_key_exists("isPrivate", $input)
+        ? $input["isPrivate"]
+        : $album["isPrivate"];
+    $showMap = array_key_exists("showMap", $input)
+        ? $input["showMap"]
+        : $album["showMap"];
+    $coverPhoto = array_key_exists("coverPhoto", $input)
+        ? $input["coverPhoto"]
+        : $album["coverPhoto"];
 
-    $result = DB::UpdateAlbumMeta($album["id"], $title, $description, $isPrivate, $showMap, $coverPhoto);
+    $result = DB::UpdateAlbumMeta(
+        $album["id"],
+        $title,
+        $description,
+        $isPrivate,
+        $showMap,
+        $coverPhoto,
+    );
 
     if ($result == -1) {
         output(["message" => "Could not update metadata"], 400);
@@ -119,14 +136,19 @@ function removePhoto() {
 
     $successCount = 0;
     foreach ($input["removals"] as $removalInst) {
-        $result = DB::RemovePhotoFromAlbum($removalInst["photoID"], $removalInst["albumID"]);
+        $result = DB::RemovePhotoFromAlbum(
+            $removalInst["photoID"],
+            $removalInst["albumID"],
+        );
         if ($result == 1) {
             $successCount += 1;
         }
     }
     output([
         "message" =>
-            $successCount . " successful removal" . ($successCount == 1 ? "" : "s"),
+            $successCount .
+            " successful removal" .
+            ($successCount == 1 ? "" : "s"),
     ]);
 }
 
@@ -187,7 +209,6 @@ function reorderAlbumList() {
 
     $fetchPrivate = $_REQUEST["POZZO_AUTH"] > 0;
     $albumList = DB::GetAlbumList($fetchPrivate);
-
 
     $existingAids = [];
     foreach ($albumList as $album) {

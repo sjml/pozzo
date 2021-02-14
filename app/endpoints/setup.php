@@ -10,6 +10,12 @@ if (DB::GetConfig("site_title") != false) {
     die();
 }
 
+function output($obj, $code = 200) {
+    http_response_code($code);
+    header("Content-Type: application/json");
+    echo json_encode($obj);
+}
+
 $input = json_decode(file_get_contents("php://input"), true);
 if (!isset($input["siteTitle"])) {
     output(["message" => "Missing parameter 'siteTitle'"], 400);
@@ -28,9 +34,7 @@ DB::SetConfig("site_title", $input["siteTitle"], "string");
 DB::SetConfig("promo", 0, "integer");
 $user = DB::CreateUser($input["userName"], $input["password"]);
 if ($user == false) {
-    header("Content-Type: application/json");
-    http_response_code(500);
-    echo json_encode(["message" => "Something went wrong. :("]);
+    output(["message" => "Something went wrong. :("], 500);
     die();
 }
 $jwt = Auth::GenerateJWT(
@@ -40,6 +44,4 @@ $jwt = Auth::GenerateJWT(
     DB::GetConfig("jwt_expiration"),
 );
 
-header("Content-Type: application/json");
-http_response_code(200);
-echo json_encode(["message" => "Setup complete!", "key" => $jwt]);
+output(["message" => "Setup complete!", "key" => $jwt]);

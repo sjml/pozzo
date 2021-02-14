@@ -69,6 +69,10 @@ class Router {
                                 $status = 403;
                                 $errData["reason"] = "signatureInvalid";
                                 break;
+                            case -6:
+                                $status = 401;
+                                $errData["reason"] = "invalidToken";
+                                break;
                             default:
                                 $status = 500;
                                 $errData["reason"] = "unknown";

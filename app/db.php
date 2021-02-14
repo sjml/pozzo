@@ -4,7 +4,7 @@
 //   hand-crafted PHP/SQL bindings without needing to use an ORM.
 // ¿Por qué no los dos?
 
-use \Ausi\SlugGenerator\SlugGenerator;
+use Ausi\SlugGenerator\SlugGenerator;
 
 require_once __DIR__ . "/util.php";
 require_once __DIR__ . "/auth.php";
@@ -228,7 +228,12 @@ class DB {
         return $ret;
     }
 
-    static function InsertPhoto($photoData, $originalFilename, $albumID, $order) {
+    static function InsertPhoto(
+        $photoData,
+        $originalFilename,
+        $albumID,
+        $order
+    ) {
         $statement = self::$pdb->prepare(
             "INSERT INTO photos (title, originalFilename, hash, uniq, width, height, aspect, size, uploadTimeStamp, uploadedBy, latitude, longitude) VALUES (?,?,?,?,?,?,?,?,datetime('now'),?,?,?)",
         );
@@ -366,7 +371,8 @@ class DB {
         $prepCommand .= ", COALESCE(photos.uniq, null) as coverUniq";
         $prepCommand .= ", COALESCE(photos.aspect, null) as coverAspect";
         $prepCommand .= " FROM albums";
-        $prepCommand .= " LEFT OUTER JOIN photos ON photos.id = albums.coverPhoto";
+        $prepCommand .=
+            " LEFT OUTER JOIN photos ON photos.id = albums.coverPhoto";
         if (!$includePrivate) {
             $prepCommand .= " WHERE isPrivate != 1";
         }
@@ -384,8 +390,7 @@ class DB {
 
     static function ReorderAlbumList($newOrdering) {
         // see note on ReorderAlbum function; it also applies here...
-        $prepCommand =
-            "UPDATE albums SET ordering = ? WHERE id = ?";
+        $prepCommand = "UPDATE albums SET ordering = ? WHERE id = ?";
         $statement = self::$pdb->prepare($prepCommand);
         foreach ($newOrdering as $i => $aid) {
             $orderIdx = $i + 1; // PHP gets cranky passing arithmetic results directly :-/
@@ -402,7 +407,7 @@ class DB {
             return -2;
         }
 
-        $sg = new SlugGenerator;
+        $sg = new SlugGenerator();
         $slug = $sg->generate($title);
 
         $prepCommand =
@@ -427,7 +432,9 @@ class DB {
             $order = 0;
         }
         $order += 1;
-        $statement = self::$pdb->prepare("UPDATE albums SET ordering = ? WHERE id = ?");
+        $statement = self::$pdb->prepare(
+            "UPDATE albums SET ordering = ? WHERE id = ?",
+        );
         $statement->bindParam(1, $order, SQLITE3_INTEGER);
         $statement->bindParam(2, $id, SQLITE3_INTEGER);
         $statement->execute();
@@ -458,8 +465,16 @@ class DB {
         return $albumData;
     }
 
-    static function UpdateAlbumMeta($id, $title, $description, $isPrivate, $showMap, $coverPhoto) {
-        $query = "UPDATE albums SET title = ?, description = ?, isPrivate = ?, showMap = ?, coverPhoto = ? WHERE id = ?";
+    static function UpdateAlbumMeta(
+        $id,
+        $title,
+        $description,
+        $isPrivate,
+        $showMap,
+        $coverPhoto
+    ) {
+        $query =
+            "UPDATE albums SET title = ?, description = ?, isPrivate = ?, showMap = ?, coverPhoto = ? WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $description, SQLITE3_TEXT);

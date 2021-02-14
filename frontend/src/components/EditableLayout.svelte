@@ -62,16 +62,16 @@
     }
 
     .editablePhoto {
-        width: 300px;
-        height: 300px;
+        width: 200px;
+        height: 200px;
         margin: 10px;
 
         display: flex;
     }
 
     .editablePhoto img {
-        max-width: 300px;
-        max-height: 300px;
+        max-width: 200px;
+        max-height: 200px;
         margin: auto;
     }
 </style>

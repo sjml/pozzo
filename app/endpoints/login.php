@@ -13,7 +13,6 @@ require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
 $router->AddHandler("/check", ["checkLogin"], true);
-$router->AddHandler("/logout", ["logout"]);
 $router->AddHandler("/$", ["login"]);
 
 $router->Route();

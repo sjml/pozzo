@@ -1,13 +1,12 @@
 <?php
 
-
 $message = [
     "message" => "Hello from Pozzo.",
     "endpoints" => [
         "/index" => [],
         "/info" => [],
         "/setup" => [],
-        "/login" => ["/", "check", "logout"],
+        "/login" => ["/", "check"],
         "/upload" => [],
         "/album" => [
             "/list",
@@ -17,15 +16,9 @@ $message = [
             "/delete",
             "/edit",
             "/reorderList",
-            "/reorder"
+            "/reorder",
         ],
-        "/photo" => [
-            "/delete",
-            "/copy",
-            "/view",
-            "/orig",
-            "/meta"
-        ]
+        "/photo" => ["/delete", "/copy", "/view", "/orig", "/meta"],
     ],
 ];
 
