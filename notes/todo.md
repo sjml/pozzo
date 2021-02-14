@@ -20,9 +20,8 @@
     - UX niceties
         - change title as we navigate around
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
-        - marker clusters on map (also increase padding but maybe to non-integer?)
-            - maybe SVG markers?
-            - add photo preview popups? or at least something when you click?
+        - maybe SVG markers?
+        - add photo preview popups? or at least something when you click?
         - 404
     - UI polish
         - color choices

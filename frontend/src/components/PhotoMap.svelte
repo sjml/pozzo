@@ -4,6 +4,9 @@
     import L from "leaflet";
     import "leaflet/dist/leaflet.css";
 
+    import "../../lib/Leaflet.markercluster/dist/leaflet.markercluster";
+    import "../../lib/Leaflet.markercluster/dist/MarkerCluster.css";
+
     import type { Photo } from "../pozzo.type";
 
     export let photos: Photo[] = [];
@@ -13,6 +16,7 @@
     let mapElement: HTMLDivElement;
     let map: L.Map;
     let mapMarkers: L.Marker[] = [];
+    let markerCluster: L.MarkerClusterGroup = null;
 
     onMount(() => {
         L.Marker.prototype.options.icon = L.icon({
@@ -71,8 +75,16 @@
         if (map == null) {
             return;
         }
+        if (markerCluster == null) {
+            markerCluster = L.markerClusterGroup({
+                showCoverageOnHover: false,
+                maxClusterRadius: 50,
+            });
+        }
+
+        map.removeLayer(markerCluster);
         mapMarkers.forEach((m) => {
-            map.removeLayer(m);
+            markerCluster.removeLayer(m);
         });
 
         let placedPhotos = photoList.map((p) => {
@@ -85,11 +97,13 @@
         let coords = placedPhotos.map((p) => {
             return L.latLng(p.latitude, p.longitude);
         });
+
         mapMarkers = coords.map((c) => {
             const marker = L.marker(c);
-            marker.addTo(map);
+            markerCluster.addLayer(marker);
             return marker;
         });
+        map.addLayer(markerCluster);
 
         map.fitBounds(L.latLngBounds(coords), {
             padding: [boundsPadding, boundsPadding]
@@ -109,5 +123,28 @@
         height: 100%;
 
         background-color: rgb(85, 85, 85);
+    }
+
+    :global(.marker-cluster) {
+        background-clip: padding-box;
+        border-radius: 20px;
+
+        background-color: rgb(51, 148, 226, 0.7);
+    }
+
+    :global(.marker-cluster div) {
+        width: 30px;
+        height: 30px;
+        margin-left: 5px;
+        margin-top: 5px;
+
+        text-align: center;
+        border-radius: 15px;
+        font-size: 14px;
+        background-color: rgba(20, 81, 131, 0.7);
+    }
+
+    :global(.marker-cluster span) {
+        line-height: 30px;
     }
 </style>
