@@ -125,6 +125,10 @@
         background-color: rgb(85, 85, 85);
     }
 
+    :global(.leaflet-container *) {
+        font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
     :global(.marker-cluster) {
         background-clip: padding-box;
         border-radius: 20px;
