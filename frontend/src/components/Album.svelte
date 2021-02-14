@@ -476,7 +476,9 @@
         max-width: 900px;
         margin: 0 auto 40px auto;
 
-        font-size: 1.1em;
+        font-size: 1.15em;
+        line-height: 1.5;
+
         padding: 5px 20px;
     }
 
