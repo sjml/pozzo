@@ -112,19 +112,21 @@ function deleteAlbum() {
 
 function removePhoto() {
     $input = json_decode(file_get_contents("php://input"), true);
-    if (!isset($input["photoID"]) || !is_numeric($input["photoID"])) {
-        output(["message" => "Invalid or missing parameter 'photoID'"], 400);
-        return;
-    }
-    if (!isset($input["albumID"]) || !is_numeric($input["albumID"])) {
-        output(["message" => "Invalid or missing parameter 'albumID'"], 400);
+    if (!isset($input["removals"]) || !is_array($input["removals"])) {
+        output(["message" => "Invalid or missing parameter 'removals'"], 400);
         return;
     }
 
-    $result = DB::RemovePhotoFromAlbum($input["photoID"], $input["albumID"]);
+    $successCount = 0;
+    foreach ($input["removals"] as $removalInst) {
+        $result = DB::RemovePhotoFromAlbum($removalInst["photoID"], $removalInst["albumID"]);
+        if ($result == 1) {
+            $successCount += 1;
+        }
+    }
     output([
         "message" =>
-            "Removed from " . $result . " album" . ($result == 1 ? "" : "s"),
+            $successCount . " successful removal" . ($successCount == 1 ? "" : "s"),
     ]);
 }
 

@@ -7,7 +7,8 @@ export const siteData = writable<SiteConfig>(
         apiUri: `${location.origin}/api`,
         formats: [],
         siteTitle: false,
-        sizes: []
+        sizes: [],
+        promo: false,
     }
 );
 

@@ -3,7 +3,8 @@ export type SiteConfig = {
     apiUri: string,
     siteTitle: string|boolean,
     formats: string[],
-    sizes: any[]
+    sizes: any[],
+    promo: boolean,
 }
 
 export type FrontendState = {
@@ -38,16 +39,17 @@ export type FileUploadStatus = {
     startUploadCallback?: Function,
 }
 
+// with all these optionals, it's debatable whether this is a worthwhile type...
 export type Photo = {
     id: number,
-    title: string,
     hash: string,
     uniq: string,
-    width: number,
-    height: number,
     aspect: number,
-    size: number,
-    uploadTimeStamp: number,
+    title?: string,
+    width?: number,
+    height?: number,
+    size?: number,
+    uploadTimeStamp?: number,
     ordering?: number,
     latitude?: number,
     longitude?: number,

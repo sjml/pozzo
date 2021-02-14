@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { navigate } from "svelte-routing";
 
-    import { siteData } from "../stores";
+    import { siteData, loginCredentialStore } from "../stores";
     import { RunApi } from "../api";
     import Overlay from "./Overlay.svelte";
 
@@ -32,6 +32,7 @@
         });
         if (res.success) {
             $siteData.siteTitle = sitenameField;
+            $loginCredentialStore = res.data.key;
             navigate("/", {replace: true});
         }
         else {

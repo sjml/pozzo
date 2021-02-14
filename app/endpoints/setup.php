@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . "/../db.php";
+require_once __DIR__ . "/../auth.php";
 
 if (DB::GetConfig("site_title") != false) {
     header("Content-Type: application/json");
@@ -24,6 +25,7 @@ if (!isset($input["password"])) {
 }
 
 DB::SetConfig("site_title", $input["siteTitle"], "string");
+DB::SetConfig("promo", 0, "integer");
 $user = DB::CreateUser($input["userName"], $input["password"]);
 if ($user == false) {
     header("Content-Type: application/json");
@@ -31,7 +33,13 @@ if ($user == false) {
     echo json_encode(["message" => "Something went wrong. :("]);
     die();
 }
+$jwt = Auth::GenerateJWT(
+    $user,
+    DB::GetConfig("app_key"),
+    0,
+    DB::GetConfig("jwt_expiration"),
+);
 
 header("Content-Type: application/json");
 http_response_code(200);
-echo json_encode(["message" => "Setup complete!"]);
+echo json_encode(["message" => "Setup complete!", "key" => $jwt]);

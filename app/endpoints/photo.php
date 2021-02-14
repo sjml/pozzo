@@ -96,30 +96,21 @@ function deletePhoto() {
 
 function copyPhoto() {
     $input = json_decode(file_get_contents("php://input"), true);
-    if (!isset($input["photoID"]) || !is_numeric($input["photoID"])) {
-        output(["message" => "Invalid or missing parameter 'photoID'"], 400);
-        return;
-    }
-    if (!isset($input["albumID"]) || !is_numeric($input["albumID"])) {
-        output(["message" => "Invalid or missing parameter 'albumID'"], 400);
+    if (!isset($input["copies"]) || !is_array($input["copies"])) {
+        output(["message" => "Invalid or missing parameter 'copies'"], 400);
         return;
     }
 
-    $photo = DB::GetPhoto($input["photoID"]);
-    if ($photo == null) {
-        output(["message" => "Photo not found"], 400);
-        return;
+    // inefficient given how AddPhotoToAlbum works, but this is not the bottleneck
+    $statuses = [];
+    $numErrors = 0;
+    foreach ($input["copies"] as $copyInst) {
+        $result = DB::AddPhotoToAlbum($copyInst["photoID"], $copyInst["albumID"], null);
+        if ($result) {
+            array_push($statuses, ["photoID" => $copyInst["photoID"], "albumID" => $copyInst["albumID"], "success" => true]);
+        } else {
+            array_push($statuses, ["photoID" => $copyInst["photoID"], "albumID" => $copyInst["albumID"], "success" => false]);
+        }
     }
-    $album = DB::FindAlbum($input["albumID"], false);
-    if ($album == false) {
-        output(["message" => "Album not found"], 400);
-        return;
-    }
-
-    $result = DB::AddPhotoToAlbum($photo["id"], $album["id"], null);
-    if ($result) {
-        output(["photoID" => $photo["id"], "albumID" => $album["id"]]);
-    } else {
-        output(["message" => "Photo already in album"], 400);
-    }
+    output(["message" => "Operation complete.", "numErrors" => $numErrors, "statuses" => $statuses]);
 }

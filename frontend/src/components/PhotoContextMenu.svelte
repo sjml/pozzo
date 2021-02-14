@@ -54,31 +54,27 @@
         else {
             targetID = targetAlbum.id;
         }
-        for (let p of photos) {
-            const copyRes = await RunApi("/photo/copy", {
-                authorize: true,
-                method: "POST",
-                params: {
-                    photoID: p.id,
-                    albumID: targetID
-                }
-            });
-            if (!copyRes.success) {
-                console.error("Couldn't copy photo to album.", copyRes);
-                continue;
+        const copyRes = await RunApi("/photo/copy", {
+            authorize: true,
+            method: "POST",
+            params: {
+                copies: photos.map(p => ({photoID: p.id, albumID: targetID}))
             }
-            const removeRes = await RunApi("/album/remove", {
-                authorize: true,
-                method: "POST",
-                params: {
-                    photoID: p.id,
-                    albumID: currentAlbum.id
-                }
-            });
-            if (!removeRes.success) {
-                console.error("Couldn't remove photo from album.", removeRes);
-                continue;
+        });
+        if (!copyRes.success) {
+            console.error("Couldn't copy all photos to target albums.", copyRes);
+            return;
+        }
+        const removeRes = await RunApi("/album/remove", {
+            authorize: true,
+            method: "POST",
+            params: {
+                removals: photos.map(p => ({photoID: p.id, albumID: currentAlbum.id}))
             }
+        });
+        if (!removeRes.success) {
+            console.error("Couldn't remove photos from target albums.", removeRes);
+            return;
         }
         dispatch("done");
     }

@@ -8,6 +8,8 @@ $message = [
     "formats" => ["image/jpeg"],
     "sizes" => sizes,
     "siteTitle" => DB::GetConfig("site_title"),
+    "promo" => DB::GetConfig("promo"),
+    "maxUpload" => ini_get('upload_max_filesize'),
 ];
 
 header("Content-Type: application/json");

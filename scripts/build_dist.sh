@@ -21,6 +21,7 @@ pushd $ROOT_DIR/public > /dev/null
     fi
     cp -R $item $ROOT_DIR/dist/public
   done
+  cp .htaccess $ROOT_DIR/dist/public
 popd > /dev/null
 
 # probably a better way to cache-bust, but here we are

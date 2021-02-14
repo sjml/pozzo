@@ -29,8 +29,12 @@
 
         map.attributionControl.setPrefix("");
 
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-            attribution: "Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors | Tiles &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
+        const accessToken = "pk.eyJ1Ijoic2ptbCIsImEiOiJja2t0ejBjcjMwdDh3Mm5wYmE5NmFzNXlxIn0.pdQ6u95-6A19aTZMBxnnyA";
+        L.tileLayer(`https://api.mapbox.com/styles/v1/sjml/ckl4ra6sc072918mucocsgswa/tiles/{z}/{x}/{y}@2x?access_token=${accessToken}`, {
+            attribution: "Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> | Tiles &copy; <a href=\"https://mapbox.com\">Mapbox</a>",
+            subdomains: "abcd",
+            tileSize: 512,
+            zoomOffset: -1,
         }).addTo(map);
 
         setMarkers(photos);
