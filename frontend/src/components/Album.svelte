@@ -14,7 +14,7 @@
     import Button from "./Button.svelte";
     import PhotoMap from "./PhotoMap.svelte";
     import EditableLayout from "./EditableLayout.svelte";
-
+    import Markdown from "./Markdown.svelte";
 
     export let albumSlug: number|string;
 
@@ -56,7 +56,9 @@
         const res = await RunApi(`/album/edit/${albumSlug}`, {
             params: {
                 showMap: album.showMap,
-                isPrivate: album.isPrivate
+                isPrivate: album.isPrivate,
+                description: album.description,
+                title: album.title,
             },
             method: "POST",
             authorize: true
@@ -243,11 +245,26 @@
     }
 
 
+    let reordering: boolean = false;
     let editing: boolean = false;
+    let rawDesc: string;
+    let rawTitle: string;
 
     function handleAlbumReorder(evt: CustomEvent) {
         album.photos = evt.detail.newOrder;
         reorderAlbum(album.photos.map(p => p.id));
+    }
+
+    async function toggleEditing() {
+        if (!editing) {
+            editing = true;
+        }
+        else {
+            album.title = rawTitle;
+            album.description = rawDesc;
+            await updateMetaData();
+            editing = false;
+        }
     }
 
 </script>
@@ -262,13 +279,25 @@
 {#await getAlbum()}
     Loading…
 {:then album}
-    {#if $isLoggedInStore && !editing}
+    {#if $isLoggedInStore && !reordering}
         <UploadZone on:done={() => getAlbum()} />
     {/if}
 
     <div class="titleRow">
-        <h2>{album.title}</h2>
+        {#if editing}
+            <h2 contenteditable="true" class="editing" bind:innerHTML={rawTitle}>{album.title}</h2>
+        {:else}
+            <h2>{album.title}</h2>
+        {/if}
         {#if $isLoggedInStore}
+            <Button
+                margin="0 0 0 10px"
+                title={editing ? "Commit Changes" : "Edit Title and Description"}
+                isToggled={editing}
+                on:click={toggleEditing}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M92.68629,216H48a8,8,0,0,1-8-8V163.31371a8,8,0,0,1,2.34315-5.65686l120-120a8,8,0,0,1,11.3137,0l44.6863,44.6863a8,8,0,0,1,0,11.3137l-120,120A8,8,0,0,1,92.68629,216Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><line x1="136" y1="64" x2="192" y2="120" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="44" y1="156" x2="100" y2="212" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
+            </Button>
             <div class="spacer"></div>
             <Button
                 margin="0 0 0 10px"
@@ -294,6 +323,20 @@
         {/if}
     </div>
 
+    {#if editing}
+        <div class="description editing"
+            contenteditable="true"
+            bind:innerHTML={rawDesc}
+        >
+            {album.description}
+        </div>
+    {:else}
+        <div class="description"
+        >
+            <Markdown markdown={album.description} />
+        </div>
+    {/if}
+
     {#if album.showMap && album.photos.length > 0}
         <div class="albumMap">
             <PhotoMap photos={album.photos} />
@@ -301,18 +344,18 @@
     {/if}
 
     {#if $isLoggedInStore && album.photos.length > 1}
-        <div class="reorderButton" class:toggled={editing}>
+        <div class="reorderButton" class:toggled={reordering}>
             <Button
                 margin="0 0 0 10px"
-                on:click={() => {editing = !editing}}
-                title={`${editing ? "Exit" : "Enter"} Edit Mode`}
+                on:click={() => {reordering = !reordering}}
+                title={`${reordering ? "Exit" : "Enter"} Edit Mode`}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="192 144 224 176 192 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="32" y1="176" x2="224" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="64 112 32 80 64 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="224.00006" y1="80" x2="32.00006" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
             </Button>
         </div>
     {/if}
 
-    {#if editing}
+    {#if reordering}
         <EditableLayout
             photoList={album.photos}
             on:reordered={handleAlbumReorder}
@@ -399,8 +442,15 @@
     }
 
     h2 {
-        padding-left: 20px;
+        margin-left: 20px;
+
         font-size: 3em;
+        padding: 5px;
+    }
+
+    h2.editing {
+        background-color: white;
+        color: black;
     }
 
     svg {
@@ -423,5 +473,18 @@
 
     .reorderButton.toggled {
         background-color: rgb(101, 101, 252);
+    }
+
+    .description {
+        max-width: 900px;
+        margin: 0 auto 40px auto;
+
+        font-size: 1.1em;
+        padding: 5px 20px;
+    }
+
+    .description.editing {
+        background-color: white;
+        color: black;
     }
 </style>

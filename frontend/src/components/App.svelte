@@ -42,7 +42,25 @@
             $frontendStateStore.fullScreen = false;
         }
     }
+
+    let title = "Pozzo";
+    $: {
+        const st = $siteData.siteTitle
+        if (typeof st === "string") {
+            title = st;
+
+            if ($frontendStateStore.currentAlbum) {
+                title += ` | ${$frontendStateStore.currentAlbum.title}`;
+            }
+        }
+    }
 </script>
+
+<svelte:head>
+    <title>
+        {title}
+    </title>
+</svelte:head>
 
 <div class="container">
     <Router url={url}>

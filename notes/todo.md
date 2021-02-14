@@ -6,10 +6,10 @@
     - file uploader gets stuck behind map
     - making new album and signing out should refresh album list (does locally, but not remote? blergh.)
     - deleting and uploading new photo to album will insert it in the gap
+    - race if you move photos while they're still loading
 
 0. Before starting actual use
     - requires backend support
-        - title/description editing for albums and pictures
         - album list context menu (delete / dissolve)
     - research needed
         - blur back on image pages? (look at stackblur/canvas solution)
@@ -18,7 +18,6 @@
     - clean up hacks
         - redo fullscreen to actually listen for events and make sure it's worked
     - UX niceties
-        - change title as we navigate around
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
@@ -34,10 +33,6 @@
         - note: once we've added a third PHP library, it might be time to properly set up composer
 
 1. Frontend pass
-    - some research required
-        - url thinks
-            - image urls that aren't predictable? 
-            - remove album numberic urls?
     - clean up hacks
         - check for all console error statements and handle gracefully in UI
             - test bad responses for everything... broken file upload hangs the UI?
