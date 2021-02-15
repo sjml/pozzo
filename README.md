@@ -1,5 +1,7 @@
 # Pozzo
 
+![automated backend tests](https://github.com/sjml/pozzo/workflows/automated%20backend%20tests/badge.svg)
+
 Because the world needed another web photo gallery. 
 
 Goals:
