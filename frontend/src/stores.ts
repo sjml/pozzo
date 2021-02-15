@@ -1,4 +1,4 @@
-import { writable, readable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import type { FrontendState, SiteConfig } from './pozzo.type';
 
 export const siteData = writable<SiteConfig>(
@@ -9,6 +9,7 @@ export const siteData = writable<SiteConfig>(
         siteTitle: false,
         sizes: [],
         promo: false,
+        maxUploadBytes: 0,
     }
 );
 
@@ -27,16 +28,12 @@ export const frontendStateStore = writable<FrontendState>({
 });
 
 
-export const isLoggedInStore = writable<boolean>(false);
 
 export const loginCredentialStore = writable<string>(localStorage.getItem("pozzoLoginJWT") || "");
 loginCredentialStore.subscribe(value => {
     localStorage.setItem("pozzoLoginJWT", value);
-    if (value.length == 0) {
-        isLoggedInStore.set(false);
-    }
-    else {
-        isLoggedInStore.set(true);
-    }
 });
 
+export const isLoggedInStore = derived(loginCredentialStore,
+    $loginCredentialStore => $loginCredentialStore.length > 0
+);

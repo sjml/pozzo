@@ -10,6 +10,11 @@ DB::Init();
 register_shutdown_function(["DB", "Cleanup"]);
 
 function error_handler($errno, $errstr, $errfile, $errline) {
+    if (error_reporting() == 0) {
+        // an error was suppressed for some reason.
+        //   assume it was a good one.
+        return;
+    }
     http_response_code(500);
     header("Content-Type: application/json");
     echo json_encode([

@@ -254,7 +254,7 @@ class DB {
 
         $vals = [];
         $fieldList = [];
-        $prepCommand = "INSERT INTO photoMeta (id, ";
+        $prepCommand = "INSERT INTO photoMeta (id";
         foreach (photoExifFields as $meta => $datums) {
             foreach ($datums as $field) {
                 if ($photoData[$meta . "_" . $field] != null) {
@@ -279,7 +279,10 @@ class DB {
             }
         }
 
-        $prepCommand .= implode(", ", $fieldList) . ") ";
+        if (count($fieldList) > 0) {
+            $prepCommand .= ", " . implode(", ", $fieldList);
+        }
+        $prepCommand .= ") ";
         $prepCommand .= "VALUES (?" . str_repeat(", ?", count($vals)) . ")";
 
         $statement = self::$pdb->prepare($prepCommand);

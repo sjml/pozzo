@@ -1,0 +1,43 @@
+This was assembled after a quick pass through Flickr looking for Creative Commons images that showed a variety of file sizes, aspect ratios, camera types (including virtual), subject matter, and amount/quality of EXIF data. It's not exhaustive by any stretch, but not a bad starting place.
+
+JPEG
+    - 01.jpeg:  https://www.flickr.com/photos/130925681@N04/18523463293
+        - Title: TESV: Kountervibe ENB Northern Lights
+        - Artist: Eilian Parker
+        - License: CC BY-NC-ND 2.0 https://creativecommons.org/licenses/by-nc-nd/2.0/
+    - 02.jpeg:  https://www.flickr.com/photos/162485676@N06/46589527714/
+        - Title: Panda head
+        - Artist: Ziad Fhema
+        - License: CC BY 2.0: https://creativecommons.org/licenses/by/2.0/
+    - 03.jpeg:  https://www.flickr.com/photos/42868587@N00/41088655274/
+        - Title: Basilica di San Pietro
+        - Artist: rpphotos
+        - License: CC BY-NC 2.0: https://creativecommons.org/licenses/by-nc/2.0/
+    - 04.jpeg: https://www.flickr.com/photos/125701341@N07/32352750774
+        - Title: Jerusalem
+        - Artist: ilirjan rrumbullaku
+        - License: CC BY-NC-ND 2.0: https://creativecommons.org/licenses/by-nc-nd/2.0/
+    - 05.jpeg: https://www.flickr.com/photos/algarve04/30981405747
+        - Title: Rivière Le Vert
+        - Artist: Coline Buch
+        - License: CC BY-NC-ND 2.0: https://creativecommons.org/licenses/by-nc-nd/2.0/
+    - 06.jpg: https://www.flickr.com/photos/130426118@N08/44992160082/
+        - Title: Blue pearls
+        - Artist: Sylvia Sassen
+        - License: CC BY-ND 2.0: https://creativecommons.org/licenses/by-nd/2.0/
+    - 07.jpg:  https://www.flickr.com/photos/mathiasappel/38969700611/
+        - Title: Red panda
+        - Artist: Matthias Appel
+        - License: CC0 (Public Domain): https://creativecommons.org/publicdomain/zero/1.0/
+    - 08.jpg: https://www.flickr.com/photos/claudiaschillinger/49327659298
+        - Title: Sweden 2019
+        - Artist: Claudia Schillinger
+        - License: CC BY-ND 2.0: https://creativecommons.org/licenses/by-nd/2.0/
+    - 09.jpeg: https://www.flickr.com/photos/117569844@N05/30495186204/
+        - Title: into the mist
+        - Artist: 小佳 顏
+        - License: CC BY-NC-ND 2.0: https://creativecommons.org/licenses/by-nc-nd/2.0/
+    - 10.jpg:  https://www.flickr.com/photos/89654772@N05/49635344151/
+        - Title: Rievaulx Abbey
+        - Artist: Richard
+        - License: CC BY-ND 2.0: https://creativecommons.org/licenses/by-nd/2.0/

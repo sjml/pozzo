@@ -10,9 +10,14 @@ backend functionality tests
     ✅ can't log in with wrong credentials
     ✅ can log in with right credentials
     ✅ login check serves new usable token
-    can't upload without credentials
-    upload 10 pictures
-    should all be in unsorted
+    ✅ can't upload without credentials
+    ✅ can upload with credentials
+    ✅ cannot upload incorrect file type
+    ✅ cannot upload incorrect image type
+    ✅ upload 10 pictures, verify hashes
+    ✅ verify that all declared sizes exist for all images
+    ✅ download original image and confirm it has same hash as upload
+    all uploads should be in unsorted
     create new album
     move 5 pictures to that album
     create another new album (set to private)

@@ -3,6 +3,7 @@ import subprocess
 import shutil
 import time
 
+import requests
 import pytest
 
 class PozzoServer:
@@ -23,7 +24,7 @@ class PozzoServer:
             ["php",
                 "-c", os.path.join(baseDir, "scripts", "configs", "no-debug.php.ini"),
                 "-S", self.baseURL,
-                "-t", os.path.join(baseDir, "public", "api")
+                "-t", os.path.join(baseDir, "public")
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -31,6 +32,9 @@ class PozzoServer:
 
     def api(self, connStr):
         return f"http://{self.baseURL}/api{connStr}"
+
+    def access(self, connStr):
+        return f"http://{self.baseURL}/{connStr}"
 
     def shutdown(self):
         self.process.terminate()
@@ -43,9 +47,16 @@ class PozzoServer:
                 os.remove(self.dbPath)
             os.rename(self.dbPath + ".bak", self.dbPath)
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(scope="session")
 def server():
     p = PozzoServer()
-    time.sleep(2)
+    time.sleep(5)
     yield p
     p.shutdown()
+
+@pytest.fixture(scope="module")
+def auth(server):
+    data = {"userName": "test_user", "password": "bad_password"}
+    res = requests.post(server.api("/login"), json=data)
+    time.sleep(1)
+    return {"Authorization": f"Bearer {res.json()['token']}"}

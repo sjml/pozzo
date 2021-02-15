@@ -221,7 +221,8 @@ function _gpsToDegrees($val) {
 }
 
 function processExif(&$photoData, $originalFilePath) {
-    $exif = exif_read_data($originalFilePath, 0, true);
+    // suppressing notices from exif_read_data
+    $exif = @exif_read_data($originalFilePath, 0, true);
 
     foreach (photoExifFields as $meta => $datums) {
         // just fill them with nulls and let the
