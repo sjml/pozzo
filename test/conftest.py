@@ -6,6 +6,15 @@ import time
 import requests
 import pytest
 
+POZZO_CONF = "no-debug.php.ini"
+if "POZZO_DEBUG" in os.environ:
+    POZZO_CONF = "debug.php.ini"
+PUBLIC_DIR = "public"
+if "POZZO_DIST" in os.environ:
+    PUBLIC_DIR = os.path.join("dist", "public")
+
+
+
 class PozzoServer:
     def __init__(self):
         baseDir = os.path.join(os.path.dirname(__file__), "..")
@@ -22,9 +31,9 @@ class PozzoServer:
             os.rename(self.imgPath, self.imgPath + ".bak")
         self.process = subprocess.Popen(
             ["php",
-                "-c", os.path.join(baseDir, "scripts", "configs", "no-debug.php.ini"),
+                "-c", os.path.join(baseDir, "scripts", "configs", POZZO_CONF),
                 "-S", self.baseURL,
-                "-t", os.path.join(baseDir, "public")
+                "-t", os.path.join(baseDir, PUBLIC_DIR)
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

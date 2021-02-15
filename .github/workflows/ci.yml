@@ -1,0 +1,32 @@
+name: Run backend tests
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
+        extensions: imagick
+        ini-values: "error_reporting=E_ERROR|E_WARNING|E_PARSE,upload_max_filesize=100M,post_max_size=100M,max_execution_time=300"
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install prerequisites
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install exiftool
+        python -m pip install --upgrade pip
+        pip install -r ./test/requirements.txt
+    - name: Build distribution
+      run: ./scripts/build_dist.sh
+    - name: Run tests
+      env:
+        POZZO_DIST: 1
+      run: cd test && pytest

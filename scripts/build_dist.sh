@@ -35,9 +35,10 @@ popd > /dev/null
 pushd $ROOT_DIR/dist/public > /dev/null
   busts=(/css/pozzo-global.css /build/bundle.css /build/bundle.js)
   for b in ${busts[@]}; do
-    hash=$(md5 -q .$b)
+    hash=$(md5sum $b | awk '{print $1}')
     newname=${b%.*}.$hash.${b##*.}
     mv .$b .$newname
-    sed -i '' -e "s:$b:$newname:g" "./index.html"
+    sed -i.bak -e "s:$b:$newname:g" "./index.html"
+    rm ./index.html.bak
   done
 popd > /dev/null
