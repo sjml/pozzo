@@ -1,4 +1,4 @@
-name: Run backend tests
+name: automated backend tests
 
 on: push
 
