@@ -77,6 +77,11 @@ function editMetadata() {
         return;
     }
 
+    if ($input == null) {
+        output(["message" => "Missing metadata parameters"], 400);
+        return;
+    }
+
     $title = array_key_exists("title", $input)
         ? $input["title"]
         : $album["title"];
@@ -120,10 +125,8 @@ function deleteAlbum() {
     $result = DB::DeleteAlbum($input["albumID"]);
     if (is_array($result)) {
         output(["message" => "Album deleted", "data" => $result]);
-    } elseif ($result == -1) {
-        output(["message" => "Could not delete: no such album"], 404);
     } else {
-        output(["message" => "Could not delete album"], 400);
+        output(["message" => "Could not delete: no such album"], 404);
     }
 }
 

@@ -17,21 +17,22 @@ backend functionality tests
     ✅ upload 10 pictures, verify hashes
     ✅ verify that all declared sizes exist for all images
     ✅ download original image and confirm it has same hash as upload
-    all uploads should be in unsorted
-    create new album
-    move 5 pictures to that album
-    create another new album (set to private)
-    move other 5 images to the private album
-    "unsorted" album is empty now
-    credentialed user can see album
-    non-credentialed cannot
-    reorder images in album
+    ✅ all uploads should be in unsorted
+    ✅ create new album
+    ✅ move 5 pictures to that album
+    ✅ create another new album (set to private)
+    ✅ credentialed user can see album
+    ✅ non-credentialed cannot
+    ✅ non-credentialed cannot edit album metadata
+    ✅ credentialed can edit album metadata
+    ✅ reorder images in album
+    ✅ reorder album list
+    ✅ non-credentialed cannot delete album
+    ✅ credentialed can delete album
     star images
     check that they are in starred list
     delete individual image
         - no longer in album
-    delete album
-        - images move back to unsorted
     delete album + images
         - images are gone
 

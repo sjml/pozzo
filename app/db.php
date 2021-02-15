@@ -461,9 +461,6 @@ class DB {
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
-        if (self::$pdb->changes() == 0) {
-            return -2;
-        }
 
         return $albumData;
     }

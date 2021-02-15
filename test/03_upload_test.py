@@ -98,3 +98,23 @@ def test_orig_getback(server):
 def test_non_existent_image_is_nonexistent(server):
     res = requests.get(server.api("/photo/view/11"))
     assert res.status_code == 404
+
+def test_duplicate_allowed_but_unique(server, auth):
+    fname = f"./test_corpus/jpeg/01.jpeg"
+    with open(fname, "rb") as f:
+        res = requests.post(
+            server.api("/upload"),
+            headers=auth,
+            files={"photoUp": f},
+        )
+    assert res.status_code == 200
+    dupe_data = res.json()
+
+    res = requests.get(
+        server.api("/photo/view/1"),
+    )
+    assert res.status_code == 200
+    orig_data = res.json()
+
+    assert orig_data["hash"] == dupe_data["hash"]
+    assert orig_data["uniq"] != dupe_data["uniq"]
