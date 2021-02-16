@@ -33,7 +33,7 @@ backend functionality tests
         - no longer in album
         - upload image, should go at end rather than in the gap
     delete album + images
-        - images are gone
+        - images are gone from server
     once exif import has been revised, check stored column data for images and make sure it matches expectations
 
 found by code coverage:

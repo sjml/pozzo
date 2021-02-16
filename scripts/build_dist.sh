@@ -26,6 +26,7 @@ pushd $ROOT_DIR/dist > /dev/null
 popd > /dev/null
 rm $ROOT_DIR/dist/composer.json $ROOT_DIR/dist/composer.lock
 rm -rf $ROOT_DIR/dist/vendor/miljar/php-exif/tests/files
+rm -rf $ROOT_DIR/dist/vendor/kornrunner/blurhash/test/data
 
 mkdir $ROOT_DIR/dist/public
 pushd $ROOT_DIR/public > /dev/null

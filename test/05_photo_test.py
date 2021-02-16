@@ -18,19 +18,6 @@ def test_nonexistent_photo_is_nonexistent(server, req):
     )
     assert res.status_code == 404
 
-def test_photo_meta(server, req):
-    res = req.get(
-        server.api("/photo/meta/4"),
-    )
-    assert res.status_code == 200
-    assert res.json()["IFD0_DateTime"] == 1488397859
-
-def test_photo_meta_nonexistent(server, req):
-    res = req.get(
-        server.api("/photo/meta/25"),
-    )
-    assert res.status_code == 404
-
 def test_delete_photo_auth(server, auth, req):
     res = req.post(
         server.api("/photo/delete"),

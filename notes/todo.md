@@ -30,12 +30,8 @@
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
-        - transition selection border appearance
         - make sure the viewing experience on a mobile-sized screen is decent
         - https://github.com/rikschennink/fitty
-    - better EXIF extraction (https://github.com/PHPExif/php-exif ?)
-        - will also pull in keywords from photos.app export, which is something that should be supported in the backend (along with stars)
-        - while looking at ingest again, consider image sizes
 
 1. Frontend pass
     - clean up hacks
@@ -51,15 +47,11 @@
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
 2. Backend pass
     - limit length of text things (titles, descriptions)
-    - remove reset endpoint
-    - complete test suite
     - pagination or just trust used to break stuff up into separate albums?
 3. Frontend caching
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
     - something-something web workers? BLERGH.
 4. Video / live pictures?
-    - let backend tell frontend what type of media it will accept
-    - also file size upload limits, etc. (side note: can this be from code or does it have to be in php.ini?)
 
 ## future
 * special handling for unsorted album? (automatically removing from it)

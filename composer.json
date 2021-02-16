@@ -3,7 +3,8 @@
   "require": {
     "miljar/php-exif": "^0.6.5",
     "firebase/php-jwt": "^5.2",
-    "ausi/slug-generator": "^1.1"
+    "ausi/slug-generator": "^1.1",
+    "kornrunner/blurhash": "^1.2"
   },
   "require-dev": {
     "phpunit/php-code-coverage": "^9.2"

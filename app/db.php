@@ -60,46 +60,45 @@ class DB {
         $statement->execute();
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos (";
-        $prepCommand .= "id INTEGER PRIMARY KEY";
-        $prepCommand .= ", originalFilename TEXT";
-        $prepCommand .= ", title TEXT";
-        $prepCommand .= ", hash TEXT";
-        $prepCommand .= ", uniq TEXT";
-        $prepCommand .= ", width INTEGER, height INTEGER";
-        $prepCommand .= ", aspect FLOAT";
+        $prepCommand .= "id INTEGER PRIMARY KEY";     // stub
         $prepCommand .= ", uploadTimeStamp DATETIME";
         $prepCommand .= ", uploadedBy INTEGER";
+        $prepCommand .= ", originalFilename TEXT";
         $prepCommand .= ", size INTEGER";
-        $prepCommand .= ", latitude FLOAT";
-        $prepCommand .= ", longitude FLOAT";
+        $prepCommand .= ", width INTEGER, height INTEGER";
+        $prepCommand .= ", title TEXT";               // stub
+        $prepCommand .= ", hash TEXT";                // stub
+        $prepCommand .= ", uniq TEXT";                // stub
+        $prepCommand .= ", blurHash TEXT";            // stub
+        $prepCommand .= ", aspect FLOAT";             // stub
+
+        $prepCommand .= ", make TEXT";
+        $prepCommand .= ", model TEXT";
+        $prepCommand .= ", lens TEXT";
+        $prepCommand .= ", mime TEXT";
+        $prepCommand .= ", creationDate DATETIME";
+        $prepCommand .= ", keywords TEXT";
+        $prepCommand .= ", subjectArea TEXT";
+
+        // intentionally setting these as text so they don't need to be formatted
+        //   not planning to do math with these, so let's make it easier on ourselves
+        $prepCommand .= ", aperture TEXT";
+        $prepCommand .= ", iso TEXT";
+        $prepCommand .= ", shutterSpeed TEXT";
+
+        $prepCommand .= ", gpsLat FLOAT";
+        $prepCommand .= ", gpsLon FLOAT";
+        $prepCommand .= ", gpsAlt FLOAT";
+
         $prepCommand .= ", FOREIGN KEY(uploadedBy) REFERENCES users(id)";
 
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
-        $prepCommand =
-            "CREATE TABLE IF NOT EXISTS photoMeta (id INTEGER PRIMARY KEY, ";
-        $fieldDescs = [];
-        foreach (photoExifFields as $meta => $datums) {
-            foreach ($datums as $field) {
-                $dbFieldName = $meta . "_" . $field . " ";
-                if (strpos($field, "DateTime") !== false) {
-                    array_push($fieldDescs, $dbFieldName . " " . "DATETIME");
-                } else {
-                    array_push($fieldDescs, $dbFieldName . " " . "TEXT");
-                }
-            }
-        }
-
-        $prepCommand .= implode(", ", $fieldDescs) . ")";
-        $statement = self::$pdb->prepare($prepCommand);
-        $statement->execute();
-
         $prepCommand = "CREATE TABLE IF NOT EXISTS photoPreviews (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", tinyJPEG TEXT";
-        $prepCommand .= ", tinyWebP TEXT";
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
@@ -216,62 +215,45 @@ class DB {
         $order
     ) {
         $statement = self::$pdb->prepare(
-            "INSERT INTO photos (title, originalFilename, hash, uniq, width, height, aspect, size, uploadTimeStamp, uploadedBy, latitude, longitude) VALUES (?,?,?,?,?,?,?,?,datetime('now'),?,?,?)",
+            "INSERT INTO photos (
+                uploadTimeStamp, uploadedBy, originalFilename, size,
+                width, height, title, hash, uniq, blurHash, aspect,
+                make, model, lens, mime, creationDate, keywords, subjectArea,
+                aperture, iso, shutterSpeed, gpsLat, gpsLon, gpsAlt
+            ) VALUES (
+                datetime('now'), :uploadedBy, :originalFilename, :size,
+                :width, :height, :title, :hash, :uniq, :blurHash, :aspect,
+                :make, :model, :lens, :mime, :creationDate, :keywords, :subjectArea,
+                :aperture, :iso, :shutterSpeed, :gpsLat, :gpsLon, :gpsAlt
+            )",
         );
-        $statement->bindParam(1, $photoData["title"], SQLITE3_TEXT);
-        $statement->bindParam(2, $originalFilename, SQLITE3_TEXT);
-        $statement->bindParam(3, $photoData["hash"], SQLITE3_TEXT);
-        $statement->bindParam(4, $photoData["uniq"], SQLITE3_TEXT);
-        $statement->bindParam(5, $photoData["width"], SQLITE3_INTEGER);
-        $statement->bindParam(6, $photoData["height"], SQLITE3_INTEGER);
-        $statement->bindParam(7, $photoData["aspect"], SQLITE3_FLOAT);
-        $statement->bindParam(8, $photoData["size"], SQLITE3_INTEGER);
-        $statement->bindParam(9, $photoData["uploadedBy"], SQLITE3_INTEGER);
-        $statement->bindParam(10, $photoData["latitude"], SQLITE3_FLOAT);
-        $statement->bindParam(11, $photoData["longitude"], SQLITE3_FLOAT);
+
+        $statement->bindParam(":uploadedBy", $photoData["uploadedBy"], SQLITE3_INTEGER);
+        $statement->bindParam(":originalFilename", $originalFilename, SQLITE3_TEXT);
+        $statement->bindParam(":size", $photoData["size"], SQLITE3_INTEGER);
+        $statement->bindParam(":width", $photoData["width"], SQLITE3_INTEGER);
+        $statement->bindParam(":height", $photoData["height"], SQLITE3_INTEGER);
+        $statement->bindParam(":title", $photoData["title"], SQLITE3_TEXT);
+        $statement->bindParam(":hash", $photoData["hash"], SQLITE3_TEXT);
+        $statement->bindParam(":uniq", $photoData["uniq"], SQLITE3_TEXT);
+        $statement->bindParam(":blurHash", $photoData["blurHash"], SQLITE3_TEXT);
+        $statement->bindParam(":aspect", $photoData["aspect"], SQLITE3_FLOAT);
+        $statement->bindParam(":make", $photoData["make"], SQLITE3_TEXT);
+        $statement->bindParam(":model", $photoData["model"], SQLITE3_TEXT);
+        $statement->bindParam(":lens", $photoData["lens"], SQLITE3_TEXT);
+        $statement->bindParam(":mime", $photoData["mime"], SQLITE3_TEXT);
+        $statement->bindParam(":creationDate", $photoData["creationDate"], SQLITE3_INTEGER);
+        $statement->bindParam(":keywords", $photoData["keywords"], SQLITE3_TEXT);
+        $statement->bindParam(":subjectArea,",$photoData["subjectArea"] , SQLITE3_TEXT);
+        $statement->bindParam(":aperture", $photoData["aperture"], SQLITE3_TEXT);
+        $statement->bindParam(":iso", $photoData["iso"], SQLITE3_TEXT);
+        $statement->bindParam(":shutterSpeed", $photoData["shutterSpeed"], SQLITE3_TEXT);
+        $statement->bindParam(":gpsLat", $photoData["gpsLat"], SQLITE3_FLOAT);
+        $statement->bindParam(":gpsLon", $photoData["gpsLon"], SQLITE3_FLOAT);
+        $statement->bindParam(":gpsAlt", $photoData["gpsAlt"], SQLITE3_FLOAT);
 
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
-
-        $vals = [];
-        $fieldList = [];
-        $prepCommand = "INSERT INTO photoMeta (id";
-        foreach (photoExifFields as $meta => $datums) {
-            foreach ($datums as $field) {
-                if ($photoData[$meta . "_" . $field] != null) {
-                    array_push($fieldList, $meta . "_" . $field);
-                    if (strpos($field, "DateTime") !== false) {
-                        $date = \DateTime::createFromFormat(
-                            "Y:m:d H:i:s",
-                            $photoData[$meta . "_" . $field],
-                        );
-
-                        array_push($vals, [
-                            $date->format("U"),
-                            SQLITE3_INTEGER,
-                        ]);
-                    } else {
-                        array_push($vals, [
-                            $photoData[$meta . "_" . $field],
-                            SQLITE3_TEXT,
-                        ]);
-                    }
-                }
-            }
-        }
-
-        if (count($fieldList) > 0) {
-            $prepCommand .= ", " . implode(", ", $fieldList);
-        }
-        $prepCommand .= ") ";
-        $prepCommand .= "VALUES (?" . str_repeat(", ?", count($vals)) . ")";
-
-        $statement = self::$pdb->prepare($prepCommand);
-        $statement->bindParam(1, $photoData["id"]);
-        foreach ($vals as $i => $value) {
-            $statement->bindParam($i + 2, $value[0], $value[1]);
-        }
-        $statement->execute();
 
         $statement = self::$pdb->prepare(
             "INSERT INTO photoPreviews(id, tinyJPEG) VALUES (?, ?)",
@@ -301,17 +283,6 @@ class DB {
         return $results->fetchArray(SQLITE3_ASSOC);
     }
 
-    static function GetMeta($id) {
-        $query = "SELECT * FROM photoMeta WHERE id = ?";
-        $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $id, SQLITE3_INTEGER);
-        $results = $statement->execute();
-        if ($results == false) {
-            return null;
-        }
-        return $results->fetchArray(SQLITE3_ASSOC);
-    }
-
     static function DeletePhoto($id) {
         $photoData = self::GetPhoto($id);
         if ($photoData == null) {
@@ -329,11 +300,6 @@ class DB {
         $results = $statement->execute();
 
         $query = "DELETE FROM photoPreviews WHERE id = ?";
-        $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
-        $results = $statement->execute();
-
-        $query = "DELETE FROM photoMeta WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();

@@ -406,7 +406,6 @@
 
     .albumPhotos {
         position: relative;
-        max-width: 95%;
         height: 50px;
         margin-left: auto;
         margin-right: auto;
@@ -417,6 +416,10 @@
 
         cursor: pointer;
         overflow: hidden;
+
+        outline: 0px solid white;
+        transition-property: outline;
+        transition-duration: 150ms;
     }
 
     .albumSlot.selected {

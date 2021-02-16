@@ -1,58 +1,50 @@
 <?php
 
+use kornrunner\Blurhash\Blurhash;
+
 require_once __DIR__ . "/db.php";
 
 const sizes = [
     [
+        "maxHeight" => 2160,
+        "maxWidth" => 3840,
+        "label" => "large2x",
+    ],
+    [
+        "maxHeight" => 1440,
+        "maxWidth" => 2560,
+        "label" => "medium2x",
+    ],
+    [
         "maxHeight" => 1080,
         "maxWidth" => 1920,
-        "label" => "large2x",
+        "label" => "large",
     ],
     [
         "maxHeight" => 720,
         "maxWidth" => 1280,
-        "label" => "medium2x",
-    ],
-    [
-        "maxHeight" => 540,
-        "maxWidth" => 960,
-        "label" => "large",
-    ],
-    [
-        "maxHeight" => 360,
-        "maxWidth" => 640,
         "label" => "medium",
     ],
-];
-
-const photoExifFields = [
-    "IFD0" => ["Make", "Model", "DateTime"],
-    "EXIF" => [
-        "ExposureTime",
-        "FNumber",
-        "ISOSpeedRatings",
-        "DateTimeOriginal",
-        "ShutterSpeedValue",
-        "ApertureValue",
-        "BrightnessValue",
-        "MeteringMode",
-        "Flash",
-        "FocalLength",
-        "SubjectLocation",
-        "MakerNote",
+    [
+        "maxHeight" => 300,
+        "maxWidth" => 300,
+        "label" => "small2x",
     ],
-    "GPS" => [
-        "GPSLatitudeRef",
-        "GPSLatitude",
-        "GPSLongitudeRef",
-        "GPSLongitude",
-        "GPSAltitudeRef",
-        "GPSAltitude",
-        "GPSSpeedRef",
-        "GPSSpeed",
-        "GPSImgDirectionRef",
-        "GPSImgDirection",
+    [
+        "maxHeight" => 150,
+        "maxWidth" => 150,
+        "label" => "small",
     ],
+    [
+        "maxHeight" => 64,
+        "maxWidth" => 64,
+        "label" => "tiny2x",
+    ],
+    [
+        "maxHeight" => 32,
+        "maxWidth" => 32,
+        "label" => "tiny",
+    ]
 ];
 
 function getImagePath($sizeLabel, $hash, $uniq) {
@@ -167,33 +159,54 @@ function processImage(&$photoData, $albumID, $order) {
         );
     }
 
-    // generate tiny preview
-    // convert -define jpeg:size=32x32 IMG_6738.jpeg -resize 32x32 -auto-orient -strip -quality 40 out.jpg
-    $img->setOption("jpeg:size", "32x32");
+    // // generate tiny preview
+    // // convert -define jpeg:size=32x32 IMG_6738.jpeg -resize 32x32 -auto-orient -strip -quality 40 out.jpg
+    // $img->setOption("jpeg:size", "32x32");
+    // $img->readImage($origPath);
+    // $img->scaleImage(32, 32, true);
+    // $orient = $img->getImageOrientation();
+    // switch ($orient) {
+    //     case imagick::ORIENTATION_RIGHTTOP:
+    //         $img->rotateImage("#00000000", 90);
+    //         break;
+    //     case imagick::ORIENTATION_BOTTOMRIGHT:
+    //         $img->rotateImage("#00000000", 180);
+    //         break;
+    //     case imagick::ORIENTATION_LEFTBOTTOM:
+    //         $img->rotateImage("#00000000", 270);
+    //         break;
+    // }
+    // $img->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
+    // $img->stripImage();
+    // $img->setCompressionQuality(40);
+    // $img->setImageFormat("jpeg");
+
+    // $photoData["tinyJPEG"] = base64_encode($img->getImageBlob());
+
+    $img->setOption(
+        "jpeg:size",
+        sizes[count(sizes) - 1]["maxWidth"] . "x" . sizes[count(sizes) - 1]["maxHeight"],
+    );
     $img->readImage($origPath);
-    $img->scaleImage(32, 32, true);
-    $orient = $img->getImageOrientation();
-    switch ($orient) {
-        case imagick::ORIENTATION_RIGHTTOP:
-            $img->rotateImage("#00000000", 90);
-            break;
-        case imagick::ORIENTATION_BOTTOMRIGHT:
-            $img->rotateImage("#00000000", 180);
-            break;
-        case imagick::ORIENTATION_LEFTBOTTOM:
-            $img->rotateImage("#00000000", 270);
-            break;
+
+    $blur = imagecreatefromstring(file_get_contents(getImagePath("tiny", $photoData["hash"], $photoData["uniq"])));
+    $blurW = imagesx($blur);
+    $blurH = imagesy($blur);
+
+    $pixels = [];
+    for ($y = 0; $y < $blurH; ++$y) {
+        $row = [];
+        for ($x = 0; $x < $blurW; ++$x) {
+            $index = imagecolorat($blur, $x, $y);
+            $colors = imagecolorsforindex($blur, $index);
+            $row[] = [$colors["red"], $colors["green"], $colors["blue"]];
+        }
+        $pixels[] = $row;
     }
-    $img->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
-    $img->stripImage();
-    $img->setCompressionQuality(40);
-    $img->setImageFormat("jpeg");
 
-    $photoData["tinyJPEG"] = base64_encode($img->getImageBlob());
-
-    //// <sigh>
-    // $img->setImageFormat("webp");
-    // $photoData["tinyWebP"] = base64_encode($img->getImageBlob());
+    $components_x = 4;
+    $components_y = 3;
+    $photoData["blurHash"] = Blurhash::encode($pixels, $components_x, $components_y);
 
     processExif($photoData, $origPath);
 
@@ -205,75 +218,32 @@ function processImage(&$photoData, $albumID, $order) {
     );
 }
 
-function _gpsToDegrees($val) {
-    $ds = explode("/", $val[0]);
-    $ms = explode("/", $val[1]);
-    $ss = explode("/", $val[2]);
-    $d = floatval($ds[0]) / floatval($ds[1]);
-    $m = floatval($ms[0]) / floatval($ms[1]);
-    $s = floatval($ss[0]) / floatval($ss[1]);
-
-    return $d + $m / 60.0 + $s / 3600.0;
-}
-
 function processExif(&$photoData, $originalFilePath) {
-    // suppressing notices from exif_read_data
-    $exif = @exif_read_data($originalFilePath, 0, true);
+    $reader = \PHPExif\Reader\Reader::factory(\PHPExif\Reader\Reader::TYPE_EXIFTOOL);
+    $exif = $reader->read($originalFilePath);
 
-    foreach (photoExifFields as $meta => $datums) {
-        // just fill them with nulls and let the
-        //   database worry about it
-        if (!array_key_exists($meta, $exif)) {
-            $exif[$meta] = [];
-        }
-        foreach ($datums as $field) {
-            if (!array_key_exists($field, $exif[$meta])) {
-                $photoData[$meta . "_" . $field] = null;
-                continue;
-            }
-            $val = $exif[$meta][$field];
-            if (is_array($val)) {
-                $val = "[" . implode(", ", $val) . "]";
-            }
-            $photoData[$meta . "_" . $field] = strval($val);
-        }
+    $rawData = $exif->getRawData();
+
+    $photoData["make"] = $rawData["IFD0:Make"] ?? null;
+    $photoData["model"] = $rawData["IFD0:Model"] ?? null;
+    $photoData["lens"] = $rawData["ExifIFD:LensModel"] ?? null;
+    $photoData["mime"] = $rawData["File:MIMEType"] ?? null;
+
+    $photoData["creationDate"] = $exif->getCreationDate() ?? null;
+    if ($photoData["creationDate"] != null) {
+        $photoData["creationDate"] = $photoData["creationDate"]->getTimeStamp();
     }
 
-    if (array_key_exists("GPS", $exif)) {
-        $gpsLat = array_key_exists("GPSLatitude", $exif["GPS"])
-            ? $exif["GPS"]["GPSLatitude"]
-            : null;
-        $gpsLatRef = array_key_exists("GPSLatitudeRef", $exif["GPS"])
-            ? $exif["GPS"]["GPSLatitudeRef"]
-            : null;
-        $gpsLon = array_key_exists("GPSLongitude", $exif["GPS"])
-            ? $exif["GPS"]["GPSLongitude"]
-            : null;
-        $gpsLonRef = array_key_exists("GPSLongitudeRef", $exif["GPS"])
-            ? $exif["GPS"]["GPSLongitudeRef"]
-            : null;
-
-        if (
-            $gpsLat != null &&
-            $gpsLatRef != null &&
-            $gpsLon != null &&
-            $gpsLonRef != null
-        ) {
-            $lat = _gpsToDegrees($gpsLat);
-            $lon = _gpsToDegrees($gpsLon);
-
-            if ($gpsLatRef != "N") {
-                $lat = -$lat;
-            }
-            if ($gpsLonRef != "E") {
-                $lon = -$lon;
-            }
-
-            $photoData["latitude"] = $lat;
-            $photoData["longitude"] = $lon;
-        } else {
-            $photoData["latitude"] = null;
-            $photoData["longitude"] = null;
-        }
+    $photoData["keywords"] = $rawData["IPTC:Keywords"] ?? "";
+    if ($photoData["keywords"] != null) {
+        $photoData["keywords"] = implode(", ", $photoData["keywords"]);
     }
+
+    $photoData["subjectArea"] = $rawData["ExifIFD:SubjectArea"] ?? null;
+    $photoData["aperture"] = $rawData["Composite:Aperture"] ?? null;
+    $photoData["iso"] = $rawData["ExifIFD:ISO"] ?? null;
+    $photoData["shutterSpeed"] = $rawData["Composite:ShutterSpeed"] ?? null;
+    $photoData["gpsLat"] = $rawData["Composite:GPSLatitude"] ?? null;
+    $photoData["gpsLon"] = $rawData["Composite:GPSLongitude"] ?? null;
+    $photoData["gpsAlt"] = $rawData["Composite:GPSAltitude"] ?? null;
 }
