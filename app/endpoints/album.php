@@ -98,6 +98,17 @@ function editMetadata() {
         ? $input["coverPhoto"]
         : $album["coverPhoto"];
 
+    if (
+           !is_string($title)
+        || !is_string($description)
+        || !is_numeric($isPrivate)
+        || !is_numeric($showMap)
+        || !is_numeric($coverPhoto)
+    ) {
+        output(["message" => "Could not update metadata"], 400);
+        return;
+    }
+
     $result = DB::UpdateAlbumMeta(
         $album["id"],
         $title,
@@ -106,11 +117,6 @@ function editMetadata() {
         $showMap,
         $coverPhoto,
     );
-
-    if ($result == -1) {
-        output(["message" => "Could not update metadata"], 400);
-        return;
-    }
 
     output(["message" => "Metadata updated successfully"]);
 }

@@ -32,6 +32,7 @@ if (!isset($input["password"])) {
 
 DB::SetConfig("site_title", $input["siteTitle"], "string");
 DB::SetConfig("promo", 0, "integer");
+DB::SetConfig("default_aspect", 1.3333, "float");
 $user = DB::CreateUser($input["userName"], $input["password"]);
 if ($user == false) {
     // @codeCoverageIgnoreStart

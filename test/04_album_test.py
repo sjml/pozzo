@@ -1,3 +1,6 @@
+import os
+import json
+
 import requests
 import pytest
 
@@ -17,6 +20,15 @@ def test_album_view(server, req):
     assert adata["title"] == "[unsorted]"
     assert len(adata["photos"]) == 11
     assert "tinyJPEG" not in adata["photos"][0]
+
+def test_album_view_by_slug(server, req):
+    res = req.get(
+        server.api("/album/view/unsorted")
+    )
+    assert res.status_code == 200
+    adata = res.json()
+    assert adata["title"] == "[unsorted]"
+    assert len(adata["photos"]) == 11
 
 def test_album_previews(server, req):
     res = req.post(
@@ -197,6 +209,20 @@ def test_album_metadata_empty(server, auth, req):
     )
     assert res.status_code == 400
 
+def test_album_metadata_nonexistent(server, auth, req):
+    res = req.post(
+        server.api("/album/edit/17"),
+        headers=auth,
+        json={
+            "title": "Edited Title",
+            "description": "**New description.**",
+            "isPrivate": 1,
+            "showMap": 1,
+            "coverPhoto": 1
+        }
+    )
+    assert res.status_code == 404
+
 def test_album_metadata(server, auth, req):
     res = req.get(
         server.api("/album/view/4")
@@ -233,6 +259,20 @@ def test_album_metadata(server, auth, req):
     assert adata["isPrivate"] == True
     assert adata["showMap"] == True
     assert adata["coverPhoto"] == 1
+
+def test_album_invalid_metadata(server, req, auth):
+    res = req.post(
+        server.api("/album/edit/4"),
+        headers=auth,
+        json={
+            "title": 5,
+            "description": "**New description.**",
+            "isPrivate": "false",
+            "showMap": "nah",
+            "coverPhoto": "number won"
+        }
+    )
+    assert res.status_code == 400
 
 def test_delete_album_auth(server, req):
     res = req.post(
@@ -282,6 +322,13 @@ def test_reorder_album_auth(server, req):
     )
     assert res.status_code == 401
 
+def test_reorder_album_missing_params(server, auth, req):
+    res = req.post(
+        server.api("/album/reorder/2"),
+        headers=auth
+    )
+    assert res.status_code == 400
+
 def test_reorder_album_not_enough(server, auth, req):
     res = req.post(
         server.api("/album/reorder/2"),
@@ -291,7 +338,7 @@ def test_reorder_album_not_enough(server, auth, req):
     assert res.status_code == 400
     assert "Miscount" in res.json()["message"]
 
-def test_reorder_album_not_enough(server, auth, req):
+def test_reorder_album_too_much(server, auth, req):
     res = req.post(
         server.api("/album/reorder/2"),
         headers=auth,
@@ -318,6 +365,14 @@ def test_reorder_album_non_unique(server, auth, req):
     assert res.status_code == 400
     assert "Non-unique" in res.json()["message"]
 
+def test_reorder_album_nonexistent(server, auth, req):
+    res = req.post(
+        server.api("/album/reorder/7"),
+        headers=auth,
+        json={"newOrdering": [5,4,3,2,1]}
+    )
+    assert res.status_code == 404
+
 def test_reorder_album(server, auth, req):
     res = req.post(
         server.api("/album/reorder/2"),
@@ -339,6 +394,13 @@ def test_reorder_album_list_auth(server, req):
         json={"newOrdering": [3,2,1]}
     )
     assert res.status_code == 401
+
+def test_reorder_album_list_missing_params(server, auth, req):
+    res = req.post(
+        server.api("/album/reorderList"),
+        headers=auth
+    )
+    assert res.status_code == 400
 
 def test_reorder_album_list_not_enough(server, auth, req):
     res = req.post(
@@ -392,3 +454,37 @@ def test_reorder_album_list(server, auth, req):
     print(res.json())
     order = [a["id"] for a in res.json()]
     assert order == [3,2,1]
+
+
+# also checking the special cases to make sure all the code is covered
+def test_ordered_upload(server, auth, req):
+    res = req.post(
+        server.api("/album/new"),
+        headers=auth,
+        json={"title": "Ordered Album"}
+    )
+    assert res.status_code == 200
+
+    files = os.listdir("./test_corpus/test_cases")
+    files.sort()
+    fcount = len(files)
+    for i, img in enumerate(files):
+        with open(f"./test_corpus/test_cases/{img}", "rb") as f:
+            res = req.post(
+                server.api("/upload"),
+                headers=auth,
+                files={"photoUp": f},
+                data={"data": json.dumps({"albumID": 4, "order": fcount - i})}
+            )
+        assert res.status_code == 200
+
+    res = req.get(
+        server.api("/album/view/ordered-album")
+    )
+    assert res.status_code == 200
+    adata = res.json()
+    assert adata["id"] == 4
+    assert len(adata["photos"]) == 2
+    assert adata["photos"][0]["id"] == 13
+    assert adata["photos"][1]["id"] == 12
+

@@ -9,7 +9,7 @@ Goals:
     * good-looking photo-centric interface, with EXIF data easily available
 * JSON-only API backend, as simple as possible (but no simpler)
     * runnable on cheap shared hosting
-    * as solid and reliable as is feasible (note automated testing and code coverage analysis)
+    * as solid and reliable as is feasible (note automated testing and code coverage analysis, but not fuzzing because I have my limits)
         - frontend, in contrast, is a land of dancing chaos, and that's ok
 
 Non-goals:

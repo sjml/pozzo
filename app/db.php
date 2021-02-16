@@ -148,9 +148,16 @@ class DB {
         $statement->bindParam(2, $pw, SQLITE3_TEXT);
         try {
             $result = $statement->execute();
+        // @codeCoverageIgnoreStart
+        // user creation is intentionally not exposed to the API, so
+        //    testing this would be annoying and not prove much.
+        // this would only fail if (a) the database was failing for
+        //    other reasons caught in other tests or (b) the name already
+        //    exists.
         } catch (\Throwable $th) {
             return false;
         }
+        // @codeCoverageIgnoreEnd
         return ["id" => self::$pdb->lastInsertRowID(), "name" => $user];
     }
 
@@ -182,9 +189,6 @@ class DB {
     static function GetConfig($key) {
         $prepCommand = "SELECT * FROM config WHERE (key = ?)";
         $statement = self::$pdb->prepare($prepCommand);
-        if ($statement == false) {
-            return false;
-        }
         $statement->bindParam(1, $key, SQLITE3_TEXT);
         $result = $statement->execute();
         $row = $result->fetchArray(SQLITE3_ASSOC);
@@ -196,30 +200,13 @@ class DB {
         switch ($row["type"]) {
             case "integer":
                 return (int) $row["value"];
-                break;
             case "float":
                 return (float) $row["value"];
-                break;
             case "string":
                 return (string) $row["value"];
-                break;
         }
 
         return false;
-    }
-
-    static function GetAllPhotos() {
-        $statement = self::$pdb->prepare(
-            "SELECT id, title, hash, width, height, size FROM photos",
-        );
-        $results = $statement->execute();
-
-        $ret = [];
-        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-            array_push($ret, $row);
-        }
-        $results->finalize();
-        return $ret;
     }
 
     static function InsertPhoto(

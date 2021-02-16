@@ -1,3 +1,5 @@
+import os
+
 import requests
 import pytest
 
@@ -58,3 +60,8 @@ def test_delete_photo(server, auth, req):
         json={"photoID": 1}
     )
     assert res.status_code == 200
+
+def test_original_nonexistent(server, req):
+    res = req.get(server.api(f"/photo/orig/25"))
+    assert res.status_code == 404
+
