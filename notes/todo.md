@@ -14,6 +14,9 @@
         - album list context menu (delete / dissolve)
     - research needed
         - blur back on image pages? (look at stackblur/canvas solution)
+            - blurhash!
+            - https://github.com/woltapp/blurhash/tree/master/TypeScript
+            - https://github.com/kornrunner/php-blurhash
         - see if we can not do the blurs if the images are already loaded?
         - look at video import, if it's easy
     - clean up hacks
@@ -50,6 +53,7 @@
     - limit length of text things (titles, descriptions)
     - remove reset endpoint
     - complete test suite
+    - pagination or just trust used to break stuff up into separate albums?
 3. Frontend caching
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
     - something-something web workers? BLERGH.

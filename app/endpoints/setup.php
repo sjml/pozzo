@@ -7,7 +7,7 @@ if (DB::GetConfig("site_title") != false) {
     header("Content-Type: application/json");
     http_response_code(403);
     echo json_encode(["message" => "Site already set up."]);
-    die();
+    return;
 }
 
 function output($obj, $code = 200) {
@@ -39,9 +39,10 @@ if ($user == false) {
     //   PHP is broken, etc. Only for first-run user who might not know what
     //   they're doing. (Arguably this message would not help them much, either.)
     output(["message" => "Something went wrong. :("], 500);
-    die();
+    return;
     // @codeCoverageIgnoreEnd
 }
+
 $jwt = Auth::GenerateJWT(
     $user,
     DB::GetConfig("app_key"),

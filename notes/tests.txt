@@ -29,17 +29,18 @@ backend functionality tests
     ✅ reorder album list
     ✅ non-credentialed cannot delete album
     ✅ credentialed can delete album
-    star images
-    check that they are in starred list
     delete individual image
         - no longer in album
+        - upload image, should go at end rather than in the gap
     delete album + images
         - images are gone
+    once exif import has been revised, check stored column data for images and make sure it matches expectations
 
 found by code coverage:
     - need images in corpus that:
         - will generate an "ad" in their hash 😑
         - have different orientations
+        - in the southern hemisphere
     - try to make a user with a duplicate name
     - login validation should check that the user in the token exists
     - try logging in as user that doesn't exist: should hit null return in GetUser

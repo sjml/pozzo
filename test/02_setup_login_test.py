@@ -28,8 +28,11 @@ def test_setup(server, req):
     res = req.post(server.api("/setup"), json=data)
     assert res.status_code == 200
 
+def test_no_repeat_setup(server, req):
+    data = {"siteTitle": "Set Up Again", "userName": "bad_guy", "password": "even_worse_password"}
     res = req.post(server.api("/setup"), json=data)
     assert res.status_code == 403
+    assert "already set up" in res.json()["message"]
 
 def test_login(server, req):
     data = {}
