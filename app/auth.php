@@ -26,6 +26,8 @@ class Auth {
 
         $secret = DB::GetConfig("app_key");
 
+        // @codeCoverageIgnoreStart
+        // Not testing generation/decoding of JWTs
         $value = self::DecodeJWT($token, $secret);
         if (is_numeric($value)) {
             if ($value == -1) {
@@ -40,6 +42,7 @@ class Auth {
                 return $value;
             }
         }
+        // @codeCoverageIgnoreEnd
 
         return $value->data->id;
     }
@@ -74,17 +77,23 @@ class Auth {
         try {
             $decoded = JWT::decode($token, $secret, ["HS256"]);
             return $decoded;
+        // @codeCoverageIgnoreStart
+        // Not testing generation/decoding of JWTs
         } catch (\Firebase\JWT\ExpiredException $th) {
             return -1;
         } catch (\Firebase\JWT\BeforeValidException $th) {
             return -2;
         } catch (\Firebase\JWT\SignatureInvalidException $th) {
             return -3;
+        // @codeCoverageIgnoreEnd
         } catch (\UnexpectedValueException $th) {
             return -4;
+        // @codeCoverageIgnoreStart
+        // Dev only
         } catch (\Throwable $th) {
             return -128;
         }
+        // @codeCoverageIgnoreEnd
     }
 
     // just using the PHP default stuff, but wrapping in case

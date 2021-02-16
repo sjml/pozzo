@@ -45,6 +45,10 @@ function upload() {
         http_response_code(200);
         header("Content-Type: application/json");
         echo json_encode($photoData);
+
+    // @codeCoverageIgnoreStart
+    // As with setup's catch, this is handling stuff that is unanticipated
+    //    (hitting disk quota limits, timeouts, etc.)
     } catch (\Throwable $th) {
         http_response_code(500);
         header("Content-Type: application/json");
@@ -53,4 +57,5 @@ function upload() {
             "data" => [$th->getMessage(), $th->getTraceAsString()],
         ]);
     }
+    // @codeCoverageIgnoreEnd
 }

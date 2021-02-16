@@ -13,6 +13,7 @@ copies=(app scripts LICENSE README.md)
 for item in ${copies[@]}; do
   cp -R $item $ROOT_DIR/dist
 done
+rm -f $ROOT_DIR/dist/scripts/deploy.sh
 
 cp $ROOT_DIR/composer.json $ROOT_DIR/dist
 cp $ROOT_DIR/composer.lock $ROOT_DIR/dist

@@ -100,11 +100,7 @@ function importImage($filePath) {
     ];
 
     $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
-    if (is_uploaded_file($filePath)) {
-        move_uploaded_file($filePath, $origPath);
-    } else {
-        copy($filePath, $origPath);
-    }
+    move_uploaded_file($filePath, $origPath);
 
     return $photoData;
 }

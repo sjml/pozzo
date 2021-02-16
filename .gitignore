@@ -1,5 +1,6 @@
 /pozzo.DB
 /public/photos
+/scripts/deploy.sh
 
 /dist
 /test/env

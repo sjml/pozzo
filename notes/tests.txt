@@ -36,6 +36,25 @@ backend functionality tests
     delete album + images
         - images are gone
 
+found by code coverage:
+    - need images in corpus that:
+        - will generate an "ad" in their hash 😑
+        - have different orientations
+    - try to make a user with a duplicate name
+    - login validation should check that the user in the token exists
+    - try logging in as user that doesn't exist: should hit null return in GetUser
+    - get all photos
+    - upload photos in an order
+    - removing cover photo from album
+    - view album by slug
+    - copy photos to album by slug
+    - edit non-existent album
+    - pass bad parameters to metadata (non-numeric index, etc)
+    - reorder without passing ordering
+    - reorder non-existent album
+    - reorder list without passing ordering
+    - download non-existent original
+
 perf/size
     don't let import time of realistic-sized album rise above X
     don't let lighthouse score of realistic-sized album drop below 90

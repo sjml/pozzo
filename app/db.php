@@ -6,7 +6,6 @@
 
 use Ausi\SlugGenerator\SlugGenerator;
 
-require_once __DIR__ . "/util.php";
 require_once __DIR__ . "/auth.php";
 require_once __DIR__ . "/image.php";
 
@@ -31,18 +30,16 @@ class DB {
         }
     }
 
+    // @codeCoverageIgnoreStart
+    // Gets automatically called at script exit/die/fail, so coverage
+    //   detection can't hook in to see it happen.
     static function Cleanup() {
         if (self::$pdb != null) {
             self::$pdb->close();
             self::$pdb = null;
         }
     }
-
-    static function Reset() {
-        self::Cleanup();
-        unlink(self::DB_PATH);
-        self::Init();
-    }
+    // @codeCoverageIgnoreEnd
 
     private static function _createDB() {
         $prepCommand = "CREATE TABLE IF NOT EXISTS users(";
@@ -173,9 +170,6 @@ class DB {
     }
 
     static function SetConfig($key, $value, $type) {
-        if (!stringInArray($type, ["integer", "string", "float"])) {
-            return false;
-        }
         $prepCommand = "INSERT INTO config(key, value, type) VALUES (?, ?, ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $key, SQLITE3_TEXT);
@@ -482,14 +476,11 @@ class DB {
         $statement->bindParam(4, $showMap, SQLITE3_INTEGER);
         $statement->bindParam(5, $coverPhoto, SQLITE3_INTEGER);
         $statement->bindParam(6, $id, SQLITE3_INTEGER);
-        try {
-            $result = $statement->execute();
-            if (!$result) {
-                return -1;
-            }
-        } catch (\Throwable $th) {
+        $result = $statement->execute();
+        if (!$result) {
             return -1;
         }
+        return 1;
     }
 
     static function AddPhotoToAlbum($photoID, $albumID, $order) {

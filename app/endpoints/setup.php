@@ -34,8 +34,13 @@ DB::SetConfig("site_title", $input["siteTitle"], "string");
 DB::SetConfig("promo", 0, "integer");
 $user = DB::CreateUser($input["userName"], $input["password"]);
 if ($user == false) {
+    // @codeCoverageIgnoreStart
+    // Here to catch fundamental setup issues -- don't have write permissions,
+    //   PHP is broken, etc. Only for first-run user who might not know what
+    //   they're doing. (Arguably this message would not help them much, either.)
     output(["message" => "Something went wrong. :("], 500);
     die();
+    // @codeCoverageIgnoreEnd
 }
 $jwt = Auth::GenerateJWT(
     $user,

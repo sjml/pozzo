@@ -9,6 +9,8 @@ Goals:
     * good-looking photo-centric interface, with EXIF data easily available
 * JSON-only API backend, as simple as possible (but no simpler)
     * runnable on cheap shared hosting
+    * as solid and reliable as is feasible (note automated testing and code coverage analysis)
+        - frontend, in contrast, is a land of dancing chaos, and that's ok
 
 Non-goals:
 * Editing photos beyond giving titles, tags, and descriptions

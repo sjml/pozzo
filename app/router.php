@@ -45,10 +45,6 @@ class Router {
                             "code" => $_REQUEST["POZZO_AUTH"],
                         ];
                         switch ($_REQUEST["POZZO_AUTH"]) {
-                            case 0:
-                                $status = 500;
-                                $errData["reason"] = "validation not performed";
-                                break;
                             case -1:
                                 $status = 401;
                                 $errData["reason"] = "missing auth headers";
@@ -57,6 +53,8 @@ class Router {
                                 $status = 401;
                                 $errData["reason"] = "missing bearer token";
                                 break;
+                            // @codeCoverageIgnoreStart
+                            // Not testing external JWT generation/reading code
                             case -3:
                                 $status = 403;
                                 $errData["reason"] = "expired";
@@ -69,14 +67,19 @@ class Router {
                                 $status = 403;
                                 $errData["reason"] = "signatureInvalid";
                                 break;
+                            // @codeCoverageIgnoreEnd
                             case -6:
                                 $status = 401;
                                 $errData["reason"] = "invalidToken";
                                 break;
+                            // @codeCoverageIgnoreStart
+                            // Only used to pass useful errors in development;
+                            //    everything should be caught by production.
                             default:
                                 $status = 500;
                                 $errData["reason"] = "unknown";
                                 break;
+                            // @codeCoverageIgnoreEnd
                         }
                         self::Output($errData, $status);
                         return;

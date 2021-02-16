@@ -4,6 +4,9 @@ require_once __DIR__ . "/../db.php";
 require_once __DIR__ . "/../auth.php";
 require_once __DIR__ . "/../image.php";
 
+// @codeCoverageIgnoreStart
+// checks for extremely large file sizes for the sake of
+//    completeness, but not worth testing all those branches
 function phpNotationToBytes($fsize) {
     $unit = strtolower(substr($fsize, -1));
 
@@ -29,6 +32,7 @@ function phpNotationToBytes($fsize) {
     }
     return (int)$num;
 }
+// @codeCoverageIgnoreEnd
 
 $message = [
     "formats" => ["image/jpeg"],
