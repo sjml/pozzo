@@ -1,4 +1,4 @@
-This was assembled after a quick pass through Flickr looking for Creative Commons images that showed a variety of file sizes, aspect ratios, camera types (including virtual), subject matter, and amount/quality of EXIF data. It's not exhaustive by any stretch, but not a bad starting place.
+Most of this was assembled after a quick pass through Flickr looking for Creative Commons images that showed a variety of file sizes, aspect ratios, camera types (including virtual), subject matter, and amount/quality of EXIF data. It's not exhaustive by any stretch, but not a bad starting place.
 
 JPEG
     - 01.jpeg:  https://www.flickr.com/photos/130925681@N04/18523463293
@@ -41,3 +41,13 @@ JPEG
         - Title: Rievaulx Abbey
         - Artist: Richard
         - License: CC BY-ND 2.0: https://creativecommons.org/licenses/by-nd/2.0/
+
+
+Edge cases were found to cause specific issues that are tested for regression.
+
+edge_cases
+    - ad-in-hash.jpg: https://unsplash.com/photos/Tpd3-heRJ9Q
+        - Title: orange and white bird on tree branch
+        - Artist: Alfred Kenneally
+        - License: Unsplash: https://unsplash.com/license
+        - Explanation: The MD5 hash of this file contains the string "ad" as one of its first three tuples, which has the chance to trigger ad blockers since it will get stored in an "ad" directory. (Blockers likely only trigger on the first tuple, but checking all of them.)
