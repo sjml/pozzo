@@ -24,9 +24,22 @@ jobs:
         sudo apt-get install exiftool
         python -m pip install --upgrade pip
         pip install -r ./test/requirements.txt
-    - name: Build distribution
+    - name: Build distribution for functional test
       run: ./scripts/build_dist.sh
-    - name: Run tests
+    - name: Run functional tests
       env:
         POZZO_DIST: 1
       run: cd test && pytest
+    # - name: Rebuild distribution for coverage test
+    #   env:
+    #     POZZO_CODE_COVERAGE: 1
+    #   run: ./scripts/build_dist.sh
+    # - name: Generate coverage data
+    #   env:
+    #     POZZO_DIST: 1
+    #     POZZO_CODE_COVERAGE: 1
+    #   run: |
+    #     cd test
+    #     pytest
+    #     ./tools/calculate_coverage.sh
+

@@ -1,10 +1,14 @@
-pozzo.DB
-samples/*
-public/photos/*
-dist/*
-test/env/*
-test/__pycache__/*
-composer.phar
-/vendor/*
+/pozzo.DB
+/public/photos
 
-.vscode/settings.json
+/dist
+/test/env
+/test/__pycache__
+/test/.pytest_cache
+/test/tools/output
+/test/tools/raw_coverage
+/test/tools/phpcov.phar
+
+/vendor
+/composer.phar
+/.vscode/settings.json
