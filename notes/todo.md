@@ -48,9 +48,11 @@
 2. Backend pass
     - limit length of text things (titles, descriptions)
     - pagination or just trust used to break stuff up into separate albums?
-3. Frontend caching
+3. Frontend extra bonus points
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
-    - something-something web workers? BLERGH.
+        - something-something web workers? BLERGH.
+    - smarter font loading: https://www.zachleat.com/web/comprehensive-webfonts/
+        - match: https://meowni.ca/font-style-matcher/
 4. Video / live pictures?
 
 ## future
