@@ -1,20 +1,18 @@
 - bugs
     - got some false positive error reporting on bulk upload... investigate what's up
         - more problematic was that I couldn't re-try :(
-    - clicking on photo with context menu open should close context menu
     - uploading to remote, never get the "processing" status
     - file uploader gets stuck behind map
-    - making new album and signing out should refresh album list (does locally, but not remote? blergh.)
     - deleting and uploading new photo to album will insert it in the gap
+    - existingIndices and ordered_upload
 
 0. Before starting actual use
     - requires backend support
         - album list context menu (delete / dissolve)
-        - bulk delete
         - have keywords return as an array; process them into a join table at import; update typescript type; add test to check for 'em
     - research needed
         - blur back on image pages? (look at stackblur/canvas solution)
-            - blurhash!
+            - blurhash! https://github.com/woltapp/blurhash
             - https://github.com/woltapp/blurhash/tree/master/TypeScript
             - https://github.com/kornrunner/php-blurhash
         - see if we can not do the blurs if the images are already loaded?
@@ -28,7 +26,6 @@
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
         - 404
-        - title updates on photo pages
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
@@ -52,6 +49,7 @@
     - pagination or just trust user to break stuff up into separate albums?
     - directly fetched photos need to check if they're in a public album
         - (basically all the /photo get endpoints)
+    - bulk delete
 3. Frontend extra bonus points
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
         - something-something web workers? BLERGH.
@@ -89,4 +87,3 @@
 * identify interesting parts of photos and center on them for cropping? 
     - how to avoid Twitter problem with ignoring black people
 * have the blur image reload only do its fade if it took more than X ms to load the image
-    - https://github.com/woltapp/blurhash

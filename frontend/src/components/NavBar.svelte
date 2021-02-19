@@ -1,60 +1,118 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import { Link } from "svelte-routing";
+    import { router } from "tinro";
 
-    import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
+    import type { Photo, Album } from "../pozzo.type";
+    import {
+        currentAlbumStore,
+        currentPhotoStore,
+        frontendStateStore,
+        siteData,
+        metadataVisible
+    } from "../stores";
     import Login from "./Login.svelte";
     import Button from "./Button.svelte";
 
     const dispatch = createEventDispatcher();
+
     let collapsed = false;
+    let prevPhotoLink: string = null;
+    let nextPhotoLink: string = null;
+
+    function findNeighbors(p: Photo, a: Album) {
+        if (p == null || a == null) {
+            return;
+        }
+        const currIdx = a.photos.findIndex((ap) => ap.id == p.id);
+        if (currIdx == -1) {
+            console.error("photo not in album!");
+            return;
+        }
+        if (currIdx == 0) {
+            prevPhotoLink = null;
+        }
+        else {
+            prevPhotoLink = `/album/${a.slug}/${a.photos[currIdx - 1].id}`;
+        }
+        if (currIdx == a.photos.length-1) {
+            nextPhotoLink = null;
+        }
+        else {
+            nextPhotoLink = `/album/${a.slug}/${a.photos[currIdx + 1].id}`;
+        }
+    }
+
+    function handleKeyDown(evt: KeyboardEvent) {
+        if (evt.key == "ArrowLeft" && prevPhotoLink != null) {
+            router.goto(prevPhotoLink);
+        }
+        else if (evt.key == "ArrowRight" && nextPhotoLink != null) {
+            router.goto(nextPhotoLink);
+        }
+    }
+
+    $: findNeighbors($currentPhotoStore, $currentAlbumStore)
 </script>
 
+<svelte:window
+    on:keydown={handleKeyDown}
+/>
 
 <nav
     on:dblclick|self={() => { collapsed = !collapsed; return false; }}
     class:collapsed
 >
     <div class="homeLink">
-        <Link to="/">
+        <a href="/">
             {$siteData.siteTitle || "Pozzo"}
-        </Link>
+        </a>
     </div>
 
     {#if $currentAlbumStore}
         <div class="backLink">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            <Link to={`/album/${$currentAlbumStore.slug}`}>
+            {#if $currentPhotoStore}
+                <a href={`/album/${$currentAlbumStore.slug}`}>
+                    {$currentAlbumStore.title}
+                </a>
+            {:else}
                 {$currentAlbumStore.title}
-            </Link>
+            {/if}
+        </div>
+    {/if}
+
+    {#if $currentPhotoStore}
+        <div class="backLink">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            {$currentPhotoStore.title}
         </div>
     {/if}
 
     <div class="spacer" />
 
-    {#if $frontendStateStore.photoToolsVisible}
+    {#if $currentPhotoStore}
         <Button
-            title={$frontendStateStore.prevPhotoLink.length == 0 ? "(No Previous Photo)" : "Previous Photo"}
+            title={prevPhotoLink == null ? "(No Previous Photo)" : "Previous Photo"}
             margin="0 5px 0 0"
-            isDisabled={$frontendStateStore.prevPhotoLink.length == 0}
+            isDisabled={prevPhotoLink == null}
         >
-            <Link to={$frontendStateStore.prevPhotoLink}>
+            <a href={prevPhotoLink}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M114.34277,229.65723l-96-96a8.003,8.003,0,0,1,0-11.31446l96-96A8.00065,8.00065,0,0,1,128,32V72h80a16.01833,16.01833,0,0,1,16,16v80a16.01833,16.01833,0,0,1-16,16H128v40a8.00066,8.00066,0,0,1-13.65723,5.65723Z"></path></svg>
-            </Link>
+            </a>
         </Button>
         <Button
-            title={$frontendStateStore.nextPhotoLink.length == 0 ? "(No Next Photo)" : "Next Photo"}
+            title={nextPhotoLink == null ? "(No Next Photo)" : "Next Photo"}
             margin="0 5px 0 0"
-            isDisabled={$frontendStateStore.nextPhotoLink.length == 0}
+            isDisabled={nextPhotoLink == null}
         >
-            <Link to={$frontendStateStore.nextPhotoLink}>
+            <a href={nextPhotoLink}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M132.93848,231.39062A8,8,0,0,1,128,224V184H48a16.01833,16.01833,0,0,1-16-16V88A16.01833,16.01833,0,0,1,48,72h80V32a8.00065,8.00065,0,0,1,13.65723-5.65723l96,96a8.003,8.003,0,0,1,0,11.31446l-96,96A8.002,8.002,0,0,1,132.93848,231.39062Z"></path></svg>
-            </Link>
+            </a>
         </Button>
         <Button margin="0 5px 0 0"
-            title={`${$frontendStateStore.isMetadataOn ? "Hide" : "View"} Metadata`}
-            isToggled={$frontendStateStore.isMetadataOn}
-            on:click={() => $frontendStateStore.isMetadataOn = !$frontendStateStore.isMetadataOn}
+            title={`${$metadataVisible ? "Hide" : "View"} Metadata`}
+            isToggled={$metadataVisible}
+            on:click={() => $metadataVisible = !$metadataVisible}
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M122.66459,25.8792,42.0101,42.0101,25.8792,122.66459a8,8,0,0,0,2.1878,7.22578L132.51977,234.34315a8,8,0,0,0,11.31371,0l90.50967-90.50967a8,8,0,0,0,0-11.31371L129.89037,28.067A8,8,0,0,0,122.66459,25.8792Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="84" cy="84" r="16"></circle></svg>
         </Button>

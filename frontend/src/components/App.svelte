@@ -1,15 +1,14 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Router, Route, navigate } from "svelte-routing";
+    import { Route } from "tinro";
+    import { router } from "tinro";
 
     import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
     import { RunApi } from "../api";
-    import SetupPage from "./SetupPage.svelte";
     import NavBar from "./NavBar.svelte";
-    import Album from "./Album.svelte";
+    import SetupPage from "./SetupPage.svelte";
     import AlbumList from "./AlbumList.svelte";
-
-    export let url = "";
+    import AlbumIndex from "./AlbumIndex.svelte";
 
     onMount(setup);
 
@@ -18,7 +17,7 @@
         if (res.success) {
             $siteData.siteTitle = res.data.siteTitle;
             if ($siteData.siteTitle == false) {
-                navigate("/setup");
+                router.goto("/setup");
             }
             else {
                 $siteData.formats = res.data.formats;
@@ -62,15 +61,17 @@
 </svelte:head>
 
 <div class="container">
-    <Router url={url}>
-        <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
+    <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
 
-        <Route path="/setup" component={SetupPage} />
-        <Route path="/album/:albumSlug" component={Album} />
+    <Route path="/*" firstmatch>
+        <Route path="/setup"><SetupPage /></Route>
 
-        <!-- default page shows list of albums -->
-        <Route component={AlbumList} />
-    </Router>
+        <Route path="/album/:albumSlug/*" let:meta>
+            <AlbumIndex albumSlug={meta.params.albumSlug} />
+        </Route>
+
+        <Route path="/"><AlbumList /></Route>
+    </Route>
 
     {#if $siteData.promo}
         <div class="promo">

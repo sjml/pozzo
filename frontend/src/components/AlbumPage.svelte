@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import { navigate } from "svelte-routing";
+    import { router } from "tinro";
 
     import justifiedLayout from "justified-layout";
 
@@ -14,38 +14,6 @@
     import Button from "./Button.svelte";
     import PhotoMap from "./PhotoMap.svelte";
     import UploadZone from "./UploadZone.svelte";
-
-    export let albumSlug: string;
-
-    onDestroy(() => {
-        $currentAlbumStore = null;
-    });
-
-    $: {
-        if ($currentAlbumStore && $currentAlbumStore.isPrivate && !$isLoggedInStore) {
-            navigate("/", {replace: true});
-        }
-    }
-
-
-    async function getAlbum(slug: string) {
-        const res = await RunApi(`/album/view/${slug}`, {
-            authorize: true
-        });
-        if (res.success) {
-            $currentAlbumStore = res.data;
-            layout = null;
-        }
-        else {
-            if (res.code == 404) {
-                navigate("/", {replace: true});
-            }
-            else {
-                console.error(res);
-            }
-        }
-    }
-    $: getAlbum(albumSlug)
 
 
     let containerWidth: number;
@@ -163,7 +131,7 @@
     <div>Loading…</div>
 {:else}
     {#if $isLoggedInStore && !reordering}
-        <UploadZone on:done={() => getAlbum(albumSlug)} />
+        <UploadZone on:done={() => router.goto(`/album/${$currentAlbumStore.slug}`) } />
     {/if}
 
     <div class="titleRow">
@@ -254,7 +222,9 @@
                 on:moved={handlePhotoMove}
             >
             {#each $currentAlbumStore.photos as pstub, pi}
-                <NavPhoto size="medium" stub={pstub} layoutDims={layout.boxes[pi]} />
+                <a href="/album/{$currentAlbumStore.slug}/{pstub.id}">
+                    <NavPhoto size="medium" stub={pstub} layoutDims={layout.boxes[pi]} />
+                </a>
             {/each}
             </NavCollection>
         {/if}

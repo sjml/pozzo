@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import type { FrontendState, SiteConfig, Album, PhotoStub } from './pozzo.type';
+import type { FrontendState, SiteConfig, Album, PhotoStub, Photo } from './pozzo.type';
 
 export const siteData = writable<SiteConfig>(
     {
@@ -14,17 +14,16 @@ export const siteData = writable<SiteConfig>(
 );
 
 
+export const metadataVisible = writable<boolean>(false);
+
 // glorified global variables? :-/
 export const frontendStateStore = writable<FrontendState>({
     fullScreen: false,
-    photoToolsVisible: false,
-    nextPhotoLink: "",
-    prevPhotoLink: "",
-    isMetadataOn: false,
     userStoppedUploadScroll: false,
 });
 
 export const currentAlbumStore = writable<Album>(null);
+export const currentPhotoStore = writable<Photo>(null);
 
 export const navSelection = writable<PhotoStub[]>([]);
 

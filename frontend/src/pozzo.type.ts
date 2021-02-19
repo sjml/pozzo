@@ -10,10 +10,6 @@ export type SiteConfig = {
 
 export type FrontendState = {
     fullScreen: boolean,
-    photoToolsVisible: boolean,
-    nextPhotoLink: string,
-    prevPhotoLink: string,
-    isMetadataOn: boolean,
     userStoppedUploadScroll: boolean,
 }
 

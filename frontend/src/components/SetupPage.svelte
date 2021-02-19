@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { navigate } from "svelte-routing";
+    import { router } from "tinro";
 
     import { siteData, loginCredentialStore } from "../stores";
     import { RunApi } from "../api";
@@ -12,7 +12,7 @@
     onMount(() => {
         sitenameInput.focus();
     })
-    $: if ($siteData.siteTitle !== false) navigate("/", {replace: true})
+    $: if ($siteData.siteTitle !== false) router.goto("/")
 
     let attemptingConfig: boolean = false;
     let sitenameField: string = "";

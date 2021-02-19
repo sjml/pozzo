@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { navigate } from "svelte-routing";
+    import { router } from "tinro";
 
     import justifiedLayout from "justified-layout";
 
@@ -72,7 +72,7 @@
 
     function onUploadDone(evt: CustomEvent) {
         if (evt.detail.numFiles > 0) {
-            navigate("/album/unsorted");
+            router.goto("/album/unsorted");
         }
     }
 
@@ -146,11 +146,13 @@
             {#if layout}
                 <NavCollection stubs={albumCoverStubs}>
                 {#each albumList as album, ai}
-                    <NavPhoto size="medium"
-                        stub={albumCoverStubs[ai]}
-                        layoutDims={layout.boxes[ai]}
-                        textOverlay={album.title}
-                    />
+                    <a href={`/album/${album.slug}`}>
+                        <NavPhoto size="medium"
+                            stub={albumCoverStubs[ai]}
+                            layoutDims={layout.boxes[ai]}
+                            textOverlay={album.title}
+                        />
+                    </a>
                 {/each}
                 </NavCollection>
             {/if}
@@ -193,77 +195,4 @@
     .reorderButton.toggled {
         background-color: rgb(101, 101, 252);
     }
-/*
-    .navAlbum {
-        position: absolute;
-
-        background-color: black;
-
-        display: flex;
-    }
-
-    .navAlbum .albumTitle {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
-        text-align: center;
-        font-size: 3.5em;
-        font-weight: 600;
-        text-shadow: 0px 0px 10px black;
-    }
-
-    .reorderButton {
-        margin-left: 30px;
-        max-width: 50px;
-
-        padding: 10px 0 5px 0;
-    }
-
-    .reorderButton.toggled {
-        background-color: rgb(101, 101, 252);
-    }
-
-    .editableLayout {
-        background-color: rgb(101, 101, 252);
-        -webkit-touch-callout: none;
-          -webkit-user-select: none;
-              -ms-user-select: none;
-                  user-select: none;
-
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .editableAlbum {
-        position: relative;
-        width: 300px;
-        height: 300px;
-        margin: 10px;
-
-        background-color: black;
-
-        display: flex;
-    }
-
-    .editableAlbum .albumTitle {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
-        text-align: center;
-        font-size: 3.5em;
-        font-weight: 600;
-        text-shadow: 0px 0px 10px black;
-    }
-
-    .editableAlbum img {
-        max-width: 300px;
-        max-height: 300px;
-        margin: auto;
-    } */
 </style>
