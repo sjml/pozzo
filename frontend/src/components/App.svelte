@@ -4,12 +4,10 @@
 
     import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
     import { RunApi } from "../api";
+    import SetupPage from "./SetupPage.svelte";
     import NavBar from "./NavBar.svelte";
     import Album from "./Album.svelte";
-    // import SetupPage from "./SetupPage.svelte";
-    // import Album from "./Album.svelte";
-    // import AlbumList from "./AlbumList.svelte";
-    // import PhotoPage from "./PhotoPage.svelte";
+    import AlbumList from "./AlbumList.svelte";
 
     export let url = "";
 
@@ -67,18 +65,13 @@
     <Router url={url}>
         <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
 
-        <Route path="/album/:albumSlug" component={Album} />
-    </Router>
-
-    <!-- <Router url={url}>
-
         <Route path="/setup" component={SetupPage} />
-        <Route path="/:albumSlug/:photoID" component={PhotoPage} />
-        <Route path="/:albumSlug" component={Album} /> -->
+        <Route path="/album/:albumSlug" component={Album} />
 
         <!-- default page shows list of albums -->
-        <!-- <Route component={AlbumList} />
-    </Router> -->
+        <Route component={AlbumList} />
+    </Router>
+
     {#if $siteData.promo}
         <div class="promo">
             <a href="https://github.com/sjml/pozzo" target="_">

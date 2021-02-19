@@ -562,6 +562,14 @@ class DB {
             $current += 1;
         }
 
+        $query =
+            "UPDATE albums SET coverPhoto = -1 WHERE id = ? AND coverPhoto in (" .
+            implode(", ", $photoIDs) .
+            ")";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
         self::$pdb->exec("COMMIT TRANSACTION;");
     }
 

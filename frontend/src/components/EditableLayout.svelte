@@ -11,38 +11,43 @@
     const dispatch = createEventDispatcher();
 
     const animationDuration = 200;
-    export let photoList: PhotoStub[] = [];
+    export let stubList: PhotoStub[] = [];
     export let size: string = "medium";
 
     function dragAndDropConsider(e) {
-        photoList = e.detail.items;
+        stubList = e.detail.items;
     }
 
     function dragAndDropFinalize(e) {
-        photoList = e.detail.items;
-        dispatch("reordered", {newStubs: photoList});
+        stubList = e.detail.items;
+        dispatch("reordered", {newStubs: stubList});
     }
 </script>
 
 <div class="editableLayout"
     use:dndzone={{
-        items: photoList,
+        items: stubList,
         flipDurationMs: animationDuration,
     }}
     on:consider={dragAndDropConsider}
     on:finalize={dragAndDropFinalize}
 >
-    {#each photoList as photo (photo.id)}
+    {#each stubList as stub (stub.id)}
         <div class="editablePhoto"
             animate:flip={{duration: animationDuration}}
         >
+            {#if stub.hash && stub.uniq}
             <img
-                alt="{photo.title}"
+                alt={stub.title ?? ""}
                 draggable="false"
                 on:dragstart|preventDefault={() => {}}
-                srcset="{GetImgPath(size, photo.hash, photo.uniq)}, {`${GetImgPath(size + "2x", photo.hash, photo.uniq)} 2x`}"
-                src="{GetImgPath(size, photo.hash, photo.uniq)}"
+                srcset="{GetImgPath(size, stub.hash, stub.uniq)}, {`${GetImgPath(size + "2x", stub.hash, stub.uniq)} 2x`}"
+                src="{GetImgPath(size, stub.hash, stub.uniq)}"
             />
+            {:else}
+                <div class="placeholder"></div>
+            {/if}
+            <div>{stub.title ?? ""}</div>
         </div>
     {/each}
 </div>
@@ -67,11 +72,22 @@
         margin: 10px;
 
         display: flex;
+        flex-direction: column;
+        align-content: center;
+        text-align: center;
     }
 
-    .editablePhoto img {
+    .editablePhoto img, .placeholder {
         max-width: 200px;
         max-height: 200px;
         margin: auto;
+    }
+
+    .placeholder {
+        width: 200px;
+        height: 130px;
+        margin: auto;
+
+        background-color: black;
     }
 </style>

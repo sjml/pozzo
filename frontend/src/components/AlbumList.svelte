@@ -1,30 +1,27 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { flip } from "svelte/animate";
-    import { Link, navigate } from "svelte-routing";
+    import { navigate } from "svelte-routing";
 
     import justifiedLayout from "justified-layout";
-    import { dndzone } from "svelte-dnd-action";
 
-    import type { Album } from "../pozzo.type";
+    import type { Album, PhotoStub } from "../pozzo.type";
     import { isLoggedInStore } from "../stores";
-    import { GetImgPath } from "../util";
     import { RunApi } from "../api";
-    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
-    import AlbumPhoto from "./AlbumPhoto.svelte";
-    import UploadZone from "./UploadZone.svelte";
     import Button from "./Button.svelte";
-
-
-    onMount(() => {
-        getAlbumList(null);
-    });
+    import UploadZone from "./UploadZone.svelte";
+    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
+    import NavCollection from "./NavCollection.svelte";
+    import NavPhoto from "./NavPhoto.svelte";
+    import EditableLayout from "./EditableLayout.svelte";
 
 
     let albumList: Album[];
-    let addingNew = false;
-    async function getAlbumList(_) {
-        const res = await RunApi("/album/list", {authorize: true});
+    let albumCoverStubs: PhotoStub[];
+
+
+    async function getAlbumList(loggedIn: boolean) {
+        const res = await RunApi("/album/list", {
+            authorize: loggedIn
+        });
         if (res.success) {
             albumList = res.data;
         }
@@ -32,45 +29,33 @@
             console.error(res);
         }
     }
-
-    async function reorderAlbumList(newOrder: number[]) {
-        const res = await RunApi("/album/reorderList", {
-            params: {newOrdering: newOrder},
-            method: "POST",
-            authorize: true
-        });
-        if (res.success) {
-            // no-op; frontend already shows backend's reality
-        }
-        else {
-            console.error(res);
-        }
-    }
-
     $: getAlbumList($isLoggedInStore)
 
-
-    function onUploadDone(evt: CustomEvent) {
-        if (evt.detail.numFiles > 0) {
-            navigate("/Unsorted");
+    function assembleStubs(alist: Album[]) {
+        if (!alist) {
+            return;
         }
+        albumCoverStubs = albumList.map((a) => ({
+            id: a.id,
+            title: a.title,
+            hash: a.coverHash,
+            uniq: a.coverUniq,
+            blurHash: a.coverBlurHash,
+            aspect: a.coverAspect || (4.0 / 3.0),
+        }));
     }
+    $: assembleStubs(albumList)
 
 
     let containerWidth: number;
     let layout = null;
 
-    function calculateLayout(width: number) {
-        if (!width || !albumList) {
+    function calculateLayout(width: number, stubs: PhotoStub[]) {
+        if (!width || !stubs) {
             return; // initial loads; don't worry yet
         }
 
-        const aspects = albumList.map(a => {
-            if (a.coverPhoto == -1) {
-                return 4.0 / 3.0;
-            }
-            return a.coverAspect;
-        });
+        const aspects = stubs.map((acs) => acs.aspect);
 
         layout = justifiedLayout(aspects, {
             targetRowHeight: 300,
@@ -79,34 +64,45 @@
             widowLayoutStyle: "center",
         });
     }
+    $: if (albumList) calculateLayout(containerWidth, albumCoverStubs)
 
-    $: if (albumList) calculateLayout(containerWidth)
 
+    let addingNew = false;
+    let reordering = false;
 
-    let editing: boolean = false;
-
-    function dragAndDropConsider(e) {
-        albumList = e.detail.items;
+    function onUploadDone(evt: CustomEvent) {
+        if (evt.detail.numFiles > 0) {
+            navigate("/album/unsorted");
+        }
     }
 
-    function dragAndDropFinalize(e) {
-        albumList = e.detail.items;
-        reorderAlbumList(albumList.map(a => a.id));
+    async function handleAlbumReorder(evt: CustomEvent) {
+        const res = await RunApi("/album/reorderList/", {
+            params: {newOrdering: evt.detail.newStubs.map(ps => ps.id)},
+            method: "POST",
+            authorize: true
+        });
+        if (res.success) {
+            albumCoverStubs = evt.detail.newStubs;
+        }
+        else {
+            console.error(res);
+        }
     }
 </script>
 
-{#if $isLoggedInStore && !editing}
+{#if $isLoggedInStore && !reordering}
     <UploadZone on:done={onUploadDone} />
 {/if}
 
-<div class="albumList">
-    {#if addingNew}
-        <NewAlbumPrompt
-            on:dismissed={() => addingNew = false}
-            on:done={() => {addingNew = false; getAlbumList(null);}}
-        />
-    {/if}
+{#if addingNew}
+    <NewAlbumPrompt
+        on:dismissed={() => addingNew = false}
+        on:done={() => {addingNew = false; getAlbumList($isLoggedInStore);}}
+    />
+{/if}
 
+<div class="albumList">
     <div class="header">
         {#if $isLoggedInStore}
             <h2>Albums</h2>
@@ -117,75 +113,50 @@
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><line x1="88" y1="128" x2="168" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="128" y1="88" x2="128" y2="168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
             </Button>
+            {#if albumList?.length > 1}
+                <div class="reorderButton" class:toggled={reordering}>
+                    <Button
+                        margin="0 0 0 0"
+                        on:click={() => {reordering = !reordering}}
+                        title={`${reordering ? "Exit" : "Enter"} Edit Mode`}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="192 144 224 176 192 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="32" y1="176" x2="224" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="64 112 32 80 64 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="224.00006" y1="80" x2="32.00006" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
+                    </Button>
+                </div>
+            {/if}
         {/if}
     </div>
 
-    {#if $isLoggedInStore && albumList?.length > 1}
-        <div class="reorderButton" class:toggled={editing}>
-            <Button
-                margin="0 0 0 10px"
-                on:click={() => {editing = !editing}}
-                title={`${editing ? "Exit" : "Enter"} Edit Mode`}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="192 144 224 176 192 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="32" y1="176" x2="224" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="64 112 32 80 64 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="224.00006" y1="80" x2="32.00006" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
-            </Button>
-        </div>
-    {/if}
-    <div class="albumListDisplay"
-        bind:clientWidth={containerWidth}
-        style={`height: ${layout?.containerHeight || 0}px;`}
-    >
-        {#if editing && albumList}
-            <!--
-                 my EditableLayout is not as
-                 generalizable as I'd hoped. :-/
-             -->
-             <div class="editableLayout"
-                use:dndzone={{
-                    items: albumList,
-                    flipDurationMs: 300
-                }}
-                on:consider={dragAndDropConsider}
-                on:finalize={dragAndDropFinalize}
-             >
-                {#each albumList as album (album.id)}
-                    <div class="editableAlbum"
-                        animate:flip={{duration: 300}}
-                    >
-                        {#if album.coverPhoto >= 0}
-                            <img
-                                alt={album.title}
-                                srcset="{GetImgPath("medium", album.coverHash, album.coverUniq)}, {`${GetImgPath("medium2x", album.coverHash, album.coverUniq)} 2x`}"
-                                src="{GetImgPath("medium", album.coverHash, album.coverUniq)}"
-                            />
-                        {/if}
-                        <div class="albumTitle">
-                            {album.title}
-                        </div>
-                    </div>
+
+    {#if albumList}
+        {#if reordering}
+            <EditableLayout
+                stubList={albumCoverStubs}
+                on:reordered={handleAlbumReorder}
+            />
+        {:else}
+        <div class="albumListDisplay"
+            bind:clientWidth={containerWidth}
+            style={`height: ${layout?.containerHeight || 0}px;`}
+        >
+            {#if albumList.length == 0}
+                <div>(No albums on this site… yet.)</div>
+            {/if}
+
+            {#if layout}
+                <NavCollection stubs={albumCoverStubs}>
+                {#each albumList as album, ai}
+                    <NavPhoto size="medium"
+                        stub={albumCoverStubs[ai]}
+                        layoutDims={layout.boxes[ai]}
+                        textOverlay={album.title}
+                    />
                 {/each}
-             </div>
-        {:else if albumList && layout}
-            {#each albumList as album, ai}
-                <Link to={`/${album.slug}`}>
-                    <div class="navAlbum"
-                        style={`top: ${layout.boxes[ai].top}px; left: ${layout.boxes[ai].left}px; width: ${layout.boxes[ai].width}px; height: ${layout.boxes[ai].height}px;`}
-                    >
-                        <div class="albumTitle">
-                            {album.title}
-                        </div>
-                        {#if album.coverPhoto >= 0}
-                            <img
-                                alt={album.title}
-                                srcset="{GetImgPath("medium", album.coverHash, album.coverUniq)}, {`${GetImgPath("medium2x", album.coverHash, album.coverUniq)} 2x`}"
-                                src="{GetImgPath("medium", album.coverHash, album.coverUniq)}"
-                            />
-                        {/if}
-                    </div>
-                </Link>
-            {/each}
+                </NavCollection>
+            {/if}
+        </div>
         {/if}
-    </div>
+    {/if}
 </div>
 
 <style>
@@ -212,6 +183,17 @@
         margin-right: auto;
     }
 
+    .reorderButton {
+        margin-left: 5px;
+        max-width: 50px;
+
+        padding: 5px;
+    }
+
+    .reorderButton.toggled {
+        background-color: rgb(101, 101, 252);
+    }
+/*
     .navAlbum {
         position: absolute;
 
@@ -283,5 +265,5 @@
         max-width: 300px;
         max-height: 300px;
         margin: auto;
-    }
+    } */
 </style>

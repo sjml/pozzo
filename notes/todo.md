@@ -6,12 +6,12 @@
     - file uploader gets stuck behind map
     - making new album and signing out should refresh album list (does locally, but not remote? blergh.)
     - deleting and uploading new photo to album will insert it in the gap
-    - race if you move photos while they're still loading
-        - album probably needs to be rebuilt -- it's a hodgepodge right now
 
 0. Before starting actual use
     - requires backend support
         - album list context menu (delete / dissolve)
+        - bulk delete
+        - have keywords return as an array; process them into a join table at import; update typescript type; add test to check for 'em
     - research needed
         - blur back on image pages? (look at stackblur/canvas solution)
             - blurhash!
@@ -21,8 +21,10 @@
         - look at video import, if it's easy
     - clean up hacks
         - redo fullscreen to actually listen for events and make sure it's worked
+            - hide it on mobile
     - UX niceties
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
+        - add "click/tap to interact" to map
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
         - 404
@@ -47,7 +49,9 @@
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
 2. Backend pass
     - limit length of text things (titles, descriptions)
-    - pagination or just trust used to break stuff up into separate albums?
+    - pagination or just trust user to break stuff up into separate albums?
+    - directly fetched photos need to check if they're in a public album
+        - (basically all the /photo get endpoints)
 3. Frontend extra bonus points
     - can I do something clever to try and pull all the images from an album as you're viewing the full-screen?
         - something-something web workers? BLERGH.

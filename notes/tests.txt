@@ -42,6 +42,7 @@ found by code coverage:
     - login validation should check that the user in the token exists
     - try logging in as user that doesn't exist: should hit null return in GetUser
     - removing cover photo from album
+        - deleting or moving photos from album resets coverphoto if needed
     - copy photos to album by slug
     - edit non-existent album
     - reorder non-existent album

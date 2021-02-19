@@ -235,7 +235,7 @@
 
     {#if reordering}
         <EditableLayout
-            photoList={$currentAlbumStore.photos}
+            stubList={$currentAlbumStore.photos}
             on:reordered={handlePhotoReorder}
         />
     {:else}
