@@ -9,6 +9,7 @@
     import SetupPage from "./SetupPage.svelte";
     import AlbumList from "./AlbumList.svelte";
     import AlbumIndex from "./AlbumIndex.svelte";
+    import NotFound from "./NotFound.svelte";
 
     onMount(setup);
 
@@ -71,6 +72,8 @@
         </Route>
 
         <Route path="/"><AlbumList /></Route>
+
+        <Route fallback><NotFound /></Route>
     </Route>
 
     {#if $siteData.promo}

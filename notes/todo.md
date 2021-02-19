@@ -25,7 +25,7 @@
         - add "click/tap to interact" to map
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
-        - 404
+        - once keywords in, get metadata back
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
