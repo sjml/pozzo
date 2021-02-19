@@ -12,7 +12,7 @@ function phpNotationToBytes($fsize) {
 
     // who is attempting to upload petabytes through PHP?!
     if (!in_array($unit, ["k", "m", "g", "t", "p"])) {
-        return (int)$fsize;
+        return (int) $fsize;
     }
 
     $num = substr($fsize, 0, -1);
@@ -30,7 +30,7 @@ function phpNotationToBytes($fsize) {
             $num *= 1024;
             break;
     }
-    return (int)$num;
+    return (int) $num;
 }
 // @codeCoverageIgnoreEnd
 

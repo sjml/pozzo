@@ -21,7 +21,6 @@ def test_credentialed_upload(server, auth, req):
             headers=auth,
             files={"photoUp": f},
         )
-    print(res.content)
     assert res.status_code == 200
 
 def test_non_image_upload(server, auth, req):

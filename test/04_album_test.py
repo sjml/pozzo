@@ -30,19 +30,9 @@ def test_album_view_by_slug(server, req):
     assert adata["title"] == "[unsorted]"
     assert len(adata["photos"]) == 11
 
-def test_album_previews(server, req):
-    res = req.post(
-        server.api("/album/view/1"),
-        json={"previews": 1}
-    )
-    assert res.status_code == 200
-    adata = res.json()
-    assert "tinyJPEG" in adata["photos"][0]
-
 def test_nonexistent_album_is_nonexistent(server, req):
     res = req.post(
-        server.api("/album/view/2"),
-        json={"previews": 1}
+        server.api("/album/view/2")
     )
     assert res.status_code == 404
 
@@ -451,7 +441,6 @@ def test_reorder_album_list(server, auth, req):
         headers=auth
     )
     assert res.status_code == 200
-    print(res.json())
     order = [a["id"] for a in res.json()]
     assert order == [3,2,1]
 

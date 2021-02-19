@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let title: string;
+    export let title: string = null;
     export let isBig: boolean = false;
     export let isToggled: boolean = false;
     export let isDisabled: boolean = false;

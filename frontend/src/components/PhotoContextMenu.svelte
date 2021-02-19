@@ -1,35 +1,21 @@
 <script lang="ts">
-    import { getContext, onMount, createEventDispatcher } from "svelte";
+    import { onMount, createEventDispatcher, tick } from "svelte";
 
-    import type { Photo, Album } from "../pozzo.type";
+    import type { PhotoStub, Album } from "../pozzo.type";
+    import { currentAlbumStore, navSelection } from "../stores";
     import { RunApi } from "../api";
-    import { albumContextMenuKey } from "../keys";
-    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
     import Button from "./Button.svelte";
+    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
 
-
-    const context = getContext(albumContextMenuKey);
     const dispatch = createEventDispatcher();
 
-    export let currentAlbum: Album;
+    export let posX: number;
+    export let posY: number;
 
-
-    onMount(() => {
-        getAlbumList();
-        posX = (context as any).clickLocation[0];
-        posY = (context as any).clickLocation[1];
-        photos = (context as any).getSelectedPhotos();
-    });
-
-
-    let posX: number = 0;
-    let posY: number = 0;
-    let photos: Photo[] = [];
-
+    let contextMenuDiv: HTMLDivElement = null;
     let albumList: Album[] = [];
     let albumListShown = false;
     let newAlbumPromptShowing = false;
-
     async function getAlbumList() {
         const res = await RunApi("/album/list", {authorize: true});
         if (res.success) {
@@ -40,101 +26,51 @@
         }
     }
 
-
-    function newAlbumMove(evt: CustomEvent) {
-        newAlbumPromptShowing = false;
-        handleAlbumMove(evt.detail.newAlbumID);
+    function onBodyClick(evt: MouseEvent) {
+        if (   evt.clientX < posX
+            || evt.clientX > posX + contextMenuDiv.clientWidth
+            || evt.clientY < posY
+            || evt.clientY > posY + contextMenuDiv.clientHeight
+        ) {
+            dispatch("dismissed");
+        }
     }
 
-    async function handleAlbumMove(targetAlbum: (Album|number)) {
-        let targetID: number;
-        if (typeof targetAlbum === "number") {
-            targetID = targetAlbum;
-        }
-        else {
-            targetID = targetAlbum.id;
-        }
-        const copyRes = await RunApi("/photo/copy", {
-            authorize: true,
-            method: "POST",
-            params: {
-                copies: photos.map(p => ({photoID: p.id, albumID: targetID}))
-            }
-        });
-        if (!copyRes.success) {
-            console.error("Couldn't copy all photos to target albums.", copyRes);
-            return;
-        }
-        const removeRes = await RunApi("/album/remove", {
-            authorize: true,
-            method: "POST",
-            params: {
-                removals: photos.map(p => ({photoID: p.id, albumID: currentAlbum.id}))
-            }
-        });
-        if (!removeRes.success) {
-            console.error("Couldn't remove photos from target albums.", removeRes);
-            return;
-        }
-        dispatch("done");
-    }
+    onMount(() => {
+        getAlbumList();
 
-    async function handleDelete() {
-        for (let p of photos) {
-            const delRes = await RunApi("/photo/delete", {
-                authorize: true,
-                method: "POST",
-                params: {
-                    photoID: p.id
-                }
-            });
-            if (!delRes.success) {
-                console.error("Could not delete photo", delRes);
-            }
+        if (contextMenuDiv.clientWidth + posX > document.body.clientWidth) {
+            posX -= contextMenuDiv.clientWidth;
         }
-        dispatch("done");
-    }
+        if (contextMenuDiv.clientHeight + posY > document.body.clientHeight) {
+            posY -= contextMenuDiv.clientHeight;
+        }
+    });
 
-    async function handleCoverPhoto() {
-        let target = photos[0].id;
-        if (target == currentAlbum.coverPhoto) {
-            target = -1;
-        }
-        const res = await RunApi(`/album/edit/${currentAlbum.id}`, {
-            authorize: true,
-            method: "POST",
-            params: {
-                coverPhoto: target
-            }
-        });
-        if (res.success) {
-            currentAlbum.coverPhoto = target;
-        }
-        else {
-            console.error(res);
-        }
-        dispatch("done");
-    }
 </script>
 
+<svelte:body
+    on:click={onBodyClick}
+/>
 
 {#if newAlbumPromptShowing}
     <NewAlbumPrompt
         on:dismissed={() => newAlbumPromptShowing = false}
-        on:done={newAlbumMove}
+        on:done={(evt) => dispatch("move", {targetAlbumID: evt.detail.newAlbumID})}
     />
 {/if}
 
 <div
+    bind:this={contextMenuDiv}
     class="contextMenu"
     style={`left: ${posX}px; top: ${posY}px`}
 >
-    <div class="header menuItem">{photos.length} photo{photos.length == 1 ? "" : "s"} selected</div>
-    {#if photos.length == 1}
-        <Button on:click={handleCoverPhoto}>
+    <div class="header menuItem">{$navSelection.length} photo{$navSelection.length == 1 ? "" : "s"} selected</div>
+    {#if $navSelection.length == 1}
+        <Button on:click={() => dispatch("coverPhotoClicked", {})}>
             <div class="cover menuItem">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="200 176 127.993 136 56 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><path d="M200,224l-72.0074-40L56,224V40a8,8,0,0,1,8-8H192a8,8,0,0,1,8,8Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-                <div>{currentAlbum.coverPhoto == photos[0].id ? "Unset" : "Set"} as Cover Photo</div>
+                <div>{$currentAlbumStore.coverPhoto == $navSelection[0].id ? "Unset" : "Set"} as Cover Photo</div>
             </div>
         </Button>
     {/if}
@@ -158,8 +94,8 @@
             </Button>
         </div>
         {#each albumList as album}
-            {#if album.id != currentAlbum.id}
-                <Button on:click={() => handleAlbumMove(album)}>
+            {#if album.id != $currentAlbumStore.id}
+                <Button on:click={(evt) => dispatch("move", {targetAlbumID: album.id})}>
                     <div class="album menuItem">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><rect x="32" y="48" width="192" height="160" rx="8" stroke-width="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" fill="none"></rect><path d="M32,167.99982l50.343-50.343a8,8,0,0,1,11.31371,0l44.68629,44.6863a8,8,0,0,0,11.31371,0l20.68629-20.6863a8,8,0,0,1,11.31371,0L223.99982,184" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="156" cy="100" r="16"></circle></svg>
                         <div class="label">{album.title}</div>
@@ -168,14 +104,13 @@
             {/if}
         {/each}
     {/if}
-    <Button on:click={() => handleDelete()}>
+    <Button on:click={() => dispatch("delete", {})}>
         <div class="delete menuItem">
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="215.99609" y1="60" x2="39.99609" y2="60.00005" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="104" y1="104" x2="104" y2="168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="152" y1="104" x2="152" y2="168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M199.99609,60.00005V208a8,8,0,0,1-8,8h-128a8,8,0,0,1-8-8v-148" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><path d="M168,60V36a16,16,0,0,0-16-16H104A16,16,0,0,0,88,36V60" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
             <div class="label">Delete</div>
         </div>
     </Button>
 </div>
-
 
 <style>
     .contextMenu {

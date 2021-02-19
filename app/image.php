@@ -44,7 +44,7 @@ const sizes = [
         "maxHeight" => 32,
         "maxWidth" => 32,
         "label" => "tiny",
-    ]
+    ],
 ];
 
 function getImagePath($sizeLabel, $hash, $uniq) {
@@ -185,11 +185,17 @@ function processImage(&$photoData, $albumID, $order) {
 
     $img->setOption(
         "jpeg:size",
-        sizes[count(sizes) - 1]["maxWidth"] . "x" . sizes[count(sizes) - 1]["maxHeight"],
+        sizes[count(sizes) - 1]["maxWidth"] .
+            "x" .
+            sizes[count(sizes) - 1]["maxHeight"],
     );
     $img->readImage($origPath);
 
-    $blur = imagecreatefromstring(file_get_contents(getImagePath("tiny", $photoData["hash"], $photoData["uniq"])));
+    $blur = imagecreatefromstring(
+        file_get_contents(
+            getImagePath("tiny", $photoData["hash"], $photoData["uniq"]),
+        ),
+    );
     $blurW = imagesx($blur);
     $blurH = imagesy($blur);
 
@@ -206,7 +212,11 @@ function processImage(&$photoData, $albumID, $order) {
 
     $components_x = 4;
     $components_y = 3;
-    $photoData["blurHash"] = Blurhash::encode($pixels, $components_x, $components_y);
+    $photoData["blurHash"] = Blurhash::encode(
+        $pixels,
+        $components_x,
+        $components_y,
+    );
 
     processExif($photoData, $origPath);
 
@@ -219,7 +229,9 @@ function processImage(&$photoData, $albumID, $order) {
 }
 
 function processExif(&$photoData, $originalFilePath) {
-    $reader = \PHPExif\Reader\Reader::factory(\PHPExif\Reader\Reader::TYPE_EXIFTOOL);
+    $reader = \PHPExif\Reader\Reader::factory(
+        \PHPExif\Reader\Reader::TYPE_EXIFTOOL,
+    );
     $exif = $reader->read($originalFilePath);
 
     $rawData = $exif->getRawData();

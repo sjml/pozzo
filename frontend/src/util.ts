@@ -32,3 +32,12 @@ export function GetImgPath(size:string, hash: string, uniq: string): string {
 
     return `/photos/${dirs.join("/")}/${hash}_${uniq}_${size}.jpg`;
 }
+
+export function IsMetaKeyDownForEvent(evt: (KeyboardEvent|MouseEvent)) {
+    if (window.navigator.platform.startsWith("Mac")) {
+        return evt.metaKey;
+    }
+    else {
+        return evt.ctrlKey;
+    }
+}

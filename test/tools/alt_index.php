@@ -7,13 +7,13 @@ use SebastianBergmann\CodeCoverage\Driver\Selector;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\PHP as PHPReport;
 
-$filter = new Filter;
+$filter = new Filter();
 $filter->includeDirectory(__DIR__ . "/../../app");
 $filter->excludeDirectory(__DIR__ . "/../../vendor");
 
 $coverage = new CodeCoverage(
-    (new Selector)->forLineCoverage($filter),
-    $filter
+    (new Selector())->forLineCoverage($filter),
+    $filter,
 );
 
 $testName = $_SERVER["HTTP_TESTNAME"];
@@ -25,5 +25,12 @@ require_once __DIR__ . "/index.real.php";
 
 $coverage->stop();
 
-
-(new PHPReport)->process($coverage, __DIR__ . "/../../test/tools/raw_coverage/" . $testName . "_" . $testIdx . ".cov");
+(new PHPReport())->process(
+    $coverage,
+    __DIR__ .
+        "/../../test/tools/raw_coverage/" .
+        $testName .
+        "_" .
+        $testIdx .
+        ".cov",
+);

@@ -52,7 +52,7 @@ export default {
   plugins: [
     svelte({
       preprocess: sveltePreprocess({ sourceMap: !production }),
-			compilerOptions: {
+      compilerOptions: {
         // enable run-time checks when not in production
         dev: !production
       }
@@ -71,10 +71,10 @@ export default {
       dedupe: ['svelte']
     }),
     commonjs(),
-		typescript({
-			sourceMap: !production,
-			inlineSources: !production
-		}),
+    typescript({
+      sourceMap: !production,
+      inlineSources: !production
+    }),
 
     // In dev mode, run the dev server
     // the bundle has been generated

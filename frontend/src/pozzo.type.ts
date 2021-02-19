@@ -11,12 +11,9 @@ export type SiteConfig = {
 export type FrontendState = {
     fullScreen: boolean,
     photoToolsVisible: boolean,
-    backLinkText: string,
-    backLink: string,
     nextPhotoLink: string,
     prevPhotoLink: string,
     isMetadataOn: boolean,
-    currentAlbum?: Album,
     userStoppedUploadScroll: boolean,
 }
 
@@ -40,21 +37,50 @@ export type FileUploadStatus = {
     startUploadCallback?: Function,
 }
 
-// with all these optionals, it's debatable whether this is a worthwhile type...
-export type Photo = {
+// only the data needed to render an image
+//   (and even the title just gets used as an alt
+//   tag so could get swapped out to something else)
+export type PhotoStub = {
     id: number,
+    title?: string,
     hash: string,
     uniq: string,
-    aspect: number,
-    title?: string,
-    width?: number,
-    height?: number,
-    size?: number,
-    uploadTimeStamp?: number,
-    ordering?: number,
-    latitude?: number,
-    longitude?: number,
-    tinyJPEG?: string,
+    blurHash: string,
+    aspect: number
+}
+
+export type Photo = {
+    // recapitulates stub, but now title is required
+    id: number,
+    title: string,
+    hash: string,
+    uniq: string,
+    blurHash: string,
+    aspect: number
+
+    // extended import data
+    uploadTimeStamp: number,
+    uploadedBy: number,
+    originalFilename: string,
+    size: number,
+    width: number,
+    height: number,
+
+    // pulled from exif, so if the uploaded photo
+    //   didn't have it, it ain't here
+    make: string|null,
+    model: string|null,
+    lens: string|null,
+    mime: string|null,
+    creationDate: number|null,
+    keywords: string|null,
+    subjectArea: string|null,
+    aperture: string|null,
+    iso: string|null,
+    shutterSpeed: string|null,
+    gpsLat: number|null,
+    gpsLon: number|null,
+    gpsAlt: number|null,
 }
 
 export type Album = {
@@ -68,6 +94,7 @@ export type Album = {
     coverHash?: string,
     coverUniq?: string,
     coverAspect?: number,
+    coverBlurHash?: string,
     highestIndex: number,
-    photos: Photo[]
+    photos: PhotoStub[]
 }

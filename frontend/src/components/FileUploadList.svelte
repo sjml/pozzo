@@ -2,7 +2,7 @@
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
     import type { FileUploadStatus } from "../pozzo.type";
-    import { frontendStateStore } from "../stores";
+    import { currentAlbumStore, frontendStateStore } from "../stores";
     import FileUploader from "./FileUploader.svelte";
     import Button from "./Button.svelte";
 
@@ -16,9 +16,9 @@
 
         let targetAlbumID = null;
         let offset = 1;
-        if ($frontendStateStore.currentAlbum != null) {
-            targetAlbumID = $frontendStateStore.currentAlbum.id;
-            const existingIndices = $frontendStateStore.currentAlbum.photos.map((p) => p.ordering);
+        if ($currentAlbumStore != null) {
+            targetAlbumID = $currentAlbumStore.id;
+            const existingIndices = $currentAlbumStore.photos.map((p) => p.ordering);
             if (existingIndices.length == 0) {
                 offset = 1;
             }

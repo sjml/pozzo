@@ -14,7 +14,9 @@ $router = new Router();
 
 $router->AddHandler("/delete", ["deletePhoto"], true);
 $router->AddHandler("/copy", ["copyPhoto"], true);
+$router->AddHandler("/move", ["movePhotos"], true);
 $router->AddHandler("/view", ["viewPhoto"]);
+$router->AddHandler("/set", ["viewPhotoSet"]);
 $router->AddHandler("/orig", ["downloadOrig"]);
 
 $router->Route();
@@ -26,17 +28,30 @@ function output($obj, $code = 200) {
 }
 
 function viewPhoto() {
-    $input = json_decode(file_get_contents("php://input"), true);
-    $getPreview = isset($input["preview"]) && $input["preview"] == 1;
-
     $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
-    $photo = DB::GetPhoto($identifier, $getPreview);
+    $photo = DB::GetPhoto($identifier);
     if ($photo == null) {
         output(["message" => "Photo not found"], 404);
         return;
     }
 
     output($photo);
+}
+
+function viewPhotoSet() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (!isset($input["photoIDs"]) || !is_array($input["photoIDs"])) {
+        output(["message" => "Invalid or missing parameter 'photoIDs'"], 400);
+        return;
+    }
+    $photoIDs = array_filter($input["photoIDs"], "is_numeric");
+    if (count($photoIDs) != count($input["photoIDs"])) {
+        output(["message" => "Non-numeric values in photoIDs list"], 400);
+        return;
+    }
+
+    $photos = DB::GetPhotoSet($input["photoIDs"]);
+    output($photos);
 }
 
 function downloadOrig() {
@@ -121,4 +136,38 @@ function copyPhoto() {
         "numErrors" => $numErrors,
         "statuses" => $statuses,
     ]);
+}
+
+function movePhotos() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (!isset($input["photoIDs"]) || !is_array($input["photoIDs"])) {
+        output(["message" => "Invalid or missing parameter 'photoIDs'"], 400);
+        return;
+    }
+    $photoIDs = array_filter($input["photoIDs"], "is_numeric");
+    if (count($photoIDs) != count($input["photoIDs"])) {
+        output(["message" => "Non-numeric values in photoIDs list"], 400);
+        return;
+    }
+    if (!isset($input["fromAlbumID"]) || !is_numeric($input["fromAlbumID"])) {
+        output(
+            ["message" => "Missing or non-numeric value for 'fromAlbumID'"],
+            400,
+        );
+        return;
+    }
+    if (!isset($input["toAlbumID"]) || !is_numeric($input["toAlbumID"])) {
+        output(
+            ["message" => "Missing or non-numeric value for 'toAlbumID'"],
+            400,
+        );
+        return;
+    }
+
+    $result = DB::MovePhotos(
+        $photoIDs,
+        $input["fromAlbumID"],
+        $input["toAlbumID"],
+    );
+    output(["message" => "Photos moved."]);
 }

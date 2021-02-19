@@ -28,6 +28,20 @@ function error_handler($errno, $errstr, $errfile, $errline) {
 }
 set_error_handler("error_handler");
 
+function exception_handler($exc) {
+    http_response_code(500);
+    header("Content-Type: application/json");
+    echo json_encode([
+        "message" => "server-side error",
+        "code" => $exc->getCode(),
+        "error" => $exc->getMessage(),
+        "file" => $exc->getFile(),
+        "line" => $exc->getLine(),
+    ]);
+    die();
+}
+set_exception_handler("exception_handler");
+
 $_REQUEST["POZZO_REQUEST"] = $_SERVER["REQUEST_URI"];
 $_REQUEST["POZZO_REQUEST"] = preg_replace(
     "/^\/api/",

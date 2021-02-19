@@ -7,11 +7,30 @@
     import "../../lib/Leaflet.markercluster/dist/leaflet.markercluster";
     import "../../lib/Leaflet.markercluster/dist/MarkerCluster.css";
 
-    import type { Photo } from "../pozzo.type";
+    import type { Photo, PhotoStub } from "../pozzo.type";
+    import { RunApi } from "../api";
 
-    export let photos: Photo[] = [];
+    export let photoIDs: number[] = [];
     export let interactEnabled: boolean = false;
     export let boundsPadding: number = 15;
+
+    let photos: Photo[] = [];
+    async function getPhotos(ids: number[]) {
+        const res = await RunApi("/photo/set", {
+            method: "POST",
+            authorize: true,
+            params: {
+                photoIDs: ids
+            }
+        });
+        if (res.success) {
+            photos = res.data;
+        }
+        else {
+            console.error(res);
+        }
+    }
+    $: getPhotos(photoIDs)
 
     let mapElement: HTMLDivElement;
     let map: L.Map;
@@ -41,7 +60,6 @@
             zoomOffset: -1,
         }).addTo(map);
 
-        setMarkers(photos);
         setInteractEnabled(interactEnabled);
     });
 
@@ -88,14 +106,14 @@
         });
 
         let placedPhotos = photoList.map((p) => {
-            if (p.latitude != null && p.longitude != null) {
+            if (p.gpsLat != null && p.gpsLon != null) {
                 return p;
             }
             return null;
         });
         placedPhotos = placedPhotos.filter(p => p !== null);
         let coords = placedPhotos.map((p) => {
-            return L.latLng(p.latitude, p.longitude);
+            return L.latLng(p.gpsLat, p.gpsLon);
         });
 
         mapMarkers = coords.map((c) => {
@@ -105,9 +123,11 @@
         });
         map.addLayer(markerCluster);
 
+        if (coords.length > 0) {
         map.fitBounds(L.latLngBounds(coords), {
             padding: [boundsPadding, boundsPadding]
         });
+        }
     }
     $: setMarkers(photos)
 </script>

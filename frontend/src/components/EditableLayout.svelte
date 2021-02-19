@@ -4,14 +4,14 @@
 
     import { dndzone } from "svelte-dnd-action";
 
-    import type { Photo } from "../pozzo.type";
+    import type { PhotoStub } from "../pozzo.type";
     import { GetImgPath } from "../util";
 
 
     const dispatch = createEventDispatcher();
 
     const animationDuration = 200;
-    export let photoList: Photo[] = [];
+    export let photoList: PhotoStub[] = [];
     export let size: string = "medium";
 
     function dragAndDropConsider(e) {
@@ -20,7 +20,7 @@
 
     function dragAndDropFinalize(e) {
         photoList = e.detail.items;
-        dispatch("reordered", {newOrder: photoList});
+        dispatch("reordered", {newStubs: photoList});
     }
 </script>
 

@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import type { FrontendState, SiteConfig } from './pozzo.type';
+import type { FrontendState, SiteConfig, Album, PhotoStub } from './pozzo.type';
 
 export const siteData = writable<SiteConfig>(
     {
@@ -18,16 +18,15 @@ export const siteData = writable<SiteConfig>(
 export const frontendStateStore = writable<FrontendState>({
     fullScreen: false,
     photoToolsVisible: false,
-    backLinkText: "",
-    backLink: "",
     nextPhotoLink: "",
     prevPhotoLink: "",
     isMetadataOn: false,
-    currentAlbum: null,
     userStoppedUploadScroll: false,
 });
 
+export const currentAlbumStore = writable<Album>(null);
 
+export const navSelection = writable<PhotoStub[]>([]);
 
 export const loginCredentialStore = writable<string>(localStorage.getItem("pozzoLoginJWT") || "");
 loginCredentialStore.subscribe(value => {

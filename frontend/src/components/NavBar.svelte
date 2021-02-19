@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import { Link } from "svelte-routing";
 
-    import { frontendStateStore, siteData } from "../stores";
+    import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
     import Login from "./Login.svelte";
     import Button from "./Button.svelte";
 
@@ -21,11 +21,11 @@
         </Link>
     </div>
 
-    {#if $frontendStateStore.backLinkText.length > 0}
+    {#if $currentAlbumStore}
         <div class="backLink">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            <Link to={$frontendStateStore.backLink}>
-                {$frontendStateStore.backLinkText}
+            <Link to={`/album/${$currentAlbumStore.slug}`}>
+                {$currentAlbumStore.title}
             </Link>
         </div>
     {/if}

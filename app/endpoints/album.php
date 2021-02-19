@@ -56,10 +56,8 @@ function newAlbum() {
 }
 
 function viewAlbum() {
-    $input = json_decode(file_get_contents("php://input"), true);
-    $previews = isset($input["previews"]) && $input["previews"] == 1;
     $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
-    $album = DB::FindAlbum($identifier, true, $previews);
+    $album = DB::FindAlbum($identifier, true);
     if ($album == false) {
         output(["message" => "Album not found"], 404);
         return;
@@ -99,11 +97,11 @@ function editMetadata() {
         : $album["coverPhoto"];
 
     if (
-           !is_string($title)
-        || !is_string($description)
-        || !is_numeric($isPrivate)
-        || !is_numeric($showMap)
-        || !is_numeric($coverPhoto)
+        !is_string($title) ||
+        !is_string($description) ||
+        !(is_numeric($isPrivate) || is_bool($isPrivate)) ||
+        !(is_numeric($showMap) || is_bool($showMap)) ||
+        !is_numeric($coverPhoto)
     ) {
         output(["message" => "Could not update metadata"], 400);
         return;

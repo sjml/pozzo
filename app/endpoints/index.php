@@ -18,7 +18,7 @@ $message = [
             "/reorderList",
             "/reorder",
         ],
-        "/photo" => ["/delete", "/copy", "/view", "/orig"],
+        "/photo" => ["/delete", "/copy", "/move", "/view", "/set", "/orig"],
     ],
 ];
 
