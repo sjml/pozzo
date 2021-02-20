@@ -4,7 +4,6 @@
 immediate todos
     - requires backend support
         - album list context menu (delete / dissolve)
-        - video import
     - UX niceties
         - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)

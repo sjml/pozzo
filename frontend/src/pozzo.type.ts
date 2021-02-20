@@ -43,7 +43,8 @@ export type PhotoStub = {
     hash: string,
     uniq: string,
     blurHash: string,
-    aspect: number
+    aspect: number,
+    isVideo: boolean,
 }
 
 export type Photo = {
@@ -54,6 +55,7 @@ export type Photo = {
     uniq: string,
     blurHash: string,
     aspect: number
+    isVideo: boolean,
 
     // extended import data
     uploadTimeStamp: number,

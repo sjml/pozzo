@@ -10,6 +10,7 @@
     import Button from "./Button.svelte";
     import PhotoMap from "./PhotoMap.svelte";
     import DoubleLoader from "./DoubleLoader.svelte";
+    import VideoLoader from "./VideoLoader.svelte";
 
     const size = "large";
 
@@ -60,11 +61,16 @@
     Loading…
 {:else}
     <div class="fullPhoto">
-        <DoubleLoader
-            stub={$currentPhotoStore}
-            size={size}
-            canvasFit="contain"
-        />
+        {#if !$currentPhotoStore.isVideo }
+            <DoubleLoader
+                stub={$currentPhotoStore}
+                size={size}
+                canvasFit="contain"
+            />
+        {:else}
+            <VideoLoader
+            />
+        {/if}
     </div>
     {#if $metadataVisible}
         <div class="metadata">

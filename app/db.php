@@ -464,7 +464,7 @@ class DB {
             return [];
         }
 
-        $query = "SELECT photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect FROM photos_tags ";
+        $query = "SELECT photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_tags ";
         $query .= "JOIN photos ON photos.id = photos_tags.photo_id ";
         $query .= "WHERE photos_tags.tag_id = ?";
         $statement = self::$pdb->prepare($query);
@@ -718,7 +718,7 @@ class DB {
             $query .= " photos.* FROM photos_albums ";
         } else {
             $query .=
-                " photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect FROM photos_albums ";
+                " photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_albums ";
         }
         $query .= "JOIN photos ON photos.id = photos_albums.photo_id ";
         $query .=
