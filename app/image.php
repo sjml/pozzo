@@ -253,9 +253,9 @@ function processExif(&$photoData, $originalFilePath) {
         $photoData["creationDate"] = $photoData["creationDate"]->getTimeStamp();
     }
 
-    $photoData["keywords"] = $rawData["IPTC:Keywords"] ?? "";
-    if ($photoData["keywords"] != null) {
-        $photoData["keywords"] = implode(", ", $photoData["keywords"]);
+    $photoData["tags"] = $rawData["IPTC:Keywords"] ?? "";
+    if ($photoData["tags"] != null) {
+        $photoData["tags"] = implode(", ", $photoData["tags"]);
     }
 
     $photoData["subjectArea"] = $rawData["ExifIFD:SubjectArea"] ?? null;

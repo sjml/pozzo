@@ -6,7 +6,6 @@
 0. Before starting actual use
     - requires backend support
         - album list context menu (delete / dissolve)
-        - have keywords return as an array; process them into a join table at import; update typescript type; add test to check for 'em
     - research needed
         - see if we can not do the blurs if the images are already loaded?
         - look at video import, if it's easy

@@ -4,18 +4,20 @@ import json
 import requests
 import pytest
 
+from test_util import stat_assert
+
 def test_list_view(server, req):
     res = req.get(
         server.api("/album/list"),
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert len(res.json()) == 1
 
 def test_album_view(server, req):
     res = req.get(
         server.api("/album/view/1")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     adata = res.json()
     assert adata["title"] == "[unsorted]"
     assert len(adata["photos"]) == 11
@@ -25,7 +27,7 @@ def test_album_view_by_slug(server, req):
     res = req.get(
         server.api("/album/view/unsorted")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     adata = res.json()
     assert adata["title"] == "[unsorted]"
     assert len(adata["photos"]) == 11
@@ -34,39 +36,39 @@ def test_nonexistent_album_is_nonexistent(server, req):
     res = req.post(
         server.api("/album/view/2")
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
 def test_create_album_auth(server, auth, req):
     res = req.post(
         server.api("/album/new")
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_create_album(server, auth, req):
     res = req.post(
         server.api("/album/new"),
         headers=auth
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
     res = req.post(
         server.api("/album/new"),
         headers=auth,
         json={"title": "Test Album 1"}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/list"),
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert len(res.json()) == 2
     assert res.json()[1]["title"] == "Test Album 1"
 
     res = req.get(
         server.api("/album/view/2")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert len(res.json()["photos"]) == 0
 
 def test_album_unique_name(server, auth, req):
@@ -75,7 +77,7 @@ def test_album_unique_name(server, auth, req):
         headers=auth,
         json={"title": "Test Album 1"}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
 def test_album_non_numeric_name(server, auth, req):
     res = req.post(
@@ -83,20 +85,20 @@ def test_album_non_numeric_name(server, auth, req):
         headers=auth,
         json={"title": "42"}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
 def test_copy_photos_auth(server, req):
     res = req.post(
         server.api("/photo/copy")
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_copy_photos(server, auth, req):
     res = req.post(
         server.api("/photo/copy"),
         headers=auth,
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
     copyInsts = [{"photoID": x, "albumID": 2} for x in range(1,6)]
     res = req.post(
@@ -106,13 +108,13 @@ def test_copy_photos(server, auth, req):
            "copies": copyInsts
         }
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert res.json()["numErrors"] == 0
 
     res = req.get(
         server.api("/album/view/2")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     adata = res.json()
     assert len(adata["photos"]) == 5
 
@@ -120,14 +122,14 @@ def test_remove_photos_auth(server, req):
     res = req.post(
         server.api("/album/remove")
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_remove_photos(server, auth, req):
     res = req.post(
         server.api("/album/remove"),
         headers=auth
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
     removeInsts = [{"photoID": x, "albumID": 1} for x in range(1,6)]
     res = req.post(
@@ -137,12 +139,12 @@ def test_remove_photos(server, auth, req):
             "removals": removeInsts
         }
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/view/1")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert len(res.json()["photos"]) == 6
 
 def test_create_private_album(server, auth, req):
@@ -151,39 +153,39 @@ def test_create_private_album(server, auth, req):
         headers=auth,
         json={"title": "Test Album 2", "isPrivate": 1}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
 def test_album_privacy(server, auth, req):
     res = req.get(
         server.api("/album/view/3")
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
     res = req.get(
         server.api("/album/view/3"),
         headers=auth
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
 def test_album_list_privacy(server, auth, req):
     res = req.get(
         server.api("/album/list"),
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert len(res.json()) == 2
 
     res = req.get(
         server.api("/album/list"),
         headers=auth
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     assert len(res.json()) == 3
 
 def test_album_metadata_auth(server, req):
     res = req.post(
         server.api("/album/edit/2"),
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_album_metadata_empty(server, auth, req):
     res = req.post(
@@ -191,13 +193,13 @@ def test_album_metadata_empty(server, auth, req):
         headers=auth,
         json={"title": "Test Album 3"}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.post(
         server.api("/album/edit/4"),
         headers=auth
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
 def test_album_metadata_nonexistent(server, auth, req):
     res = req.post(
@@ -211,13 +213,13 @@ def test_album_metadata_nonexistent(server, auth, req):
             "coverPhoto": 1
         }
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
 def test_album_metadata(server, auth, req):
     res = req.get(
         server.api("/album/view/4")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     adata = res.json()
     assert adata["title"] == "Test Album 3"
     assert adata["description"] == ""
@@ -236,13 +238,13 @@ def test_album_metadata(server, auth, req):
             "coverPhoto": 1
         }
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/view/4"),
         headers=auth
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     adata = res.json()
     assert adata["title"] == "Edited Title"
     assert adata["description"] == "**New description.**"
@@ -262,40 +264,40 @@ def test_album_invalid_metadata(server, req, auth):
             "coverPhoto": "number won"
         }
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
 def test_delete_album_auth(server, req):
     res = req.post(
         server.api("/album/delete"),
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_delete_album(server, auth, req):
     res = req.post(
         server.api("/album/delete"),
         headers=auth,
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
     res = req.post(
         server.api("/album/delete"),
         headers=auth,
         json={"albumID": 7}
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
     res = req.post(
         server.api("/album/delete"),
         headers=auth,
         json={"albumID": 4}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/view/4"),
         headers=auth
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
 def test_delete_nonexistent_album(server, auth, req):
     res = req.post(
@@ -303,21 +305,21 @@ def test_delete_nonexistent_album(server, auth, req):
         headers=auth,
         json={"albumID": 4}
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
 def test_reorder_album_auth(server, req):
     res = req.post(
         server.api("/album/reorder/2"),
         json={"newOrdering": [5,4,3,2,1]}
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_reorder_album_missing_params(server, auth, req):
     res = req.post(
         server.api("/album/reorder/2"),
         headers=auth
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
 def test_reorder_album_not_enough(server, auth, req):
     res = req.post(
@@ -325,7 +327,7 @@ def test_reorder_album_not_enough(server, auth, req):
         headers=auth,
         json={"newOrdering": [5,4,3]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Miscount" in res.json()["message"]
 
 def test_reorder_album_too_much(server, auth, req):
@@ -334,7 +336,7 @@ def test_reorder_album_too_much(server, auth, req):
         headers=auth,
         json={"newOrdering": [7,6,5,4,3,2,1]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Miscount" in res.json()["message"]
 
 def test_reorder_album_bad_index(server, auth, req):
@@ -343,7 +345,7 @@ def test_reorder_album_bad_index(server, auth, req):
         headers=auth,
         json={"newOrdering": [5,4,3,2,7]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Misplaced" in res.json()["message"]
 
 def test_reorder_album_non_unique(server, auth, req):
@@ -352,7 +354,7 @@ def test_reorder_album_non_unique(server, auth, req):
         headers=auth,
         json={"newOrdering": [5,4,4,3,2]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Non-unique" in res.json()["message"]
 
 def test_reorder_album_nonexistent(server, auth, req):
@@ -361,7 +363,7 @@ def test_reorder_album_nonexistent(server, auth, req):
         headers=auth,
         json={"newOrdering": [5,4,3,2,1]}
     )
-    assert res.status_code == 404
+    stat_assert(res, 404)
 
 def test_reorder_album(server, auth, req):
     res = req.post(
@@ -369,12 +371,12 @@ def test_reorder_album(server, auth, req):
         headers=auth,
         json={"newOrdering": [5,4,3,2,1]}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/view/2")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     order = [p["id"] for p in res.json()["photos"]]
     assert order == [5,4,3,2,1]
 
@@ -383,14 +385,14 @@ def test_reorder_album_list_auth(server, req):
         server.api("/album/reorderList"),
         json={"newOrdering": [3,2,1]}
     )
-    assert res.status_code == 401
+    stat_assert(res, 401)
 
 def test_reorder_album_list_missing_params(server, auth, req):
     res = req.post(
         server.api("/album/reorderList"),
         headers=auth
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
 
 def test_reorder_album_list_not_enough(server, auth, req):
     res = req.post(
@@ -398,7 +400,7 @@ def test_reorder_album_list_not_enough(server, auth, req):
         headers=auth,
         json={"newOrdering": [2,1]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Miscount" in res.json()["message"]
 
 def test_reorder_album_list_too_much(server, auth, req):
@@ -407,7 +409,7 @@ def test_reorder_album_list_too_much(server, auth, req):
         headers=auth,
         json={"newOrdering": [4,3,2,1]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Miscount" in res.json()["message"]
 
 def test_reorder_album_list_bad_index(server, auth, req):
@@ -416,7 +418,7 @@ def test_reorder_album_list_bad_index(server, auth, req):
         headers=auth,
         json={"newOrdering": [3,2,7]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Misplaced" in res.json()["message"]
 
 def test_reorder_album_list_non_unique(server, auth, req):
@@ -425,7 +427,7 @@ def test_reorder_album_list_non_unique(server, auth, req):
         headers=auth,
         json={"newOrdering": [3,2,2]}
     )
-    assert res.status_code == 400
+    stat_assert(res, 400)
     assert "Non-unique" in res.json()["message"]
 
 def test_reorder_album_list(server, auth, req):
@@ -434,13 +436,13 @@ def test_reorder_album_list(server, auth, req):
         headers=auth,
         json={"newOrdering": [3,2,1]}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/list"),
         headers=auth
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     order = [a["id"] for a in res.json()]
     assert order == [3,2,1]
 
@@ -452,7 +454,7 @@ def test_ordered_upload(server, auth, req):
         headers=auth,
         json={"title": "Ordered Album"}
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
 
     files = os.listdir("./test_corpus/test_cases")
     files.sort()
@@ -465,12 +467,12 @@ def test_ordered_upload(server, auth, req):
                 files={"photoUp": f},
                 data={"data": json.dumps({"albumID": 4, "order": fcount - i})}
             )
-        assert res.status_code == 200
+        stat_assert(res, 200)
 
     res = req.get(
         server.api("/album/view/ordered-album")
     )
-    assert res.status_code == 200
+    stat_assert(res, 200)
     adata = res.json()
     assert adata["id"] == 4
     assert len(adata["photos"]) == 2

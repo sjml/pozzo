@@ -77,7 +77,7 @@ class DB {
         $prepCommand .= ", lens TEXT";
         $prepCommand .= ", mime TEXT";
         $prepCommand .= ", creationDate DATETIME";
-        $prepCommand .= ", keywords TEXT";
+        $prepCommand .= ", tags TEXT";
         $prepCommand .= ", subjectArea TEXT";
 
         // intentionally setting these as text so they don't need to be formatted
@@ -93,6 +93,26 @@ class DB {
         $prepCommand .= ", FOREIGN KEY(uploadedBy) REFERENCES users(id)";
 
         $prepCommand .= ")";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS tags (";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", tag TEXT UNIQUE";
+        $prepCommand .= ")";
+
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS photos_tags (";
+        $prepCommand .= "photo_id INTEGER NOT NULL";
+        $prepCommand .= ", tag_id INTEGER NOT NULL";
+        $prepCommand .=
+            ", CONSTRAINT PK_photo_tag PRIMARY KEY (photo_id, tag_id)";
+        $prepCommand .= ", FOREIGN KEY(photo_id) REFERENCES photos(id)";
+        $prepCommand .= ", FOREIGN KEY(tag_id) REFERENCES tags(id)";
+        $prepCommand .= ")";
+
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
@@ -211,12 +231,12 @@ class DB {
             "INSERT INTO photos (
                 uploadTimeStamp, uploadedBy, originalFilename, size,
                 width, height, title, hash, uniq, blurHash, aspect,
-                make, model, lens, mime, creationDate, keywords, subjectArea,
+                make, model, lens, mime, creationDate, tags, subjectArea,
                 aperture, iso, shutterSpeed, gpsLat, gpsLon, gpsAlt
             ) VALUES (
                 datetime('now'), :uploadedBy, :originalFilename, :size,
                 :width, :height, :title, :hash, :uniq, :blurHash, :aspect,
-                :make, :model, :lens, :mime, :creationDate, :keywords, :subjectArea,
+                :make, :model, :lens, :mime, :creationDate, :tags, :subjectArea,
                 :aperture, :iso, :shutterSpeed, :gpsLat, :gpsLon, :gpsAlt
             )",
         );
@@ -253,8 +273,8 @@ class DB {
             SQLITE3_INTEGER,
         );
         $statement->bindParam(
-            ":keywords",
-            $photoData["keywords"],
+            ":tags",
+            $photoData["tags"],
             SQLITE3_TEXT,
         );
         $statement->bindParam(
@@ -281,6 +301,13 @@ class DB {
         $photoData["id"] = self::$pdb->lastInsertRowID();
 
         self::AddPhotoToAlbum($photoData["id"], $albumID, $order);
+
+        if ($photoData["tags"] != "") {
+            $tags = explode(", ", $photoData["tags"]);
+            foreach ($tags as $tag) {
+                self::TagPhoto($photoData["id"], $tag);
+            }
+        }
 
         return $photoData["id"];
     }
@@ -337,6 +364,111 @@ class DB {
         }
 
         return $photoData;
+    }
+
+    static function _getTagID($tag) {
+        $query = "SELECT COUNT(*) as count, id FROM tags WHERE tag = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $tag, SQLITE3_TEXT);
+        $result = $statement->execute();
+
+        $data = $result->fetchArray(SQLITE3_ASSOC);
+        if ($data["count"] == 0) {
+            return -1;
+        }
+        return $data["id"];
+    }
+
+    static function TagPhoto($photoID, $tag) {
+        $tagID = self::_getTagID($tag);
+        if ($tagID == -1) {
+            $query = "INSERT INTO tags (tag) VALUES (?);";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $tag, SQLITE3_TEXT);
+            $statement->execute();
+            $tagID = self::$pdb->lastInsertRowID();
+        }
+
+        $query = "INSERT OR IGNORE INTO photos_tags (photo_id, tag_id) VALUES (?, ?);";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $tagID, SQLITE3_INTEGER);
+        $statement->execute();
+
+        if (self::$pdb->changes() > 0) {
+            $photoData = self::GetPhoto($photoID);
+            $tagString = $photoData["tags"];
+            if ($tagString == "") {
+                $existingTags = [];
+            }
+            else {
+                $existingTags = explode(", ", $tagString);
+            }
+            $idx = array_search($tag, $existingTags);
+            if ($idx === false) {
+                array_push($existingTags, $tag);
+                $tagString = implode(", ", $existingTags);
+                $query = "UPDATE photos SET tags = ? WHERE id = ?;";
+                $statement = self::$pdb->prepare($query);
+                $statement->bindParam(1, $tagString, SQLITE3_TEXT);
+                $statement->bindParam(2, $photoID, SQLITE3_INTEGER);
+                $statement->execute();
+            }
+        }
+    }
+
+    static function UntagPhoto($photoID, $tag) {
+        $tagID = self::_getTagID($tag);
+        if ($tagID < 0) {
+            return;
+        }
+        $query = "DELETE FROM photos_tags WHERE photo_id = ? AND tag_id = ?;";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $tagID, SQLITE3_INTEGER);
+        $statement->execute();
+
+        if (self::$pdb->changes() > 0) {
+            $photoData = self::GetPhoto($photoID);
+            $tagString = $photoData["tags"];
+            if ($tagString == "") {
+                $existingTags = [];
+            }
+            else {
+                $existingTags = explode(", ", $tagString);
+            }
+            $idx = array_search($tag, $existingTags);
+            if ($idx !== false) {
+                unset($existingTags[$idx]);
+            }
+
+            $tagString = implode(", ", $existingTags);
+            $query = "UPDATE photos SET tags = ? WHERE id = ?;";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $tagString, SQLITE3_TEXT);
+            $statement->bindParam(2, $photoID, SQLITE3_INTEGER);
+            $statement->execute();
+        }
+    }
+
+    static function GetPhotosTagged($tag) {
+        $tagID = self::_getTagID($tag);
+        if ($tagID < 0) {
+            return [];
+        }
+
+        $query = "SELECT photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect FROM photos_tags ";
+        $query .= "JOIN photos ON photos.id = photos_tags.photo_id ";
+        $query .= "WHERE photos_tags.tag_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $tagID);
+        $results = $statement->execute();
+
+        $taggedPhotos = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            array_push($taggedPhotos, $row);
+        }
+        return $taggedPhotos;
     }
 
     static function GetAlbumList($includePrivate = false) {

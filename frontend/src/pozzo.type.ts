@@ -61,15 +61,15 @@ export type Photo = {
     size: number,
     width: number,
     height: number,
+    tags: string[],
 
-    // pulled from exif, so if the uploaded photo
+    // initially pulled from exif, so if the uploaded photo
     //   didn't have it, it ain't here
     make: string|null,
     model: string|null,
     lens: string|null,
     mime: string|null,
     creationDate: number|null,
-    keywords: string|null,
     subjectArea: string|null,
     aperture: string|null,
     iso: string|null,

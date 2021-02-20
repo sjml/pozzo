@@ -16,6 +16,9 @@ $router->AddHandler("/delete", ["deletePhoto"], true);
 $router->AddHandler("/copy", ["copyPhoto"], true);
 $router->AddHandler("/move", ["movePhotos"], true);
 $router->AddHandler("/view", ["viewPhoto"]);
+$router->AddHandler("/tagset", ["getPhotosTagged"]);
+$router->AddHandler("/tag", ["tagPhotos"], true);
+$router->AddHandler("/untag", ["untagPhotos"], true);
 $router->AddHandler("/set", ["viewPhotoSet"]);
 $router->AddHandler("/orig", ["downloadOrig"]);
 
@@ -35,6 +38,13 @@ function viewPhoto() {
         return;
     }
 
+    if ($photo["tags"] != "") {
+        $photo["tags"] = explode(", ", $photo["tags"]);
+    }
+    else {
+        $photo["tags"] = [];
+    }
+
     output($photo);
 }
 
@@ -51,6 +61,18 @@ function viewPhotoSet() {
     }
 
     $photos = DB::GetPhotoSet($input["photoIDs"]);
+    foreach ($photos as $photo) {
+        if ($photo == null) {
+            continue;
+        }
+        if ($photo["tags"] != "") {
+            $photo["tags"] = explode(", ", $photo["tags"]);
+        }
+        else {
+            $photo["tags"] = [];
+        }
+    }
+
     output($photos);
 }
 
@@ -170,4 +192,73 @@ function movePhotos() {
         $input["toAlbumID"],
     );
     output(["message" => "Photos moved."]);
+}
+
+function tagPhotos() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (!isset($input["photoIDs"]) || !is_array($input["photoIDs"])) {
+        output(["message" => "Invalid or missing parameter 'photoIDs'"], 400);
+        return;
+    }
+    $photoIDs = array_filter($input["photoIDs"], "is_numeric");
+    if (count($photoIDs) != count($input["photoIDs"])) {
+        output(["message" => "Non-numeric values in photoIDs list"], 400);
+        return;
+    }
+    if (!isset($input["tags"]) || !is_array($input["tags"])) {
+        output(["message" => "Invalid or missing parameter 'tags'"], 400);
+        return;
+    }
+
+    foreach ($input["tags"] as $tag) {
+        foreach ($photoIDs as $photoID) {
+            DB::TagPhoto($photoID, $tag);
+        }
+    }
+
+    output(["message" => "Photos tagged"]);
+}
+
+function untagPhotos() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (!isset($input["photoIDs"]) || !is_array($input["photoIDs"])) {
+        output(["message" => "Invalid or missing parameter 'photoIDs'"], 400);
+        return;
+    }
+    $photoIDs = array_filter($input["photoIDs"], "is_numeric");
+    if (count($photoIDs) != count($input["photoIDs"])) {
+        output(["message" => "Non-numeric values in photoIDs list"], 400);
+        return;
+    }
+    if (!isset($input["tags"]) || !is_array($input["tags"])) {
+        output(["message" => "Invalid or missing parameter 'tags'"], 400);
+        return;
+    }
+
+    foreach ($input["tags"] as $tag) {
+        foreach ($photoIDs as $photoID) {
+            DB::UntagPhoto($photoID, $tag);
+        }
+    }
+
+    output(["message" => "Photos untagged"]);
+}
+
+function getPhotosTagged() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (!isset($input["tags"]) || !is_array($input["tags"])) {
+        output(["message" => "Invalid or missing parameter 'tags'"], 400);
+        return;
+    }
+    $tags = $input["tags"];
+    if (count($tags) == 0) {
+        output([]);
+        return;
+    }
+    if (count($tags) > 1) {
+        output(["message" => "Only one tag at a time supported right now :("], 400);
+        return;
+    }
+
+    output(DB::GetPhotosTagged($tags[0]));
 }
