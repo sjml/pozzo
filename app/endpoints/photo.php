@@ -84,7 +84,13 @@ function downloadOrig() {
         return;
     }
 
-    $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"]);
+    if ($photo["isVideo"]) {
+        $ext = pathinfo($photo["originalFilename"], PATHINFO_EXTENSION);
+        $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"], $ext);
+    }
+    else {
+        $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"]);
+    }
 
     header("Content-Description: File Transfer");
     header("Content-Type: application/octet-stream");

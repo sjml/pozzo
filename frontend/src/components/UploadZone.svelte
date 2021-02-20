@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
 
-    import { isLoggedInStore } from "../stores";
+    import { isLoggedInStore, siteData } from "../stores";
     import FileUploadList from "./FileUploadList.svelte";
 
     let fileList: File[];
@@ -13,11 +13,21 @@
     async function handleDrop(event: DragEvent) {
         dragCount = 0;
         let filteringList = [...event.dataTransfer.files];
-        filteringList = filteringList.filter(f => f.type == "image/jpeg");
+        filteringList = filteringList.filter(isValidFile);
         if (filteringList.length == 0) {
             return;
         }
         fileList = filteringList;
+    }
+
+    function isValidFile(f: File) {
+        if (!$siteData.formats.includes(f.type)) {
+            return false;
+        }
+        if (f.size > $siteData.maxUploadBytes) {
+            return false;
+        }
+        return true;
     }
 
 

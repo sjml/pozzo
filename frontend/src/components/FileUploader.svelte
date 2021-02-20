@@ -19,12 +19,14 @@
         uploadStatus.startUploadCallback = () => startUpload();
         progressBar.value = 0;
 
-        const fr = new FileReader();
-        fr.readAsDataURL(uploadStatus.file);
-        fr.onloadend = () => {
-            previewSrc = fr.result;
-            previewAlt = uploadStatus.file.name;
-        };
+        if (uploadStatus.file.type.startsWith("image")) {
+            const fr = new FileReader();
+            fr.readAsDataURL(uploadStatus.file);
+            fr.onloadend = () => {
+                previewSrc = fr.result;
+                previewAlt = uploadStatus.file.name;
+            };
+        }
     });
 
 
@@ -81,7 +83,9 @@
             <div class="size"><span class="label">Size:</span> {HumanBytes(uploadStatus.file.size)}</div>
         </div>
         <div class="preview">
-            <img src={previewSrc} alt={previewAlt}>
+            {#if previewSrc}
+                <img src={previewSrc} alt={previewAlt}>
+            {/if}
         </div>
     </div>
     <div class="status">

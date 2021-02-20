@@ -4,7 +4,8 @@
     "miljar/php-exif": "^0.6.5",
     "firebase/php-jwt": "^5.2",
     "ausi/slug-generator": "^1.1",
-    "kornrunner/blurhash": "^1.2"
+    "kornrunner/blurhash": "^1.2",
+    "php-ffmpeg/php-ffmpeg": "^0.17.0"
   },
   "require-dev": {
     "phpunit/php-code-coverage": "^9.2"

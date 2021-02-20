@@ -71,6 +71,7 @@ class DB {
         $prepCommand .= ", uniq TEXT"; // stub
         $prepCommand .= ", blurHash TEXT"; // stub
         $prepCommand .= ", aspect FLOAT"; // stub
+        $prepCommand .= ", isVideo BOOLEAN DEFAULT 0"; // stub
 
         $prepCommand .= ", make TEXT";
         $prepCommand .= ", model TEXT";
@@ -229,12 +230,12 @@ class DB {
     ) {
         $statement = self::$pdb->prepare(
             "INSERT INTO photos (
-                uploadTimeStamp, uploadedBy, originalFilename, size,
+                uploadTimeStamp, uploadedBy, originalFilename, isVideo, size,
                 width, height, title, hash, uniq, blurHash, aspect,
                 make, model, lens, mime, creationDate, tags, subjectArea,
                 aperture, iso, shutterSpeed, gpsLat, gpsLon, gpsAlt
             ) VALUES (
-                datetime('now'), :uploadedBy, :originalFilename, :size,
+                datetime('now'), :uploadedBy, :originalFilename, :isVideo, :size,
                 :width, :height, :title, :hash, :uniq, :blurHash, :aspect,
                 :make, :model, :lens, :mime, :creationDate, :tags, :subjectArea,
                 :aperture, :iso, :shutterSpeed, :gpsLat, :gpsLon, :gpsAlt
@@ -252,6 +253,7 @@ class DB {
             SQLITE3_TEXT,
         );
         $statement->bindParam(":size", $photoData["size"], SQLITE3_INTEGER);
+        $statement->bindParam(":isVideo", $photoData["isVideo"], SQLITE3_INTEGER);
         $statement->bindParam(":width", $photoData["width"], SQLITE3_INTEGER);
         $statement->bindParam(":height", $photoData["height"], SQLITE3_INTEGER);
         $statement->bindParam(":title", $photoData["title"], SQLITE3_TEXT);
@@ -704,7 +706,7 @@ class DB {
             implode(", ", $photoIDs) .
             ")";
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $fromAlbumID["id"], SQLITE3_INTEGER);
+        $statement->bindParam(1, $fromAlbumID, SQLITE3_INTEGER);
         $results = $statement->execute();
 
         self::$pdb->exec("COMMIT TRANSACTION;");

@@ -1,6 +1,6 @@
 Most of this was assembled after a quick pass through Flickr looking for Creative Commons images that showed a variety of file sizes, aspect ratios, camera types (including virtual), subject matter, and amount/quality of EXIF data. It's not exhaustive by any stretch, but not a bad starting place.
 
-JPEG
+jpeg
     - 01.jpeg:  https://www.flickr.com/photos/130925681@N04/18523463293
         - Title: TESV: Kountervibe ENB Northern Lights
         - Artist: Eilian Parker
@@ -42,6 +42,12 @@ JPEG
         - Artist: Richard
         - License: CC BY-ND 2.0: https://creativecommons.org/licenses/by-nd/2.0/
 
+png
+    - 01.png: https://www.flickr.com/photos/vladcepesh/30522058731
+        - Title: Skyrim SE
+        - Artist: Vlat [T]
+        - License: CC BY-ND 2.0: https://creativecommons.org/licenses/by-nc-nd/2.0/
+
 
 Edge cases were found to cause specific issues that are tested for regression.
 
@@ -56,3 +62,10 @@ edge_cases
         - Artist: Shane Liesegang, SJ
         - Licence: CC BY-NC-ND 4.0: https://creativecommons.org/licenses/by-nc-nd/4.0/
         - Explanation: There weren't any photos from the southern hemisphere, which the GPS code checks for at one point. So here's a shot that I took in Cape Town. It also appears to knock out one of the orientations, so double yay.
+
+
+video
+    - Abstract.mp4: https://www.videvo.net/video/abstract-streamers/4435/
+        - Title: Abstract Streamers
+        - Artist: Starflight
+        - License: Creative Commons 3.0 Unported (CC BY 3.0): https://creativecommons.org/licenses/by/3.0/

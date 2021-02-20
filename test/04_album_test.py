@@ -1,5 +1,6 @@
 import os
 import json
+import mimetypes
 
 import requests
 import pytest
@@ -21,7 +22,6 @@ def test_album_view(server, req):
     adata = res.json()
     assert adata["title"] == "[unsorted]"
     assert len(adata["photos"]) == 11
-    assert "tinyJPEG" not in adata["photos"][0]
 
 def test_album_view_by_slug(server, req):
     res = req.get(
@@ -464,7 +464,7 @@ def test_ordered_upload(server, auth, req):
             res = req.post(
                 server.api("/upload"),
                 headers=auth,
-                files={"photoUp": f},
+                files={"mediaUp": (img, f, mimetypes.guess_type(img)[0])},
                 data={"data": json.dumps({"albumID": 4, "order": fcount - i})}
             )
         stat_assert(res, 200)

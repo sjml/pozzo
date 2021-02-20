@@ -133,7 +133,7 @@ export async function UploadFile(fileStatus: FileUploadStatus, progressCallback:
         }
         fd.append("data", JSON.stringify(params));
 
-        fd.append("photoUp", file);
+        fd.append("mediaUp", file);
         xhr.send(fd);
     });
 }

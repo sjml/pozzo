@@ -8,6 +8,7 @@ immediate todos
     - UX niceties
         - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
+        - shift-click to select ranges
         - map polish
             - add "click/tap to interact" when it's locked
             - maybe SVG markers?

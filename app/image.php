@@ -47,7 +47,7 @@ const sizes = [
     ],
 ];
 
-function getImagePath($sizeLabel, $hash, $uniq) {
+function getImagePath($sizeLabel, $hash, $uniq, $extension="jpg") {
     $ret = __DIR__ . "/../public/photos/";
     $rawDirs = str_split($hash, 2);
     $rawDirs = array_slice($rawDirs, 0, 3);
@@ -66,7 +66,7 @@ function getImagePath($sizeLabel, $hash, $uniq) {
     if (!is_dir($ret)) {
         mkdir($ret, 0755, true);
     }
-    return $ret . "/" . $hash . "_" . $uniq . "_" . $sizeLabel . ".jpg";
+    return $ret . "/" . $hash . "_" . $uniq . "_" . $sizeLabel . "." . $extension;
 }
 
 function deleteImagesWithHash($hash, $uniq) {
@@ -97,22 +97,49 @@ function importImage($filePath) {
     return $photoData;
 }
 
-function processImage(&$photoData, $albumID, $order) {
+function importVideo($filePath, $origName) {
+    $photoData = [
+        "title" => basename($filePath),
+        "size" => filesize($filePath),
+        "hash" => md5_file($filePath),
+        "uniq" => uniqid(),
+    ];
+
+    $ext = pathinfo($origName, PATHINFO_EXTENSION);
+    $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"], $ext);
+    move_uploaded_file($filePath, $origPath);
+
+    $ffprobe = FFMpeg\FFProbe::create();
+    $duration = $ffprobe->format($origPath)->get("duration");
+    $ffmpeg = FFMpeg\FFMpeg::create();
+    $video = $ffmpeg->open($origPath);
+    $preview = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds($duration / 3));
+    $previewPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
+    $preview->save($previewPath);
+
+    return $photoData;
+}
+
+function processImage(&$photoData) {
     $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
 
     $img = new IMagick();
+
+    if (!isset($photoData["width"])) {
+        $img->readImage($origPath);
+        $photoData["width"] = $img->getImageWidth();
+        $photoData["height"] = $img->getImageHeight();
+        $photoData["aspect"] =
+            (float) $img->getImageWidth() / (float) $img->getImageHeight();
+    }
+
     foreach (sizes as $size) {
         $img->setOption(
             "jpeg:size",
             $size["maxWidth"] . "x" . $size["maxHeight"],
         );
+
         $img->readImage($origPath);
-        if (!isset($photoData["width"])) {
-            $photoData["width"] = $img->getImageWidth();
-            $photoData["height"] = $img->getImageHeight();
-            $photoData["aspect"] =
-                (float) $img->getImageWidth() / (float) $img->getImageHeight();
-        }
 
         // Quality setting is higher than it *needs* to be by any strict definition,
         //   but for gallery purposes I'd rather err on the side of images being
@@ -159,30 +186,6 @@ function processImage(&$photoData, $albumID, $order) {
         );
     }
 
-    // // generate tiny preview
-    // // convert -define jpeg:size=32x32 IMG_6738.jpeg -resize 32x32 -auto-orient -strip -quality 40 out.jpg
-    // $img->setOption("jpeg:size", "32x32");
-    // $img->readImage($origPath);
-    // $img->scaleImage(32, 32, true);
-    // $orient = $img->getImageOrientation();
-    // switch ($orient) {
-    //     case imagick::ORIENTATION_RIGHTTOP:
-    //         $img->rotateImage("#00000000", 90);
-    //         break;
-    //     case imagick::ORIENTATION_BOTTOMRIGHT:
-    //         $img->rotateImage("#00000000", 180);
-    //         break;
-    //     case imagick::ORIENTATION_LEFTBOTTOM:
-    //         $img->rotateImage("#00000000", 270);
-    //         break;
-    // }
-    // $img->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
-    // $img->stripImage();
-    // $img->setCompressionQuality(40);
-    // $img->setImageFormat("jpeg");
-
-    // $photoData["tinyJPEG"] = base64_encode($img->getImageBlob());
-
     $img->setOption(
         "jpeg:size",
         sizes[count(sizes) - 1]["maxWidth"] .
@@ -224,18 +227,11 @@ function processImage(&$photoData, $albumID, $order) {
         $components_x,
         $components_y,
     );
-
-    processExif($photoData, $origPath);
-
-    $photoData["id"] = DB::InsertPhoto(
-        $photoData,
-        $photoData["title"],
-        $albumID,
-        $order,
-    );
 }
 
-function processExif(&$photoData, $originalFilePath) {
+function processPhotoMeta(&$photoData) {
+    $originalFilePath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
+
     $reader = \PHPExif\Reader\Reader::factory(
         \PHPExif\Reader\Reader::TYPE_EXIFTOOL,
     );
@@ -268,4 +264,26 @@ function processExif(&$photoData, $originalFilePath) {
     $photoData["gpsLat"] = $rawData["Composite:GPSLatitude"] ?? null;
     $photoData["gpsLon"] = $rawData["Composite:GPSLongitude"] ?? null;
     $photoData["gpsAlt"] = $rawData["Composite:GPSAltitude"] ?? null;
+}
+
+function processVideoMeta(&$vidData) {
+    $ext = pathinfo($vidData["title"], PATHINFO_EXTENSION);
+    $originalFilePath = getImagePath("orig", $vidData["hash"], $vidData["uniq"], $ext);
+
+    $reader = \PHPExif\Reader\Reader::factory(
+        \PHPExif\Reader\Reader::TYPE_EXIFTOOL,
+    );
+    $exif = $reader->read($originalFilePath);
+
+    $rawExif = $exif->getRawData();
+
+    $vidData["make"] = $rawExif["UserData:Make"] ?? null;
+    $vidData["model"] = $rawExif["UserData:Model"] ?? null;
+    $vidData["mime"] = $rawExif["File:MIMEType"] ?? null;
+    $vidData["creationDate"] = $rawExif["Keys:CreationDate"] ?? null;
+
+    $vidData["gpsLat"] = $rawExif["Composite:GPSLatitude"] ?? null;
+    $vidData["gpsLon"] = $rawExif["Composite:GPSLongitude"] ?? null;
+    $vidData["gpsAlt"] = $rawExif["Composite:GPSAltitude"] ?? null;
+
 }

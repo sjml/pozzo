@@ -30,21 +30,57 @@ function upload() {
             }
         }
 
-        $photoData = importImage($_FILES["photoUp"]["tmp_name"]);
-        if ($photoData == null) {
+        if (substr($_FILES["mediaUp"]["type"], 0, 6) === "image/") {
+            $photoData = importImage($_FILES["mediaUp"]["tmp_name"]);
+            if ($photoData == null) {
+                http_response_code(415);
+                echo '{"error": "415 / Unsupported Media Type"}';
+                return;
+            }
+            $photoData["isVideo"] = false;
+            $photoData["title"] = $_FILES["mediaUp"]["name"];
+            $photoData["uploadedBy"] = $_REQUEST["POZZO_AUTH"];
+
+            processImage($photoData);
+
+            processPhotoMeta($photoData);
+
+            $photoData["id"] = DB::InsertPhoto(
+                $photoData,
+                $photoData["title"],
+                $albumID,
+                $orderSlot,
+            );
+
+            http_response_code(200);
+            header("Content-Type: application/json");
+            echo json_encode($photoData);
+        }
+        elseif (substr($_FILES["mediaUp"]["type"], 0, 6) === "video/") {
+            $vidData = importVideo($_FILES["mediaUp"]["tmp_name"], $_FILES["mediaUp"]["name"]);
+            $vidData["isVideo"] = true;
+            $vidData["title"] = $_FILES["mediaUp"]["name"];
+            $vidData["uploadedBy"] = $_REQUEST["POZZO_AUTH"];
+
+            processImage($vidData);
+            processVideoMeta($vidData);
+
+            $vidData["id"] = DB::InsertPhoto(
+                $vidData,
+                $vidData["title"],
+                $albumID,
+                $orderSlot,
+            );
+
+            http_response_code(200);
+            header("Content-Type: application/json");
+            echo json_encode($vidData);
+        }
+        else {
             http_response_code(415);
             echo '{"error": "415 / Unsupported Media Type"}';
             return;
         }
-        $photoData["title"] = $_FILES["photoUp"]["name"];
-        $photoData["uploadedBy"] = $_REQUEST["POZZO_AUTH"];
-
-        processImage($photoData, $albumID, $orderSlot);
-        unset($photoData["tinyJPEG"]);
-
-        http_response_code(200);
-        header("Content-Type: application/json");
-        echo json_encode($photoData);
 
         // @codeCoverageIgnoreStart
         // As with setup's catch, this is handling stuff that is unanticipated

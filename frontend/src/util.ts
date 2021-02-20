@@ -24,13 +24,13 @@ export function TimestampToDateString(timestamp: number): string {
 }
 
 // matching the backend logic from image.php's getImagePath function
-export function GetImgPath(size:string, hash: string, uniq: string): string {
+export function GetImgPath(size:string, hash: string, uniq: string, ext: string = "jpg"): string {
     const dirs = hash.match(/.{1,2}/g)
                     .slice(0,3)
                     .map((d) => {if (d == "ad") return "a_"; else return d; });
                     // "ad" is special-case censored to avoid triggering ad-blockers
 
-    return `/photos/${dirs.join("/")}/${hash}_${uniq}_${size}.jpg`;
+    return `/photos/${dirs.join("/")}/${hash}_${uniq}_${size}.${ext}`;
 }
 
 export function IsMetaKeyDownForEvent(evt: (KeyboardEvent|MouseEvent)) {

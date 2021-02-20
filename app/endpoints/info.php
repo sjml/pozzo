@@ -35,7 +35,7 @@ function phpNotationToBytes($fsize) {
 // @codeCoverageIgnoreEnd
 
 $message = [
-    "formats" => ["image/jpeg"],
+    "formats" => ["image/jpeg", "video/mp4", "video/quicktime"],
     "sizes" => sizes,
     "siteTitle" => DB::GetConfig("site_title"),
     "promo" => DB::GetConfig("promo"),
