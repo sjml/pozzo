@@ -68,7 +68,7 @@
         bottom: 0;
         left: 0;
 
-        z-index: 400;
+        z-index: 1500;
         pointer-events: none;
 
         display: flex;

@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { onDestroy } from "svelte";
-    import { router } from "tinro";
+    import { createEventDispatcher } from "svelte";
 
     import justifiedLayout from "justified-layout";
 
@@ -14,6 +13,8 @@
     import Button from "./Button.svelte";
     import PhotoMap from "./PhotoMap.svelte";
     import UploadZone from "./UploadZone.svelte";
+
+    const dispatch = createEventDispatcher();
 
 
     let containerWidth: number;
@@ -131,7 +132,7 @@
     <div>Loading…</div>
 {:else}
     {#if $isLoggedInStore && !reordering}
-        <UploadZone on:done={() => router.goto(`/album/${$currentAlbumStore.slug}`) } />
+        <UploadZone on:done={() => dispatch("uploaded")} />
     {/if}
 
     <div class="titleRow">

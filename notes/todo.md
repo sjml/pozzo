@@ -2,9 +2,6 @@
     - got some false positive error reporting on bulk upload... investigate what's up
         - more problematic was that I couldn't re-try :(
     - uploading to remote, never get the "processing" status
-    - file uploader gets stuck behind map
-    - deleting and uploading new photo to album will insert it in the gap
-    - existingIndices and ordered_upload
 
 0. Before starting actual use
     - requires backend support

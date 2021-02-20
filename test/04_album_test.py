@@ -474,6 +474,6 @@ def test_ordered_upload(server, auth, req):
     adata = res.json()
     assert adata["id"] == 4
     assert len(adata["photos"]) == 2
-    # assert adata["photos"][0]["id"] == 13
-    # assert adata["photos"][1]["id"] == 12
+    assert adata["photos"][0]["id"] == 13
+    assert adata["photos"][1]["id"] == 12
 

@@ -467,20 +467,17 @@ class DB {
         }
 
         self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
-        $query =
-            "SELECT MAX(ordering) FROM photos_albums WHERE album_id = ?;";
-        $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
-        $results = $statement->execute();
-        $max = $results->fetchArray(SQLITE3_NUM)[0];
-        if ($max == null) {
-            $max = 0;
-        }
         if ($order == null) {
+            $query =
+                "SELECT MAX(ordering) FROM photos_albums WHERE album_id = ?;";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+            $results = $statement->execute();
+            $max = $results->fetchArray(SQLITE3_NUM)[0];
+            if ($max == null) {
+                $max = 0;
+            }
             $order = $max + 1;
-        }
-        else {
-            $order += $max;
         }
 
         $statement = self::$pdb->prepare(

@@ -107,7 +107,7 @@
     }
 
     img.main {
-        z-index: 100;
+        z-index: 20;
 
         object-fit: contain;
         opacity: 0.0;

@@ -19,7 +19,6 @@
         }
     }
 
-
     async function getAlbum(slug: string) {
         const res = await RunApi(`/album/view/${slug}`, {
             authorize: true
@@ -45,7 +44,7 @@
             <PhotoPage photoIdentifier={meta.params.photoID} />
         </Route>
         <Route path="/">
-            <AlbumPage />
+            <AlbumPage on:uploaded={() => getAlbum(albumSlug) } />
         </Route>
     </Route>
 {/if}
