@@ -40,6 +40,7 @@ $message = [
     "siteTitle" => DB::GetConfig("site_title"),
     "promo" => DB::GetConfig("promo"),
     "maxUploadBytes" => phpNotationToBytes(ini_get("upload_max_filesize")),
+    "simultaneousUploads" => 4,
 ];
 
 header("Content-Type: application/json");

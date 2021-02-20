@@ -33,7 +33,7 @@
         if (res.success) {
             $siteData.siteTitle = sitenameField;
             $loginCredentialStore = res.data.key;
-            navigate("/", {replace: true});
+            router.goto("/");
         }
         else {
             configMessage = "Something went wrong. :(";

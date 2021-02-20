@@ -210,14 +210,14 @@ function processImage(&$photoData, $albumID, $order) {
         $pixels[] = $row;
     }
 
-    // making bigger blurs hash than standard
+    // making slightly bigger blurs hash than standard
     if ($photoData["aspect"] > 1.0) {
-        $components_x = 9;
-        $components_y = max([3, round(($components_x / $photoData["aspect"]))]);
+        $components_x = 6;
+        $components_y = max([2, round(($components_x / $photoData["aspect"]))]);
     }
     else {
-        $components_y = 9;
-        $components_x = max([3, round(($components_y * $photoData["aspect"]))]);
+        $components_y = 6;
+        $components_x = max([2, round(($components_y * $photoData["aspect"]))]);
     }
     $photoData["blurHash"] = Blurhash::encode(
         $pixels,

@@ -2,12 +2,11 @@
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
     import type { FileUploadStatus } from "../pozzo.type";
-    import { currentAlbumStore, frontendStateStore } from "../stores";
+    import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
     import FileUploader from "./FileUploader.svelte";
     import Button from "./Button.svelte";
 
     const dispatch = createEventDispatcher();
-    const MAX_UPLOADS = 4;
 
     export let fileList: File[];
 
@@ -47,7 +46,7 @@
     let uploadStackPointer = 0;
     let currentUploadCount = 0;
     function queueUploads() {
-        while (currentUploadCount < MAX_UPLOADS) {
+        while (currentUploadCount < $siteData.simultaneousUploads) {
             if (uploadStackPointer >= uploadStatuses.length) {
                 break;
             }

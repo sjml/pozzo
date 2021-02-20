@@ -50,6 +50,7 @@
         else {
             $currentAlbumStore.coverPhoto = $navSelection[0].id;
         }
+        dispatch("coverChanged");
         contextMenuVisible = false;
         $navSelection = [];
     }

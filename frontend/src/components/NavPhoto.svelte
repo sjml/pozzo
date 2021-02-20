@@ -56,6 +56,7 @@
             size={size}
             altTitle={textOverlay}
             canvasFit="fill"
+            lazy={true}
         />
     {/if}
 </div>

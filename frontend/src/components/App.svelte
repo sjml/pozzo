@@ -16,14 +16,10 @@
     async function setup() {
         const res = await RunApi("/info");
         if (res.success) {
-            $siteData.siteTitle = res.data.siteTitle;
+            Object.assign($siteData, res.data);
+            $siteData.siteTitle = $siteData.siteTitle;
             if ($siteData.siteTitle == false) {
                 router.goto("/setup");
-            }
-            else {
-                $siteData.formats = res.data.formats;
-                $siteData.sizes = res.data.sizes;
-                $siteData.promo = res.data.promo;
             }
         }
         else {

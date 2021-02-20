@@ -43,8 +43,8 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
     catch (error) {
         return {
             success: false,
-            code: 500,
-            data: {error: error}
+            code: 400,
+            data: {error: error, res: res}
         }
     }
 }
@@ -67,8 +67,12 @@ export async function UploadFile(fileStatus: FileUploadStatus, progressCallback:
 
         xhr.upload.onprogress = (ev) => {
             if (ev.lengthComputable) {
+                const progress = ev.loaded / ev.total;
                 if (progressCallback) {
-                    progressCallback(ev.loaded / ev.total);
+                    progressCallback(progress);
+                }
+                if (finishedUploadCallback && progress >= 1.0) {
+                    finishedUploadCallback(true);
                 }
             }
         };

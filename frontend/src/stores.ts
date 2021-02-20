@@ -10,6 +10,7 @@ export const siteData = writable<SiteConfig>(
         sizes: [],
         promo: false,
         maxUploadBytes: 0,
+        simultaneousUploads: 1,
     }
 );
 

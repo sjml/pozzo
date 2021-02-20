@@ -6,6 +6,7 @@ export type SiteConfig = {
     sizes: any[],
     promo: boolean,
     maxUploadBytes: number,
+    simultaneousUploads: number,
 }
 
 export type FrontendState = {

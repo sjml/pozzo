@@ -11,6 +11,7 @@
     export let size: string = null;
     export let altTitle: string = null;
     export let canvasFit: string = "contain";
+    export let lazy: boolean = false;
 
     let loaded = false;
     let preloaderVisible = true;
@@ -81,9 +82,11 @@
 
 <img
     on:load={mainLoaded}
+    bind:this={mainImg}
     class="main"
     class:loaded
-    bind:this={mainImg}
+
+    loading={lazy ? "lazy" : null}
     alt={stub.title ?? altTitle ?? null}
     srcset="{GetImgPath(size, stub.hash, stub.uniq)}, {`${GetImgPath(size + "2x", stub.hash, stub.uniq)} 2x`}"
     src="{GetImgPath(size, stub.hash, stub.uniq)}"

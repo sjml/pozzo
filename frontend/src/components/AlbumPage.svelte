@@ -53,7 +53,6 @@
     }
 
     async function updateMetaData() {
-        console.log("metadata update call");
         if ($currentAlbumStore.showMap == null || $currentAlbumStore.isPrivate == null) {
             // probably just initial load
             return;
@@ -64,6 +63,7 @@
                 isPrivate: $currentAlbumStore.isPrivate,
                 description: $currentAlbumStore.description,
                 title: $currentAlbumStore.title,
+                coverPhoto: $currentAlbumStore.coverPhoto,
             },
             method: "POST",
             authorize: true
@@ -221,6 +221,7 @@
             <NavCollection stubs={$currentAlbumStore.photos}
                 on:deleted={handlePhotoDeletion}
                 on:moved={handlePhotoMove}
+                on:coverChanged={() => updateMetaData()}
             >
             {#each $currentAlbumStore.photos as pstub, pi}
                 <a href="/album/{$currentAlbumStore.slug}/{pstub.id}">

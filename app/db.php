@@ -355,6 +355,11 @@ class DB {
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
+        $query = "DELETE FROM photos_tags WHERE photo_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
         $query = "DELETE FROM photos WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
@@ -699,7 +704,7 @@ class DB {
             implode(", ", $photoIDs) .
             ")";
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
+        $statement->bindParam(1, $fromAlbumID["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
         self::$pdb->exec("COMMIT TRANSACTION;");
