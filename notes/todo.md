@@ -1,13 +1,12 @@
 - bugs
     - EXIF: aperture seems to not correspond to f-stop in all cameras :-/
 
-0. Before starting actual use
+immediate todos
     - requires backend support
         - album list context menu (delete / dissolve)
         - video import
-    - research needed
-        - see if we can not do the blurs if the images are already loaded?
     - UX niceties
+        - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
         - map polish
             - add "click/tap to interact" when it's locked
@@ -15,13 +14,17 @@
             - add photo preview popups? or at least something when you click?
         - do blur load when navigating pages (right now it's not smart enough to reset itself)
         - uploader should reject too-large files
-        - add/remove tags from photo page and context menu
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
         - make sure the viewing experience on a mobile-sized screen is decent
         - for album titles: https://github.com/rikschennink/fitty
 
+0. Granularity
+    - album collections
+        - open question -- how to set cover photo?
+    - sub-groups within albums
+        - can probably just manage as interstitial descriptions that the frontend will break up
 1. Frontend pass
     - clean up hacks
         - check for all console error statements and handle gracefully in UI
@@ -41,11 +44,11 @@
 3. Frontend extra bonus points
     - can I do something clever to try and pull all the images from an album as you're viewing the individual pages?
         - something-something web workers? BLERGH.
+        - might be able to not do the blurs if the images are already loaded, though...
     - smarter font loading: https://www.zachleat.com/web/comprehensive-webfonts/
         - match: https://meowni.ca/font-style-matcher/
 
 ## future
-* inserting little text descriptions between photos, breaking them up for narration
 * special handling for unsorted album? (automatically removing from it)
     - "smart" albums in general? (let's not get crazy)
     - option for copying to album instead of moving to it
