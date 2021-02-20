@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { text } from "svelte/internal";
-import type { PhotoStub } from "../pozzo.type";
+    import type { PhotoStub } from "../pozzo.type";
     import { isLoggedInStore, navSelection } from "../stores";
-    import { GetImgPath, IsMetaKeyDownForEvent } from "../util";
+    import { IsMetaKeyDownForEvent } from "../util";
+    import DoubleLoader from "./DoubleLoader.svelte";
 
     export let stub: PhotoStub = null;
     export let layoutDims: any = null;
@@ -30,6 +30,9 @@ import type { PhotoStub } from "../pozzo.type";
     }
 
     function handleRightClick() {
+        if (!$isLoggedInStore) {
+            return;
+        }
         if ($navSelection.length == 0) {
             $navSelection = [...$navSelection, stub];
         }
@@ -48,12 +51,12 @@ import type { PhotoStub } from "../pozzo.type";
         <div class="textOverlay">{textOverlay}</div>
     {/if}
     {#if stub.hash && stub.uniq}
-    <img
-        alt={stub.title ?? textOverlay ?? null}
-        class="main"
-        srcset="{GetImgPath(size, stub.hash, stub.uniq)}, {`${GetImgPath(size + "2x", stub.hash, stub.uniq)} 2x`}"
-        src="{GetImgPath(size, stub.hash, stub.uniq)}"
-    />
+        <DoubleLoader
+            stub={stub}
+            size={size}
+            altTitle={textOverlay}
+            canvasFit="fill"
+        />
     {/if}
 </div>
 {/if}
@@ -80,15 +83,6 @@ import type { PhotoStub } from "../pozzo.type";
 
     .navSlot.selected {
         outline: 3px solid white;
-    }
-
-    img {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-
-        object-fit: cover;
     }
 
     .textOverlay {

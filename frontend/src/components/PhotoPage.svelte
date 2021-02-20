@@ -6,9 +6,10 @@
     // import type { Photo } from "../pozzo.type";
     import { RunApi } from "../api";
     import { currentAlbumStore, currentPhotoStore, metadataVisible } from "../stores";
-    import { GetImgPath, HumanBytes, TimestampToDateString } from "../util";
+    import { HumanBytes, TimestampToDateString } from "../util";
     import Button from "./Button.svelte";
     import PhotoMap from "./PhotoMap.svelte";
+    import DoubleLoader from "./DoubleLoader.svelte";
 
     const size = "large";
 
@@ -48,13 +49,13 @@
     Loading…
 {:else}
     <div class="fullPhoto">
-        <img
-            alt="{$currentPhotoStore.title}"
-            srcset="{GetImgPath(size, $currentPhotoStore.hash, $currentPhotoStore.uniq)}, {`${GetImgPath(size + "2x", $currentPhotoStore.hash, $currentPhotoStore.uniq)} 2x`}"
-            src="{GetImgPath(size, $currentPhotoStore.hash, $currentPhotoStore.uniq)}"
+        <DoubleLoader
+            stub={$currentPhotoStore}
+            size={size}
+            canvasFit="contain"
         />
     </div>
-    {#if metadataVisible}
+    {#if $metadataVisible}
         <div class="metadata">
             <!-- this could be made more data-driven, but for now, sticking with hand-crafted -->
             <div class="title"><span class="label">Title:</span> {$currentPhotoStore.title}</div>
@@ -131,15 +132,5 @@
     .photoMap {
         height: 250px;
         margin: 10px 0px;
-    }
-
-    img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-
-        object-fit: contain;
     }
 </style>

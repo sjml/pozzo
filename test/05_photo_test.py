@@ -128,7 +128,6 @@ def test_photo_move(server, req, auth):
         headers=auth,
         json={"photoIDs": [3,4,5], "fromAlbumID": 2, "toAlbumID": 4}
     )
-    print(res.content)
     assert res.status_code == 200
 
     res = req.get(

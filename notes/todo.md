@@ -11,10 +11,6 @@
         - album list context menu (delete / dissolve)
         - have keywords return as an array; process them into a join table at import; update typescript type; add test to check for 'em
     - research needed
-        - blur back on image pages? (look at stackblur/canvas solution)
-            - blurhash! https://github.com/woltapp/blurhash
-            - https://github.com/woltapp/blurhash/tree/master/TypeScript
-            - https://github.com/kornrunner/php-blurhash
         - see if we can not do the blurs if the images are already loaded?
         - look at video import, if it's easy
     - clean up hacks
@@ -26,6 +22,7 @@
         - maybe SVG markers?
         - add photo preview popups? or at least something when you click?
         - once keywords in, get metadata back
+        - do blur load when navigating pages (right now it's not smart enough to reset itself)
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
@@ -36,7 +33,6 @@
     - clean up hacks
         - check for all console error statements and handle gracefully in UI
             - test bad responses for everything... broken file upload hangs the UI?
-        - see if EditableLayout can be generalized so albumlist and album can share it
     - UX niceties
         - add license display option? (site config)
         - sync up date displays for metadata (requires either pulling the uploadedBy as an integer or not typing that column as a datetime :-/)
@@ -64,7 +60,6 @@
         - trivial on the backend, but UX of "this photo is in multiple albums" is questionable
 * share buttons? :-/
     - generate share cards
-    - https://smcllns.github.io/css-social-buttons/
 * testing setup
     - maybe setup automated lighthouse testing as GitHub action?
     - also check speed of import
