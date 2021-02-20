@@ -3,7 +3,7 @@
     import { Route } from "tinro";
     import { router } from "tinro";
 
-    import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
+    import { currentAlbumStore, currentPhotoStore, frontendStateStore, siteData } from "../stores";
     import { RunApi } from "../api";
     import NavBar from "./NavBar.svelte";
     import SetupPage from "./SetupPage.svelte";
@@ -29,16 +29,18 @@
         else {
             console.error(res);
         }
+
+        document.addEventListener("fullscreenchange", () => {
+            $frontendStateStore.fullScreen = (document.fullscreenElement != null);
+        });
     }
 
     function setFullscreen(on: boolean) {
         if (on) {
             document.documentElement.requestFullscreen();
-            $frontendStateStore.fullScreen = true;
         }
         else {
             document.exitFullscreen();
-            $frontendStateStore.fullScreen = false;
         }
     }
 
@@ -50,6 +52,10 @@
 
             if ($currentAlbumStore) {
                 title += ` | ${$currentAlbumStore.title}`;
+
+                if ($currentPhotoStore) {
+                    title += ` | ${$currentPhotoStore.title}`;
+                }
             }
         }
     }

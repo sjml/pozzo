@@ -13,15 +13,13 @@
     - research needed
         - see if we can not do the blurs if the images are already loaded?
         - look at video import, if it's easy
-    - clean up hacks
-        - redo fullscreen to actually listen for events and make sure it's worked
-            - hide it on mobile
     - UX niceties
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
-        - add "click/tap to interact" to map
-        - maybe SVG markers?
-        - add photo preview popups? or at least something when you click?
-        - once keywords in, get metadata back
+        - map polish
+            - add "click/tap to interact" when it's locked
+            - maybe SVG markers?
+            - add photo preview popups? or at least something when you click?
+        - once keywords in, get metadata displayed again
         - do blur load when navigating pages (right now it's not smart enough to reset itself)
     - UI polish
         - color choices
