@@ -2,6 +2,7 @@
     - got some false positive error reporting on bulk upload... investigate what's up
         - more problematic was that I couldn't re-try :(
     - uploading to remote, never get the "processing" status
+    - aperture seems to not correspond to f-stop in all cameras :-/
 
 0. Before starting actual use
     - requires backend support
@@ -15,7 +16,6 @@
             - add "click/tap to interact" when it's locked
             - maybe SVG markers?
             - add photo preview popups? or at least something when you click?
-        - once keywords in, get metadata displayed again
         - do blur load when navigating pages (right now it's not smart enough to reset itself)
     - UI polish
         - color choices

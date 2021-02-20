@@ -13,6 +13,17 @@
 
     const size = "large";
 
+    const metaMapping = [
+        {key: "creationDate", value: "Taken", filter: TimestampToDateString},
+        {key: "mime", value: "Format"},
+        {key: "make", value: "Camera Make"},
+        {key: "model", value: "Camera Model"},
+        {key: "lens", value: "Lens"},
+        {key: "aperture", value: "Aperture", filter: (val) => `f/${val}`},
+        {key: "iso", value: "ISO"},
+        {key: "shutterSpeed", value: "Shutter Speed"},
+    ];
+
     export let photoIdentifier: string;
     let photoID: number = null;
 
@@ -59,8 +70,10 @@
         <div class="metadata">
             <!-- this could be made more data-driven, but for now, sticking with hand-crafted -->
             <div class="title"><span class="label">Title:</span> {$currentPhotoStore.title}</div>
-            <div><span class="label">Original: </span>{$currentPhotoStore.width}×{$currentPhotoStore.height} ({HumanBytes($currentPhotoStore.size)})</div>
-            <div><span class="label">Uploaded: </span>{$currentPhotoStore.uploadTimeStamp}</div>
+            <table class="photoMeta">
+            <tr><td class="label">Original: </td><td>{$currentPhotoStore.width}×{$currentPhotoStore.height} ({HumanBytes($currentPhotoStore.size)})</td></tr>
+            <tr><td class="label">Uploaded: </td><td>{$currentPhotoStore.uploadTimeStamp}</td></tr>
+            </table>
             <div class="dlOrig">
                 <a href="/api/photo/orig/{$currentPhotoStore.id}" tinro-ignore>
                     <Button margin="0 10px 0 0">
@@ -74,17 +87,21 @@
                     <PhotoMap photoIDs={[$currentPhotoStore.id]} />
                 </div>
             {/if}
-            <!-- {#if photoMeta}
-                {#if photoMeta.IFD0_Make}
-                    <div><span class="label">Make: </span>{photoMeta.IFD0_Make}</div>
-                {/if}
-                {#if photoMeta.IFD0_Model}
-                    <div><span class="label">Model: </span>{photoMeta.IFD0_Model}</div>
-                {/if}
-                {#if photoMeta.IFD0_DateTime}
-                    <div><span class="label">Taken: </span>{TimestampToDateString(photoMeta.IFD0_DateTime)}</div>
-                {/if}
-            {/if} -->
+
+            <table class="photoMeta">
+                <tr>
+                    <td class="label">Tags</td>
+                    <td class="value">{$currentPhotoStore.tags.length > 0 ? $currentPhotoStore.tags.join(", ") : "(None)"}</td>
+                </tr>
+                {#each metaMapping as meta}
+                    {#if $currentPhotoStore[meta.key] != null}
+                        <tr>
+                            <td class="label">{meta.value}</td>
+                            <td class="value">{meta.filter == undefined ? $currentPhotoStore[meta.key] : meta.filter($currentPhotoStore[meta.key])}</td>
+                        </tr>
+                    {/if}
+                {/each}
+            </table>
         </div>
     {/if}
 {/if}
@@ -98,7 +115,18 @@
         width: 300px;
 
         padding: 10px;
+        overflow-y: scroll;
         border-left: 1px solid rgb(58, 58, 58);
+    }
+
+    table .label {
+        white-space: nowrap;
+        padding-right: 5px;
+    }
+
+    table {
+        border-spacing: 0 10px;
+        border-collapse: separate;
     }
 
     .title {

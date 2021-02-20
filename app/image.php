@@ -248,8 +248,11 @@ function processExif(&$photoData, $originalFilePath) {
     $photoData["lens"] = $rawData["ExifIFD:LensModel"] ?? null;
     $photoData["mime"] = $rawData["File:MIMEType"] ?? null;
 
-    $photoData["creationDate"] = $exif->getCreationDate() ?? null;
-    if ($photoData["creationDate"] != null) {
+    $photoData["creationDate"] = $exif->getCreationDate();
+    if ($photoData["creationDate"] === false) {
+        $photoData["creationDate"] = null;
+    }
+    else {
         $photoData["creationDate"] = $photoData["creationDate"]->getTimeStamp();
     }
 
