@@ -1,6 +1,6 @@
 # Pozzo
 
-![automated backend tests](https://github.com/sjml/pozzo/workflows/automated%20backend%20tests/badge.svg)
+[![automated backend tests](https://github.com/sjml/pozzo/actions/workflows/ci.yml/badge.svg)](https://github.com/sjml/pozzo/actions/workflows/ci.yml)
 
 Because the world needed another web photo gallery. 
 
