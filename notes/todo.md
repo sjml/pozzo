@@ -1,5 +1,6 @@
 - bugs
     - EXIF: aperture seems to not correspond to f-stop in all cameras :-/
+    - reordering larger album throws miscount error >:(
 
 immediate todos
     - requires backend support
@@ -13,7 +14,6 @@ immediate todos
             - maybe SVG markers?
             - add photo preview popups? or at least something when you click?
         - do blur load when navigating pages (right now it's not smart enough to reset itself)
-        - uploader should reject too-large files
     - UI polish
         - color choices
             - centralize into global file, everyone else use variables
@@ -35,6 +35,7 @@ immediate todos
         - transitions between albums and stuff
         - accessibility checks
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
+        - uploadzone should tell you when it rejects a file and why
 2. Backend pass
     - limit length of text things (titles, descriptions)
     - pagination or just trust user to break stuff up into separate albums?
@@ -57,11 +58,9 @@ immediate todos
     - no, but generate share cards
 * perf notes
     - looked at lighthouse score (now low-90s) which isn't bad considering it's mostly big images
-        * set cache policy in .htaccess? (images should be easily cachable since their
-          filenames *are* hashes... does the filepath become part of that?)
-        * lighthouse tests with 85% quality and considers anything higher "optimizable"
-            - not sure I want to make that tradeoff though........
+        * set cache policy in .htaccess? (images should be easily cachable since their filenames *are* hashes... does the filepath become part of that?)
 * sweep through API responses and make sure there's some consistency
     - "error" vs "message", response codes, JSON schema, etc.
+    - some names are plural, others singular; some take GET query params, others only post; a little messy all around
     - add index actions to each endpoint to explain what they can do?
         - maybe the robustified Router can automatically do that?
