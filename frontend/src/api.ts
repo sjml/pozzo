@@ -8,6 +8,7 @@ export async function RunApi(url: string, opts?: ApiOptions): Promise<ApiResult>
     const fetchParams: RequestInit = {};
     opts = opts ?? {};
     fetchParams.method = opts.method ?? "GET";
+    fetchParams.cache = "no-cache";
     if (opts.params) {
         fetchParams.body = JSON.stringify(opts.params);
     }

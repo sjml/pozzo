@@ -108,8 +108,16 @@
     }
 
     .promo a {
+        opacity: 0.2;
+        transition-property: opacity;
+        transition-duration: 200ms;
+
         display: flex;
         align-items: center;
+    }
+
+    .promo a:hover {
+        opacity: 0.8;
     }
 
     .promo svg {

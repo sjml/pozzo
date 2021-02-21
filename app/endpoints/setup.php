@@ -31,7 +31,7 @@ if (!isset($input["password"])) {
 }
 
 DB::SetConfig("site_title", $input["siteTitle"], "string");
-DB::SetConfig("promo", 0, "integer");
+DB::SetConfig("promo", 1, "integer");
 $user = DB::CreateUser($input["userName"], $input["password"]);
 if ($user == false) {
     // @codeCoverageIgnoreStart

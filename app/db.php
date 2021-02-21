@@ -50,6 +50,7 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
+
         $prepCommand = "CREATE TABLE IF NOT EXISTS config(";
         $prepCommand .= "key TEXT NOT NULL UNIQUE";
         $prepCommand .= ", value TEXT";
@@ -58,6 +59,7 @@ class DB {
         $prepCommand .= ")";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
+
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos (";
         $prepCommand .= "id INTEGER PRIMARY KEY"; // stub
@@ -97,6 +99,7 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
+
         $prepCommand = "CREATE TABLE IF NOT EXISTS tags (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", tag TEXT UNIQUE";
@@ -104,6 +107,7 @@ class DB {
 
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
+
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos_tags (";
         $prepCommand .= "photo_id INTEGER NOT NULL";
@@ -116,6 +120,7 @@ class DB {
 
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
+
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
@@ -134,6 +139,7 @@ class DB {
         $unsortedIdx = self::CreateAlbum("[unsorted]");
         self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
 
+
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
         $prepCommand .= "photo_id INTEGER NOT NULL";
         $prepCommand .= ", album_id INTEGER NOT NULL";
@@ -146,6 +152,45 @@ class DB {
 
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
+
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS interstitials (";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", album_id INTEGER";
+        $prepCommand .= ", before INTEGER";
+        $prepCommand .= ", text TEXT";
+        $prepCommand .= ", FOREIGN KEY(album_id) REFERENCES albums(id)";
+        $prepCommand .= ")";
+
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS collections (";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", name TEXT";
+        $prepCommand .= ", description TEXT";
+        $prepCommand .= ", coverPhoto INTEGER";
+        $prepCommand .= ")";
+
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+
+        $prepCommand = "CREATE TABLE IF NOT EXISTS albums_collections (";
+        $prepCommand .= "album_id INTEGER NOT NULL";
+        $prepCommand .= ", collection_id INTEGER NOT NULL";
+        $prepCommand .= ", ordering INTEGER";
+        $prepCommand .=
+            ", CONSTRAINT PK_photo_album PRIMARY KEY (album_id, collection_id)";
+        $prepCommand .= ", FOREIGN KEY(album_id) REFERENCES albums(id)";
+        $prepCommand .= ", FOREIGN KEY(collection_id) REFERENCES collections(id)";
+        $prepCommand .= ")";
+
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+
 
         self::SetConfig("app_key", Auth::GenerateKey(), "string");
         self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
