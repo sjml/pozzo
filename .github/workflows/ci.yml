@@ -30,16 +30,23 @@ jobs:
       env:
         POZZO_DIST: 1
       run: cd test && pytest
-    # - name: Rebuild distribution for coverage test
-    #   env:
-    #     POZZO_CODE_COVERAGE: 1
-    #   run: ./scripts/build_dist.sh
-    # - name: Generate coverage data
-    #   env:
-    #     POZZO_DIST: 1
-    #     POZZO_CODE_COVERAGE: 1
-    #   run: |
-    #     cd test
-    #     pytest
-    #     ./tools/calculate_coverage.sh
+    - name: Rebuild distribution for coverage test
+      env:
+        POZZO_CODE_COVERAGE: 1
+      run: ./scripts/build_dist.sh
+    - name: Generate coverage data
+      env:
+        POZZO_DIST: 1
+        POZZO_CODE_COVERAGE: 1
+      run: |
+        cd test
+        pytest
+        mv ../dist/test/tools/raw_coverage ./tools/
+        ./tools/calculate_coverage.sh
+    - name: Upload coverage data
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        bash <(curl -s https://codecov.io/bash) -f test/tools/output/coverage.xml -t $CODECOV_TOKEN
+
 
