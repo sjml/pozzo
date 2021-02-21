@@ -1,6 +1,7 @@
 # Pozzo
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/sjml/pozzo/automated%20backend%20tests?label=automated%20backend%20tests)
+![Coveralls github](https://img.shields.io/coveralls/github/sjml/pozzo?label=test%20coverage)
 
 Because the world needed another web photo gallery. 
 
