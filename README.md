@@ -1,7 +1,6 @@
 # Pozzo
 
-[![automated backend tests](https://github.com/sjml/pozzo/actions/workflows/ci.yml/badge.svg)](https://github.com/sjml/pozzo/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/sjml/pozzo/branch/main/graph/badge.svg?token=GXJK047NOD)](https://codecov.io/gh/sjml/pozzo)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/sjml/pozzo/automated%20backend%20tests?label=automated%20backend%20tests)
 
 Because the world needed another web photo gallery. 
 

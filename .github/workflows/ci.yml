@@ -45,8 +45,8 @@ jobs:
         ./tools/calculate_coverage.sh
     - name: Upload coverage data
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        bash <(curl -s https://codecov.io/bash) -f test/tools/output/coverage.xml -t $CODECOV_TOKEN
+        php dist/vendor/bin/php-coveralls --verbose --coverage_clover=test/tools/output/coverage.xml --json_path ./coveralls_upload.json
 
 

@@ -8,6 +8,7 @@
     "php-ffmpeg/php-ffmpeg": "^0.17.0"
   },
   "require-dev": {
-    "phpunit/php-code-coverage": "^9.2"
+    "phpunit/php-code-coverage": "^9.2",
+    "php-coveralls/php-coveralls": "^2.4"
   }
 }
