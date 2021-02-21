@@ -27,6 +27,9 @@
     }
 
     function onBodyClick(evt: MouseEvent) {
+        if (newAlbumPromptShowing) {
+            return;
+        }
         if (   evt.clientX < posX
             || evt.clientX > posX + contextMenuDiv.clientWidth
             || evt.clientY < posY
