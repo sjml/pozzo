@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { fade } from "svelte/transition";
 
     import L from "leaflet";
     import "leaflet/dist/leaflet.css";
@@ -9,10 +10,14 @@
 
     import type { Photo, PhotoStub } from "../pozzo.type";
     import { RunApi } from "../api";
+    import { currentAlbumStore } from "../stores";
+    import { GetImgPath } from "../util";
 
     export let photoIDs: number[] = [];
     export let interactEnabled: boolean = false;
     export let boundsPadding: number = 15;
+    export let exploreIconOnly: boolean = false;
+    export let popups: boolean = true;
 
     let photos: Photo[] = [];
     async function getPhotos(ids: number[]) {
@@ -48,6 +53,7 @@
 
         map = L.map(mapElement, {
             zoomControl: false,
+            minZoom: 2,
         });
 
         map.attributionControl.setPrefix("");
@@ -116,33 +122,84 @@
             return L.latLng(p.gpsLat, p.gpsLon);
         });
 
-        mapMarkers = coords.map((c) => {
+        mapMarkers = coords.map((c, ci) => {
             const marker = L.marker(c);
+
+            if (popups) {
+                const popupImgUrl = GetImgPath("small2x", placedPhotos[ci].hash, placedPhotos[ci].uniq);
+                marker.bindPopup(
+                    L.popup({
+                        closeButton: false,
+                        className: "photoMapPopup",
+                        minWidth: 150,
+                        autoPanPadding: [150, 150],
+                        autoClose: true,
+                    })
+                    .setContent(`<a draggable="false" href="/album/${$currentAlbumStore.slug}/${placedPhotos[ci].id}"><img draggable="false" src="${popupImgUrl}" alt="${placedPhotos[ci].title}"/></a>`)
+                );
+            }
+
             markerCluster.addLayer(marker);
             return marker;
         });
         map.addLayer(markerCluster);
 
         if (coords.length > 0) {
-        map.fitBounds(L.latLngBounds(coords), {
-            padding: [boundsPadding, boundsPadding]
-        });
+            map.fitBounds(L.latLngBounds(coords), {
+                padding: [boundsPadding, boundsPadding]
+            });
         }
     }
     $: setMarkers(photos)
 </script>
 
-<div class="map"
-    bind:this={mapElement}
-    on:click={() => setInteractEnabled(true) }
-/>
+<div class="mapContainer">
+    <div class="map"
+        bind:this={mapElement}
+        on:click={() => interactEnabled = true }
+    />
+    {#if !interactEnabled}
+        <div class="interactionIndicator"
+            transition:fade={{duration: 150}}
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><circle cx="128" cy="128" r="92" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><line x1="128" y1="36" x2="128" y2="76" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="36" y1="128" x2="76" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="128" y1="220" x2="128" y2="180" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="220" y1="128" x2="180" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
+            {#if !exploreIconOnly}
+                Click/Tap to Explore
+            {/if}
+        </div>
+    {/if}
+</div>
 
 <style>
-    .map {
+    .mapContainer {
+        position: relative;
         width: 100%;
         height: 100%;
 
         background-color: var(--ui-light-color);
+    }
+
+    .map {
+        width: 100%;
+        height: 100%;
+    }
+
+    .interactionIndicator {
+        position: absolute;
+        top: 0;
+        z-index: 100000;
+
+        background-color: var(--ui-medium-color);
+        padding: 5px;
+        opacity: 0.5;
+
+        display: flex;
+        align-items: center;
+    }
+
+    .interactionIndicator svg {
+        width: var(--button-size);
+        margin: 0;
     }
 
     :global(.leaflet-container *) {
@@ -170,5 +227,19 @@
 
     :global(.marker-cluster span) {
         line-height: 30px;
+    }
+
+    :global(.photoMapPopup img) {
+        max-width: 150px;
+        margin-bottom: -3px;
+    }
+
+    :global(.leaflet-popup-content) {
+        margin: 3px !important;
+        overflow: hidden;
+    }
+
+    :global(.leaflet-popup-content-wrapper) {
+        border-radius: 5px !important;
     }
 </style>

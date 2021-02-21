@@ -5,12 +5,7 @@
 immediate todos
     - UX niceties
         - do blur load when navigating pages (right now it's not smart enough to reset itself)
-        - map polish
-            - add "click/tap to interact" when it's locked
-            - maybe SVG markers?
-            - add photo preview popups? or at least something when you click?
-            - "full screen" option to take over viewport? 
-            - links to OSM/Google on photo pages
+        - fix shutter speed display
         - edit photo title
         - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)

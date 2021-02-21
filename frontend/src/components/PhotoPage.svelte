@@ -90,7 +90,11 @@
             </div>
             {#if $currentPhotoStore.gpsLat && $currentPhotoStore.gpsLon}
                 <div class="photoMap">
-                    <PhotoMap photoIDs={[$currentPhotoStore.id]} />
+                    <PhotoMap photoIDs={[$currentPhotoStore.id]} exploreIconOnly={true} popups={false} />
+                </div>
+                <div class="mapLinks">
+                    {"{"} <a target="_" href="https://www.openstreetmap.org/?mlat={$currentPhotoStore.gpsLat}&mlon={$currentPhotoStore.gpsLon}#map=18/{$currentPhotoStore.gpsLat}/{$currentPhotoStore.gpsLon}">OpenStreetMap</a>
+                    | <a target="_" href="https://www.google.com/maps/search/?api=1&query={$currentPhotoStore.gpsLat},{$currentPhotoStore.gpsLon}">Google Maps</a> {"}"}
                 </div>
             {/if}
 
@@ -171,6 +175,11 @@
 
     .photoMap {
         height: 250px;
-        margin: 10px 0px;
+        margin: 10px 0 0 0;
+    }
+
+    .mapLinks {
+        text-align: right;
+        margin: 5px 0;
     }
 </style>
