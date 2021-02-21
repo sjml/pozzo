@@ -129,7 +129,8 @@ function deleteAlbum() {
     $result = DB::DeleteAlbum($input["albumID"]);
     if (is_array($result)) {
         output(["message" => "Album deleted", "data" => $result]);
-    } else {
+    }
+    else {
         output(["message" => "Could not delete: no such album"], 404);
     }
 }

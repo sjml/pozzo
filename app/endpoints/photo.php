@@ -40,7 +40,8 @@ function viewPhoto() {
 
     if ($photo["tags"] != "") {
         $photo["tags"] = explode(", ", $photo["tags"]);
-    } else {
+    }
+    else {
         $photo["tags"] = [];
     }
 
@@ -66,7 +67,8 @@ function viewPhotoSet() {
         }
         if ($photo["tags"] != "") {
             $photo["tags"] = explode(", ", $photo["tags"]);
-        } else {
+        }
+        else {
             $photo["tags"] = [];
         }
     }
@@ -85,7 +87,8 @@ function downloadOrig() {
     if ($photo["isVideo"]) {
         $ext = pathinfo($photo["originalFilename"], PATHINFO_EXTENSION);
         $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"], $ext);
-    } else {
+    }
+    else {
         $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"]);
     }
 
@@ -115,7 +118,8 @@ function deletePhoto() {
         if ($result == -1) {
             output(["message" => "Photo not found"], 404);
             return;
-        } elseif ($result == -2) {
+        }
+        elseif ($result == -2) {
             output(["message" => "Could not delete photo"], 500);
             return;
         }
@@ -148,7 +152,8 @@ function copyPhoto() {
                 "albumID" => $copyInst["albumID"],
                 "success" => true,
             ]);
-        } else {
+        }
+        else {
             array_push($statuses, [
                 "photoID" => $copyInst["photoID"],
                 "albumID" => $copyInst["albumID"],

@@ -6,7 +6,10 @@ $message = [
         "/index" => [],
         "/info" => [],
         "/setup" => [],
-        "/login" => ["/", "check"],
+        "/login" => [
+            "/",
+            "check"
+        ],
         "/upload" => [],
         "/album" => [
             "/list",
@@ -18,7 +21,17 @@ $message = [
             "/reorderList",
             "/reorder",
         ],
-        "/photo" => ["/delete", "/copy", "/move", "/view", "/set", "/orig"],
+        "/photo" => [
+            "/delete",
+            "/copy",
+            "/move",
+            "/view",
+            "/set",
+            "/orig",
+            "/tagset",
+            "/tag",
+            "/untag",
+        ],
     ],
 ];
 

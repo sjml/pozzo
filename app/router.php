@@ -29,7 +29,8 @@ class Router {
                 $prefix = substr($prefix, 0, strlen($prefix) - 1);
                 $prefixLength -= 1;
                 $match = $prefix == $_REQUEST["POZZO_REQUEST"];
-            } else {
+            }
+            else {
                 if (
                     substr($_REQUEST["POZZO_REQUEST"], 0, $prefixLength) ==
                     $prefix
@@ -93,7 +94,8 @@ class Router {
                 $call = $handler["call"];
                 if ($call[0] == "require") {
                     require $call[1];
-                } else {
+                }
+                else {
                     call_user_func($call[0], array_slice($call, 1));
                 }
                 return;

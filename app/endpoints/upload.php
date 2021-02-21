@@ -55,7 +55,8 @@ function upload() {
             http_response_code(200);
             header("Content-Type: application/json");
             echo json_encode($photoData);
-        } elseif (substr($_FILES["mediaUp"]["type"], 0, 6) === "video/") {
+        }
+        elseif (substr($_FILES["mediaUp"]["type"], 0, 6) === "video/") {
             $vidData = importVideo(
                 $_FILES["mediaUp"]["tmp_name"],
                 $_FILES["mediaUp"]["name"],
@@ -77,16 +78,18 @@ function upload() {
             http_response_code(200);
             header("Content-Type: application/json");
             echo json_encode($vidData);
-        } else {
+        }
+        else {
             http_response_code(415);
             echo '{"error": "415 / Unsupported Media Type"}';
             return;
         }
 
-        // @codeCoverageIgnoreStart
-        // As with setup's catch, this is handling stuff that is unanticipated
-        //    (hitting disk quota limits, timeouts, etc.)
-    } catch (\Throwable $th) {
+    }
+    // @codeCoverageIgnoreStart
+    // As with setup's catch, this is handling stuff that is unanticipated
+    //    (hitting disk quota limits, timeouts, etc.)
+    catch (\Throwable $th) {
         http_response_code(500);
         header("Content-Type: application/json");
         echo json_encode([

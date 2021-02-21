@@ -206,13 +206,14 @@ class DB {
         $statement->bindParam(2, $pw, SQLITE3_TEXT);
         try {
             $result = $statement->execute();
-            // @codeCoverageIgnoreStart
-            // user creation is intentionally not exposed to the API, so
-            //    testing this would be annoying and not prove much.
-            // this would only fail if (a) the database was failing for
-            //    other reasons caught in other tests or (b) the name already
-            //    exists.
-        } catch (\Throwable $th) {
+        }
+        // @codeCoverageIgnoreStart
+        // user creation is intentionally not exposed to the API, so
+        //    testing this would be annoying and not prove much.
+        // this would only fail if (a) the database was failing for
+        //    other reasons caught in other tests or (b) the name already
+        //    exists.
+        catch (\Throwable $th) {
             return false;
         }
         // @codeCoverageIgnoreEnd
@@ -222,7 +223,8 @@ class DB {
     static function GetUser($username, $includePWH = false) {
         if ($includePWH) {
             $query = "SELECT id, name, password FROM users WHERE name = ?";
-        } else {
+        }
+        else {
             $query = "SELECT id, name FROM users WHERE name = ?";
         }
         $statement = self::$pdb->prepare($query);
@@ -298,48 +300,24 @@ class DB {
             SQLITE3_TEXT,
         );
         $statement->bindParam(":size", $photoData["size"], SQLITE3_INTEGER);
-        $statement->bindParam(
-            ":isVideo",
-            $photoData["isVideo"],
-            SQLITE3_INTEGER,
-        );
+        $statement->bindParam(":isVideo", $photoData["isVideo"], SQLITE3_INTEGER);
         $statement->bindParam(":width", $photoData["width"], SQLITE3_INTEGER);
         $statement->bindParam(":height", $photoData["height"], SQLITE3_INTEGER);
         $statement->bindParam(":title", $photoData["title"], SQLITE3_TEXT);
         $statement->bindParam(":hash", $photoData["hash"], SQLITE3_TEXT);
         $statement->bindParam(":uniq", $photoData["uniq"], SQLITE3_TEXT);
-        $statement->bindParam(
-            ":blurHash",
-            $photoData["blurHash"],
-            SQLITE3_TEXT,
-        );
+        $statement->bindParam(":blurHash", $photoData["blurHash"], SQLITE3_TEXT);
         $statement->bindParam(":aspect", $photoData["aspect"], SQLITE3_FLOAT);
         $statement->bindParam(":make", $photoData["make"], SQLITE3_TEXT);
         $statement->bindParam(":model", $photoData["model"], SQLITE3_TEXT);
         $statement->bindParam(":lens", $photoData["lens"], SQLITE3_TEXT);
         $statement->bindParam(":mime", $photoData["mime"], SQLITE3_TEXT);
-        $statement->bindParam(
-            ":creationDate",
-            $photoData["creationDate"],
-            SQLITE3_INTEGER,
-        );
+        $statement->bindParam(":creationDate", $photoData["creationDate"], SQLITE3_INTEGER);
         $statement->bindParam(":tags", $photoData["tags"], SQLITE3_TEXT);
-        $statement->bindParam(
-            ":subjectArea,",
-            $photoData["subjectArea"],
-            SQLITE3_TEXT,
-        );
-        $statement->bindParam(
-            ":aperture",
-            $photoData["aperture"],
-            SQLITE3_TEXT,
-        );
+        $statement->bindParam(":subjectArea", $photoData["subjectArea"], SQLITE3_TEXT);
+        $statement->bindParam(":aperture", $photoData["aperture"], SQLITE3_TEXT);
         $statement->bindParam(":iso", $photoData["iso"], SQLITE3_TEXT);
-        $statement->bindParam(
-            ":shutterSpeed",
-            $photoData["shutterSpeed"],
-            SQLITE3_TEXT,
-        );
+        $statement->bindParam(":shutterSpeed", $photoData["shutterSpeed"], SQLITE3_TEXT);
         $statement->bindParam(":gpsLat", $photoData["gpsLat"], SQLITE3_FLOAT);
         $statement->bindParam(":gpsLon", $photoData["gpsLon"], SQLITE3_FLOAT);
         $statement->bindParam(":gpsAlt", $photoData["gpsAlt"], SQLITE3_FLOAT);
@@ -453,7 +431,8 @@ class DB {
             $tagString = $photoData["tags"];
             if ($tagString == "") {
                 $existingTags = [];
-            } else {
+            }
+            else {
                 $existingTags = explode(", ", $tagString);
             }
             $idx = array_search($tag, $existingTags);
@@ -485,7 +464,8 @@ class DB {
             $tagString = $photoData["tags"];
             if ($tagString == "") {
                 $existingTags = [];
-            } else {
+            }
+            else {
                 $existingTags = explode(", ", $tagString);
             }
             $idx = array_search($tag, $existingTags);
@@ -761,7 +741,8 @@ class DB {
         $query = "SELECT photos_albums.ordering,";
         if ($getFullPhotos) {
             $query .= " photos.* FROM photos_albums ";
-        } else {
+        }
+        else {
             $query .=
                 " photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_albums ";
         }
@@ -804,7 +785,8 @@ class DB {
             $query = "SELECT * FROM albums WHERE id = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_INTEGER);
-        } else {
+        }
+        else {
             $query = "SELECT * FROM albums WHERE slug = ?";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $identifier, SQLITE3_TEXT);

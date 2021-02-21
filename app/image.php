@@ -57,7 +57,8 @@ function getImagePath($sizeLabel, $hash, $uniq, $extension = "jpg") {
         //   can trigger some adblockers
         if ($d == "ad") {
             array_push($dirs, "a_");
-        } else {
+        }
+        else {
             array_push($dirs, $d);
         }
     }
@@ -232,7 +233,8 @@ function processImage(&$photoData) {
     if ($photoData["aspect"] > 1.0) {
         $components_x = 6;
         $components_y = max([2, round($components_x / $photoData["aspect"])]);
-    } else {
+    }
+    else {
         $components_y = 6;
         $components_x = max([2, round($components_y * $photoData["aspect"])]);
     }
@@ -265,7 +267,8 @@ function processPhotoMeta(&$photoData) {
     $photoData["creationDate"] = $exif->getCreationDate();
     if ($photoData["creationDate"] === false) {
         $photoData["creationDate"] = null;
-    } else {
+    }
+    else {
         $photoData["creationDate"] = $photoData["creationDate"]->getTimeStamp();
     }
 

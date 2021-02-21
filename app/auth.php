@@ -32,13 +32,17 @@ class Auth {
         if (is_numeric($value)) {
             if ($value == -1) {
                 return -3;
-            } elseif ($value == -2) {
+            }
+            elseif ($value == -2) {
                 return -4;
-            } elseif ($value == -3) {
+            }
+            elseif ($value == -3) {
                 return -5;
-            } elseif ($value == -4) {
+            }
+            elseif ($value == -4) {
                 return -6;
-            } else {
+            }
+            else {
                 return $value;
             }
         }
@@ -77,20 +81,25 @@ class Auth {
         try {
             $decoded = JWT::decode($token, $secret, ["HS256"]);
             return $decoded;
-            // @codeCoverageIgnoreStart
-            // Not testing generation/decoding of JWTs
-        } catch (\Firebase\JWT\ExpiredException $th) {
+        }
+        // @codeCoverageIgnoreStart
+        // Not testing generation/decoding of JWTs
+        catch (\Firebase\JWT\ExpiredException $th) {
             return -1;
-        } catch (\Firebase\JWT\BeforeValidException $th) {
+        }
+        catch (\Firebase\JWT\BeforeValidException $th) {
             return -2;
-        } catch (\Firebase\JWT\SignatureInvalidException $th) {
+        }
+        catch (\Firebase\JWT\SignatureInvalidException $th) {
             return -3;
-            // @codeCoverageIgnoreEnd
-        } catch (\UnexpectedValueException $th) {
+        }
+        // @codeCoverageIgnoreEnd
+        catch (\UnexpectedValueException $th) {
             return -4;
-            // @codeCoverageIgnoreStart
-            // Dev only
-        } catch (\Throwable $th) {
+        }
+        // @codeCoverageIgnoreStart
+        // Dev only
+        catch (\Throwable $th) {
             return -128;
         }
         // @codeCoverageIgnoreEnd
