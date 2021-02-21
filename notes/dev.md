@@ -2,7 +2,7 @@
 
 ## On a Mac:
 
-1. `brew install imagemagick php@7.4 composer`
+1. `brew install imagemagick php@7.4 composer exiftool ffmpeg`
 2. In the project directory: `composer install`
 3. Have some version of Node.js around. 
 4. In the frontend directory: `npm install`
@@ -14,7 +14,7 @@
 1. Have some version of Python 3 around. Probably use a virtualenv? You do you.
 2. `pip install -r test/requirements.txt`
 3. From the test directory: `pytest`
-    * Note this tries to start up its on PHP server on the same port, so you can't be running the dev server at the same time. 
+    * Note this tries to start up its own PHP server on the same port, so you can't be running the dev server at the same time. 
     * If it detects existing database or images it will move them out of the way to run its tests from a clean start and then move them back. (All the more reason not to be running the dev server at the same time.)
 
 
