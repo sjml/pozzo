@@ -54,7 +54,7 @@
 
 <style>
     .editableLayout {
-        background-color: rgb(101, 101, 252);
+        background-color: var(--edit-color);
         -webkit-touch-callout: none;
           -webkit-user-select: none;
               -ms-user-select: none;
@@ -88,6 +88,6 @@
         height: 130px;
         margin: auto;
 
-        background-color: black;
+        background-color: var(--placeholder-color);
     }
 </style>

@@ -265,14 +265,20 @@
         padding: 5px;
     }
 
-    h2.editing {
-        background-color: white;
-        color: black;
+    @media only screen and (max-device-width: 480px) {
+        h2 {
+            font-size: 2em;
+        }
+    }
+
+    .editing {
+        background-color: var(--main-text-color);
+        color: var(--main-background-color);
     }
 
     svg {
-        width: 30px;
-        height: 30px;
+        width: var(--button-size);
+        height: var(--button-size);
     }
 
     .albumMap {
@@ -289,7 +295,7 @@
     }
 
     .reorderButton.toggled {
-        background-color: rgb(101, 101, 252);
+        background-color: var(--edit-color);
     }
 
     .description {
@@ -308,8 +314,5 @@
 
     .description.editing {
         display: block;
-
-        background-color: white;
-        color: black;
     }
 </style>

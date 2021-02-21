@@ -164,12 +164,10 @@
 <style>
     .albumList {
         margin-top: 1em;
-
-        padding-left: 30px;
     }
 
     h2 {
-        margin: 0;
+        margin: 0 0 0 15px;
     }
 
     .header {
@@ -193,6 +191,6 @@
     }
 
     .reorderButton.toggled {
-        background-color: rgb(101, 101, 252);
+        background-color: var(--edit-color);
     }
 </style>

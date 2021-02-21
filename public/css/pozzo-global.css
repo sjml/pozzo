@@ -1,3 +1,47 @@
+/* Global Variables */
+
+:root {
+    /* set main colors as a very dark gray and a very light gray */
+    --main-hs: 0, 0%;
+    --main-bg-l: 12.5%;
+    --main-fg-l: 85%;
+
+    --main-bgc-values: var(--main-hs), var(--main-bg-l);
+    --main-fgc-values: var(--main-hs), var(--main-fg-l);
+
+    --main-background-color: hsl(var(--main-bgc-values));
+    --main-text-color: hsl(var(--main-fgc-values));
+
+    /* structural colors */
+    --placeholder-color: hsl(var(--main-hs), calc(var(--main-bg-l) * 0.25));
+    --overlay-shadow-color: hsla(0, 0%, 0%, 0.7);
+    --navbar-color: var(--main-background-color);
+    --navbar-collapsed-color: hsl(var(--main-hs), calc(var(--main-bg-l) * 3.5));
+    --separator-color: hsl(var(--main-hs), calc(var(--main-fg-l) * 0.30));
+
+    /* UI colors */
+    --ui-light-color: hsl(var(--main-hs), 40%);
+    --ui-medium-color: hsl(var(--main-hs), 29%);
+    --ui-dark-color: hsl(var(--main-hs), 22%);
+    --ui-border-color: hsl(var(--main-hs), 47%);
+    --warning-color: hsl(0, 80%, 35%);
+    --warning-color-disabled: hsl(0, 40%, 50%);
+    --marker-cluster-background: hsla(200, 75%, 55%, 0.7);
+    --marker-cluster-foreground: hsla(200, 75%, 30%, 0.7);
+    --edit-color: hsl(220, 40%, 50%);
+
+    /* proportions */
+    --button-size: 30px;
+}
+
+/* can't set break widths as variables, sadly */
+@media only screen and (max-device-width: 480px) {
+    :root {
+        --button-size: 25px;
+    }
+}
+
+
 /* Lato weights by ascending weight:
     Hairline
     Thin
@@ -11,6 +55,15 @@
 */
 
 /* For my uses, Lato's Latin subset is sufficient, but others may want/need a fuller character set. */
+
+@font-face {
+    font-family: "Lato";
+    src: url("../fonts/LatoLatin/LatoLatin-Light.woff2") format("woff2"),
+         url("../fonts/LatoLatin/LatoLatin-Light.woff") format("woff");
+    font-style: normal;
+    font-weight: 100;
+    text-rendering: optimizeLegibility;
+}
 
 @font-face {
     font-family: "Lato";
@@ -52,7 +105,7 @@
 
 
 :root {
-    font-family: Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    font-family: Lato, "Open Sans", sans-serif;
     overflow-y: scroll;
 }
 * {
@@ -60,12 +113,12 @@
 }
 
 body {
-    color: rgb(214, 214, 214);
-    background-color: rgb(32, 32, 32);
+    color: var(--main-text-color);
+    background-color: var(--main-background-color);
 }
 
 a:visited, a {
-    color: rgb(214, 214, 214);
+    color: var(--main-text-color);
     text-decoration: none;
 }
 
@@ -73,7 +126,7 @@ a:visited, a {
 /* Mixture of scrollbar style directives to work across browsers */
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(214, 214, 214, 0.4) rgb(32, 32, 32);
+    scrollbar-color: hsla(var(--main-fgc-values), 0.4) var(--main-background-color);
 }
 
 *::-webkit-scrollbar {
@@ -81,11 +134,11 @@ a:visited, a {
 }
 
 *::-webkit-scrollbar-track {
-    background: rgb(32, 32, 32);
+    background: var(--main-background-color);
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: rgb(214, 214, 214, 0.4);
+    background-color: hsla(var(--main-fgc-values), 0.4);
     border-radius: 20px;
-    border: 3px solid rgb(32, 32, 32);
+    border: 3px solid var(--main-background-color);
 }

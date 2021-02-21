@@ -117,9 +117,9 @@
         position: fixed;
         min-width: 150px;
 
-        background-color: rgb(71, 71, 71);
-        border: 1px solid black;
-        z-index: 200;
+        background-color: var(--ui-medium-color);
+        border: 1px solid var(--ui-border-color);
+        z-index: 1400;
         cursor: pointer;
         -webkit-touch-callout: none;
           -webkit-user-select: none;
@@ -148,7 +148,7 @@
     }
 
     .menuItem:hover {
-        background-color: rgb(110, 110, 110);
+        background-color: var(--ui-light-color);
     }
 
     .menuItem.header {
@@ -156,24 +156,24 @@
         padding-bottom: 5px;
         font-weight: bold;
         border-bottom: 3px solid black;
-        background-color: rgb(49, 49, 49);
+        background-color: var(--ui-dark-color);
 
         cursor: default;
     }
 
     .menuItem.delete {
-        background-color: rgb(172, 75, 75);
+        background-color: var(--warning-color-disabled);
     }
 
     .menuItem.delete:hover {
-        background-color: rgb(170, 17, 17);
+        background-color: var(--warning-color);
     }
 
     .menuItem.album {
-        background-color: rgb(49, 49, 49);;
+        background-color: var(--ui-dark-color);;
         padding-left: 20px;
     }
     .menuItem.album:hover {
-        background-color: rgb(110, 110, 110);;
+        background-color: var(--ui-light-color);;
     }
 </style>

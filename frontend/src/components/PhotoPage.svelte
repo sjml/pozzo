@@ -65,7 +65,7 @@
             <DoubleLoader
                 stub={$currentPhotoStore}
                 size={size}
-                canvasFit="contain"
+                objectFit="contain"
             />
         {:else}
             <VideoLoader
@@ -122,7 +122,13 @@
 
         padding: 10px;
         overflow-y: scroll;
-        border-left: 1px solid rgb(58, 58, 58);
+        border-left: 1px solid var(--separator-color);
+    }
+
+    @media only screen and (max-device-width: 480px) {
+        .metadata {
+            display: none;
+        }
     }
 
     table .label {
@@ -157,8 +163,8 @@
     }
 
     svg {
-        width: 30px;
-        height: 30px;
+        width: var(--button-size);
+        height: var(--button-size);
 
         margin-right: 15px;
     }

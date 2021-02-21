@@ -158,7 +158,7 @@
         max-height: 85vh;
         margin: auto;
 
-        border: 1px solid rgb(119, 119, 119);
+        border: 1px solid hsl(var(--main-hs), calc(var(--main-bg-l) * 4.0));
         border-radius: 6px;
         overflow-y: scroll;
         pointer-events: all;
@@ -168,7 +168,7 @@
         padding: 10px;
         font-size: x-large;
         text-align: center;
-        background-color: rgb(66, 66, 66);
+        background-color: hsl(var(--main-hs), calc(var(--main-bg-l) * 2.0));
     }
 
     .yesno {

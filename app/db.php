@@ -253,7 +253,11 @@ class DB {
             SQLITE3_TEXT,
         );
         $statement->bindParam(":size", $photoData["size"], SQLITE3_INTEGER);
-        $statement->bindParam(":isVideo", $photoData["isVideo"], SQLITE3_INTEGER);
+        $statement->bindParam(
+            ":isVideo",
+            $photoData["isVideo"],
+            SQLITE3_INTEGER,
+        );
         $statement->bindParam(":width", $photoData["width"], SQLITE3_INTEGER);
         $statement->bindParam(":height", $photoData["height"], SQLITE3_INTEGER);
         $statement->bindParam(":title", $photoData["title"], SQLITE3_TEXT);
@@ -274,11 +278,7 @@ class DB {
             $photoData["creationDate"],
             SQLITE3_INTEGER,
         );
-        $statement->bindParam(
-            ":tags",
-            $photoData["tags"],
-            SQLITE3_TEXT,
-        );
+        $statement->bindParam(":tags", $photoData["tags"], SQLITE3_TEXT);
         $statement->bindParam(
             ":subjectArea,",
             $photoData["subjectArea"],
@@ -396,7 +396,8 @@ class DB {
             $tagID = self::$pdb->lastInsertRowID();
         }
 
-        $query = "INSERT OR IGNORE INTO photos_tags (photo_id, tag_id) VALUES (?, ?);";
+        $query =
+            "INSERT OR IGNORE INTO photos_tags (photo_id, tag_id) VALUES (?, ?);";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
         $statement->bindParam(2, $tagID, SQLITE3_INTEGER);
@@ -407,8 +408,7 @@ class DB {
             $tagString = $photoData["tags"];
             if ($tagString == "") {
                 $existingTags = [];
-            }
-            else {
+            } else {
                 $existingTags = explode(", ", $tagString);
             }
             $idx = array_search($tag, $existingTags);
@@ -440,8 +440,7 @@ class DB {
             $tagString = $photoData["tags"];
             if ($tagString == "") {
                 $existingTags = [];
-            }
-            else {
+            } else {
                 $existingTags = explode(", ", $tagString);
             }
             $idx = array_search($tag, $existingTags);
@@ -464,7 +463,8 @@ class DB {
             return [];
         }
 
-        $query = "SELECT photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_tags ";
+        $query =
+            "SELECT photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_tags ";
         $query .= "JOIN photos ON photos.id = photos_tags.photo_id ";
         $query .= "WHERE photos_tags.tag_id = ?";
         $statement = self::$pdb->prepare($query);

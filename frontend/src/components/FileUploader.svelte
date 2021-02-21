@@ -98,8 +98,8 @@
     .fileUploader {
         padding: 10px 20px;
         background-image: linear-gradient(
-            rgb(99, 99, 99),
-            rgb(56, 56, 56)
+            var(--ui-light-color),
+            var(--ui-dark-color)
         );
         border-top: 1px solid black;
 

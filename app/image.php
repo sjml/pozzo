@@ -47,7 +47,7 @@ const sizes = [
     ],
 ];
 
-function getImagePath($sizeLabel, $hash, $uniq, $extension="jpg") {
+function getImagePath($sizeLabel, $hash, $uniq, $extension = "jpg") {
     $ret = __DIR__ . "/../public/photos/";
     $rawDirs = str_split($hash, 2);
     $rawDirs = array_slice($rawDirs, 0, 3);
@@ -66,7 +66,15 @@ function getImagePath($sizeLabel, $hash, $uniq, $extension="jpg") {
     if (!is_dir($ret)) {
         mkdir($ret, 0755, true);
     }
-    return $ret . "/" . $hash . "_" . $uniq . "_" . $sizeLabel . "." . $extension;
+    return $ret .
+        "/" .
+        $hash .
+        "_" .
+        $uniq .
+        "_" .
+        $sizeLabel .
+        "." .
+        $extension;
 }
 
 function deleteImagesWithHash($hash, $uniq) {
@@ -106,14 +114,21 @@ function importVideo($filePath, $origName) {
     ];
 
     $ext = pathinfo($origName, PATHINFO_EXTENSION);
-    $origPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"], $ext);
+    $origPath = getImagePath(
+        "orig",
+        $photoData["hash"],
+        $photoData["uniq"],
+        $ext,
+    );
     move_uploaded_file($filePath, $origPath);
 
     $ffprobe = FFMpeg\FFProbe::create();
     $duration = $ffprobe->format($origPath)->get("duration");
     $ffmpeg = FFMpeg\FFMpeg::create();
     $video = $ffmpeg->open($origPath);
-    $preview = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds($duration / 3));
+    $preview = $video->frame(
+        FFMpeg\Coordinate\TimeCode::fromSeconds($duration / 3),
+    );
     $previewPath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
     $preview->save($previewPath);
 
@@ -216,11 +231,10 @@ function processImage(&$photoData) {
     // making slightly bigger blurs hash than standard
     if ($photoData["aspect"] > 1.0) {
         $components_x = 6;
-        $components_y = max([2, round(($components_x / $photoData["aspect"]))]);
-    }
-    else {
+        $components_y = max([2, round($components_x / $photoData["aspect"])]);
+    } else {
         $components_y = 6;
-        $components_x = max([2, round(($components_y * $photoData["aspect"]))]);
+        $components_x = max([2, round($components_y * $photoData["aspect"])]);
     }
     $photoData["blurHash"] = Blurhash::encode(
         $pixels,
@@ -230,7 +244,11 @@ function processImage(&$photoData) {
 }
 
 function processPhotoMeta(&$photoData) {
-    $originalFilePath = getImagePath("orig", $photoData["hash"], $photoData["uniq"]);
+    $originalFilePath = getImagePath(
+        "orig",
+        $photoData["hash"],
+        $photoData["uniq"],
+    );
 
     $reader = \PHPExif\Reader\Reader::factory(
         \PHPExif\Reader\Reader::TYPE_EXIFTOOL,
@@ -247,8 +265,7 @@ function processPhotoMeta(&$photoData) {
     $photoData["creationDate"] = $exif->getCreationDate();
     if ($photoData["creationDate"] === false) {
         $photoData["creationDate"] = null;
-    }
-    else {
+    } else {
         $photoData["creationDate"] = $photoData["creationDate"]->getTimeStamp();
     }
 
@@ -268,7 +285,12 @@ function processPhotoMeta(&$photoData) {
 
 function processVideoMeta(&$vidData) {
     $ext = pathinfo($vidData["title"], PATHINFO_EXTENSION);
-    $originalFilePath = getImagePath("orig", $vidData["hash"], $vidData["uniq"], $ext);
+    $originalFilePath = getImagePath(
+        "orig",
+        $vidData["hash"],
+        $vidData["uniq"],
+        $ext,
+    );
 
     $reader = \PHPExif\Reader\Reader::factory(
         \PHPExif\Reader\Reader::TYPE_EXIFTOOL,
@@ -285,5 +307,4 @@ function processVideoMeta(&$vidData) {
     $vidData["gpsLat"] = $rawExif["Composite:GPSLatitude"] ?? null;
     $vidData["gpsLon"] = $rawExif["Composite:GPSLongitude"] ?? null;
     $vidData["gpsAlt"] = $rawExif["Composite:GPSAltitude"] ?? null;
-
 }

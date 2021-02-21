@@ -102,10 +102,10 @@
 
         padding: 50px;
         background-image: linear-gradient(
-            rgb(99, 99, 99),
-            rgb(56, 56, 56)
+            var(--ui-light-color),
+            var(--ui-dark-color)
         );
-        border: 1px solid rgb(119, 119, 119);
+        border: 1px solid var(--ui-border-color);
         border-radius: 6px;
 
         display: flex;
@@ -137,6 +137,6 @@
 
         font-size: xx-large;
         text-align: center;
-        color: rgb(179, 0, 0);
+        color: var(--warning-color);
     }
 </style>

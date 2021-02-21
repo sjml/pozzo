@@ -55,9 +55,11 @@ function upload() {
             http_response_code(200);
             header("Content-Type: application/json");
             echo json_encode($photoData);
-        }
-        elseif (substr($_FILES["mediaUp"]["type"], 0, 6) === "video/") {
-            $vidData = importVideo($_FILES["mediaUp"]["tmp_name"], $_FILES["mediaUp"]["name"]);
+        } elseif (substr($_FILES["mediaUp"]["type"], 0, 6) === "video/") {
+            $vidData = importVideo(
+                $_FILES["mediaUp"]["tmp_name"],
+                $_FILES["mediaUp"]["name"],
+            );
             $vidData["isVideo"] = true;
             $vidData["title"] = $_FILES["mediaUp"]["name"];
             $vidData["uploadedBy"] = $_REQUEST["POZZO_AUTH"];
@@ -75,8 +77,7 @@ function upload() {
             http_response_code(200);
             header("Content-Type: application/json");
             echo json_encode($vidData);
-        }
-        else {
+        } else {
             http_response_code(415);
             echo '{"error": "415 / Unsupported Media Type"}';
             return;

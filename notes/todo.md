@@ -3,22 +3,21 @@
     - reordering larger album throws miscount error >:(
 
 immediate todos
-    - requires backend support
-        - album list context menu (delete / dissolve)
     - UX niceties
-        - add/remove tags from photo page and context menu
-        - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
-        - shift-click to select ranges
+        - do blur load when navigating pages (right now it's not smart enough to reset itself)
         - map polish
             - add "click/tap to interact" when it's locked
             - maybe SVG markers?
             - add photo preview popups? or at least something when you click?
-        - do blur load when navigating pages (right now it's not smart enough to reset itself)
-    - UI polish
-        - color choices
-            - centralize into global file, everyone else use variables
-        - make sure the viewing experience on a mobile-sized screen is decent
-        - for album titles: https://github.com/rikschennink/fitty
+            - "full screen" option to take over viewport? 
+            - links to OSM/Google on photo pages
+        - edit photo title
+        - add/remove tags from photo page and context menu
+        - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
+            - set the "don't leave" flag during any mutating operations
+        - shift-click to select ranges
+    - requires backend support
+        - album list context menu (delete / dissolve)
 
 0. Granularity
     - album collections

@@ -49,6 +49,3 @@
     </Route>
 {/if}
 
-<style>
-
-</style>

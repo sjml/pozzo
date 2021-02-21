@@ -10,7 +10,7 @@
     export let stub: PhotoStub = null;
     export let size: string = null;
     export let altTitle: string = null;
-    export let canvasFit: string = "contain";
+    export let objectFit: string = "contain";
     export let lazy: boolean = false;
 
     let loaded = false;
@@ -90,13 +90,14 @@
     alt={stub.title ?? altTitle ?? null}
     srcset="{GetImgPath(size, stub.hash, stub.uniq)}, {`${GetImgPath(size + "2x", stub.hash, stub.uniq)} 2x`}"
     src="{GetImgPath(size, stub.hash, stub.uniq)}"
+    style={`object-fit: ${objectFit};`}
 />
 
 {#if preloaderVisible}
     <canvas
         class="preload"
         bind:this={preloadCanvas}
-        style={`object-fit: ${canvasFit};`}
+        style={`object-fit: ${objectFit};`}
     />
 {/if}
 

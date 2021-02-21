@@ -40,8 +40,7 @@ function viewPhoto() {
 
     if ($photo["tags"] != "") {
         $photo["tags"] = explode(", ", $photo["tags"]);
-    }
-    else {
+    } else {
         $photo["tags"] = [];
     }
 
@@ -67,8 +66,7 @@ function viewPhotoSet() {
         }
         if ($photo["tags"] != "") {
             $photo["tags"] = explode(", ", $photo["tags"]);
-        }
-        else {
+        } else {
             $photo["tags"] = [];
         }
     }
@@ -87,8 +85,7 @@ function downloadOrig() {
     if ($photo["isVideo"]) {
         $ext = pathinfo($photo["originalFilename"], PATHINFO_EXTENSION);
         $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"], $ext);
-    }
-    else {
+    } else {
         $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"]);
     }
 
@@ -262,7 +259,10 @@ function getPhotosTagged() {
         return;
     }
     if (count($tags) > 1) {
-        output(["message" => "Only one tag at a time supported right now :("], 400);
+        output(
+            ["message" => "Only one tag at a time supported right now :("],
+            400,
+        );
         return;
     }
 

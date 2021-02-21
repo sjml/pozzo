@@ -87,7 +87,7 @@
         width: 100%;
         height: 100%;
 
-        background-image: radial-gradient(ellipse, rgba(0,0,0,0) 50%, rgb(121, 121, 121) 120%);
+        background-image: radial-gradient(ellipse, hsla(0,0%,0%,0) 50%, var(--main-text-color) 120%);
         opacity: 0.5;
 
         display: flex;
@@ -97,7 +97,7 @@
         height: 95%;
         margin: auto;
 
-        border: 10px dashed rgb(255, 255, 255);
+        border: 10px dashed var(--main-text-color);
         border-radius: 30px;
     }
 </style>

@@ -62,31 +62,51 @@
     on:dblclick|self={() => { collapsed = !collapsed; return false; }}
     class:collapsed
 >
-    <div class="homeLink">
-        <a href="/">
-            {$siteData.siteTitle || "Pozzo"}
-        </a>
+    <div class="fullBreadcrumbs">
+        <div class="homeLink">
+            <a href="/">
+                {$siteData.siteTitle || "Pozzo"}
+            </a>
+        </div>
+
+        {#if $currentAlbumStore}
+            <div class="backLink">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                {#if $currentPhotoStore}
+                    <a href={`/album/${$currentAlbumStore.slug}`}>
+                        {$currentAlbumStore.title}
+                    </a>
+                {:else}
+                    {$currentAlbumStore.title}
+                {/if}
+            </div>
+        {/if}
+
+        {#if $currentPhotoStore}
+            <div class="backLink">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                {$currentPhotoStore.title}
+            </div>
+        {/if}
     </div>
 
-    {#if $currentAlbumStore}
+    <div class="backButton">
         <div class="backLink">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             {#if $currentPhotoStore}
                 <a href={`/album/${$currentAlbumStore.slug}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$currentAlbumStore.title}
                 </a>
+            {:else if $currentAlbumStore}
+                <a href="/">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
+                    {$siteData.siteTitle || "Pozzo"}
+                </a>
             {:else}
-                {$currentAlbumStore.title}
+                <h2>{$siteData.siteTitle || "Pozzo"}</h2>
             {/if}
         </div>
-    {/if}
-
-    {#if $currentPhotoStore}
-        <div class="backLink">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            {$currentPhotoStore.title}
-        </div>
-    {/if}
+    </div>
 
     <div class="spacer" />
 
@@ -109,13 +129,15 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M132.93848,231.39062A8,8,0,0,1,128,224V184H48a16.01833,16.01833,0,0,1-16-16V88A16.01833,16.01833,0,0,1,48,72h80V32a8.00065,8.00065,0,0,1,13.65723-5.65723l96,96a8.003,8.003,0,0,1,0,11.31446l-96,96A8.002,8.002,0,0,1,132.93848,231.39062Z"></path></svg>
             </a>
         </Button>
-        <Button margin="0 5px 0 0"
-            title={`${$metadataVisible ? "Hide" : "View"} Metadata`}
-            isToggled={$metadataVisible}
-            on:click={() => $metadataVisible = !$metadataVisible}
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M122.66459,25.8792,42.0101,42.0101,25.8792,122.66459a8,8,0,0,0,2.1878,7.22578L132.51977,234.34315a8,8,0,0,0,11.31371,0l90.50967-90.50967a8,8,0,0,0,0-11.31371L129.89037,28.067A8,8,0,0,0,122.66459,25.8792Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="84" cy="84" r="16"></circle></svg>
-        </Button>
+        <div class="metaDataToggle">
+            <Button margin="0 5px 0 0"
+                title={`${$metadataVisible ? "Hide" : "View"} Metadata`}
+                isToggled={$metadataVisible}
+                on:click={() => $metadataVisible = !$metadataVisible}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M122.66459,25.8792,42.0101,42.0101,25.8792,122.66459a8,8,0,0,0,2.1878,7.22578L132.51977,234.34315a8,8,0,0,0,11.31371,0l90.50967-90.50967a8,8,0,0,0,0-11.31371L129.89037,28.067A8,8,0,0,0,122.66459,25.8792Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="84" cy="84" r="16"></circle></svg>
+            </Button>
+        </div>
     {/if}
     <div class="fullscreenButton">
         {#if $frontendStateStore.fullScreen}
@@ -139,8 +161,9 @@
     nav {
         grid-row: 1;
         grid-column: 1 / span 2;
+        height: 40px;
 
-        background-color: rgb(32, 32, 32);
+        background-color: var(--navbar-color);
         font-size: large;
         -webkit-touch-callout: none;
           -webkit-user-select: none;
@@ -155,7 +178,7 @@
     nav.collapsed {
         height: 5px;
 
-        background-color: rgb(71, 71, 71);
+        background-color: var(--navbar-collapsed-color);
     }
 
     nav.collapsed * {
@@ -185,9 +208,14 @@
     }
 
     .backLink svg {
-        width: 30px;
-        height: 30px;
+        width: var(--button-size);
+        height: var(--button-size);
         margin: auto;
+    }
+
+    .backLink a {
+        display: flex;
+        align-items: center;
     }
 
     .login {
@@ -195,8 +223,28 @@
         margin-right: 5px;
     }
 
+
     @media only screen and (max-device-width: 480px) {
+        h2 {
+            margin: 5px;
+            font-size: larger;
+        }
+
         .fullscreenButton {
+            display: none;
+        }
+
+        .metaDataToggle {
+            display: none;
+        }
+
+        .fullBreadcrumbs {
+            display: none;
+        }
+    }
+
+    @media only screen and (min-device-width: 480px) {
+        .backButton {
             display: none;
         }
     }

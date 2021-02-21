@@ -142,7 +142,7 @@
         width: 100%;
         height: 100%;
 
-        background-color: rgb(85, 85, 85);
+        background-color: var(--ui-light-color);
     }
 
     :global(.leaflet-container *) {
@@ -153,7 +153,7 @@
         background-clip: padding-box;
         border-radius: 20px;
 
-        background-color: rgb(51, 148, 226, 0.7);
+        background-color: var(--marker-cluster-background);
     }
 
     :global(.marker-cluster div) {
@@ -165,7 +165,7 @@
         text-align: center;
         border-radius: 15px;
         font-size: 14px;
-        background-color: rgba(20, 81, 131, 0.7);
+        background-color: var(--marker-cluster-foreground);
     }
 
     :global(.marker-cluster span) {

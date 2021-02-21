@@ -48,14 +48,16 @@
     on:contextmenu={handleRightClick}
 >
     {#if textOverlay}
-        <div class="textOverlay">{textOverlay}</div>
+        <div class="textOverlayContainer">
+            <div class="textOverlay">{textOverlay}</div>
+        </div>
     {/if}
     {#if stub.hash && stub.uniq}
         <DoubleLoader
             stub={stub}
             size={size}
             altTitle={textOverlay}
-            canvasFit="fill"
+            objectFit="cover"
             lazy={true}
         />
     {/if}
@@ -76,9 +78,10 @@
         cursor: pointer;
         overflow: hidden;
 
-        background-color: black;
-        outline: 0px solid white;
-        transition-property: outline;
+        background-color: var(--placeholder-color);
+
+        outline: 0px solid var(--main-text-color);
+        transition-property: outline-width;
         transition-duration: 150ms;
 
         -webkit-touch-callout: none;
@@ -88,29 +91,33 @@
     }
 
     .navSlot.selected {
-        outline: 3px solid white;
+        outline-width: 3px;
+    }
+
+    .textOverlayContainer {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .textOverlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
         text-align: center;
         font-size: 3.5em;
-        font-weight: bold;
-        text-shadow: 0px 0px 10px black;
-        z-index: 100;
+        text-shadow: 0px 0px 20px var(--overlay-shadow-color);
     }
 
     .videoIndicator {
         position: absolute;
-        z-index: 100;
-        width: 30px;
+        width: var(--button-size);
         margin: 5px;
         right: 0;
 
-        filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.7));
+        filter: drop-shadow(0px 0px 5px var(--overlay-shadow-color));
+        z-index: 100;
     }
 </style>

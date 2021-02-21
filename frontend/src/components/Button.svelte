@@ -33,7 +33,7 @@
     }
 
     .button.isToggled {
-        color: rgb(101, 101, 252);
+        color: var(--edit-color);
         transition-property: color;
         transition-duration: 200ms;
     }
@@ -45,8 +45,8 @@
     }
 
     .button :global(svg) {
-        width: 30px;
-        height: 30px;
+        width: var(--button-size);
+        height: var(--button-size);
         transition-property: transform;
         transition-duration: 200ms;
     }
