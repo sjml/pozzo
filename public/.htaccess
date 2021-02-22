@@ -1,3 +1,4 @@
+# redirect all requests to the index.html page (SPA setup)
 DirectoryIndex index.html
 RewriteEngine On
 RewriteBase /
@@ -5,4 +6,8 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.+)$ index.html [QSA,L]
 
+# pass any Authorization headers in to PHP
 SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
+
+# compress output when appropriate
+AddOutputFilterByType DEFLATE text/html text/css text/plain text/javascript application/javascript

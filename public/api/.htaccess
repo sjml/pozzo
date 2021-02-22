@@ -1,3 +1,4 @@
+# redirect everything to the index.php file, which delegates
 DirectoryIndex index.php
 RewriteEngine On
 RewriteBase /
@@ -5,4 +6,5 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.+)$ api/index.php [QSA,L]
 
+# pass authentication headers into PHP
 SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
