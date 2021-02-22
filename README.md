@@ -1,7 +1,7 @@
 # Pozzo
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/sjml/pozzo/automated%20backend%20tests?label=automated%20backend%20tests)
-![Coveralls github](https://img.shields.io/coveralls/github/sjml/pozzo?label=test%20coverage)
+<a href="https://github.com/sjml/pozzo/actions/workflows/ci.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/sjml/pozzo/automated%20backend%20tests"></a>
+<a href="https://coveralls.io/github/sjml/pozzo"><img alt="Coveralls github" src="https://img.shields.io/coveralls/github/sjml/pozzo?label=test%20coverage"></a>
 
 Because the world needed another web photo gallery. 
 
