@@ -83,7 +83,7 @@
             </div>
             {#if $currentPhotoStore.gpsLat && $currentPhotoStore.gpsLon}
                 <div class="photoMap">
-                    <PhotoMap photoIDs={[$currentPhotoStore.id]} exploreIconOnly={true} popups={false} />
+                    <PhotoMap photos={[$currentPhotoStore]} exploreIconOnly={true} popups={false} />
                 </div>
                 <div class="mapLinks">
                     {"{"} <a target="_" href="https://www.openstreetmap.org/?mlat={$currentPhotoStore.gpsLat}&mlon={$currentPhotoStore.gpsLon}#map=18/{$currentPhotoStore.gpsLat}/{$currentPhotoStore.gpsLon}">OpenStreetMap</a>

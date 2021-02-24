@@ -344,24 +344,17 @@ class DB {
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $id, SQLITE3_INTEGER);
         $results = $statement->execute();
-        if ($results == false) {
+        $photoData = $results->fetchArray(SQLITE3_ASSOC);
+        if ($photoData == false) {
             return null;
         }
-        return $results->fetchArray(SQLITE3_ASSOC);
-    }
-
-    static function GetPhotoSet($photoIDs) {
-        $query =
-            "SELECT * FROM photos WHERE id IN (" . implode(", ", $photoIDs) . ")";
-        $statement = self::$pdb->prepare($query);
-        $results = $statement->execute();
-
-        $ret = array_fill(0, count($photoIDs), null);
-        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-            $idx = array_search($row["id"], $photoIDs);
-            $ret[$idx] = $row;
+        if ($photoData["tags"] == "") {
+            $photoData["tags"] = [];
         }
-        return $ret;
+        else {
+            $photoData["tags"] = explode(", ", $photoData["tags"]);
+        }
+        return $photoData;
     }
 
     static function DeletePhoto($id) {
@@ -428,13 +421,7 @@ class DB {
 
         if (self::$pdb->changes() > 0) {
             $photoData = self::GetPhoto($photoID);
-            $tagString = $photoData["tags"];
-            if ($tagString == "") {
-                $existingTags = [];
-            }
-            else {
-                $existingTags = explode(", ", $tagString);
-            }
+            $existingTags = $photoData["tags"];
             $idx = array_search($tag, $existingTags);
             if ($idx === false) {
                 array_push($existingTags, $tag);
@@ -461,13 +448,7 @@ class DB {
 
         if (self::$pdb->changes() > 0) {
             $photoData = self::GetPhoto($photoID);
-            $tagString = $photoData["tags"];
-            if ($tagString == "") {
-                $existingTags = [];
-            }
-            else {
-                $existingTags = explode(", ", $tagString);
-            }
+            $existingTags = $photoData["tags"];
             $idx = array_search($tag, $existingTags);
             if ($idx !== false) {
                 unset($existingTags[$idx]);
@@ -489,7 +470,7 @@ class DB {
         }
 
         $query =
-            "SELECT photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_tags ";
+            "SELECT photos.* FROM photos_tags ";
         $query .= "JOIN photos ON photos.id = photos_tags.photo_id ";
         $query .= "WHERE photos_tags.tag_id = ?";
         $statement = self::$pdb->prepare($query);
@@ -498,6 +479,12 @@ class DB {
 
         $taggedPhotos = [];
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            if ($row["tags"] == "") {
+                $row["tags"] = [];
+            }
+            else {
+                $row["tags"] = explode(", ", $row["tags"]);
+            }
             array_push($taggedPhotos, $row);
         }
         return $taggedPhotos;
@@ -720,7 +707,7 @@ class DB {
 
         // doing a fresh selection instead of relying on the order they were passed in
         //   (which may be the order they were selected in a GUI or something; want to
-        //    maintain the order)
+        //    maintain the set ordering from the source album)
         $query = "SELECT * FROM photos_albums WHERE album_id = ?";
         // $photoIDs has already been filtered to be array of numeric values
         $query .=

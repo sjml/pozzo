@@ -13,29 +13,11 @@
     import { currentAlbumStore } from "../stores";
     import { GetImgPath } from "../util";
 
-    export let photoIDs: number[] = [];
+    export let photos: Photo[] = [];
     export let interactEnabled: boolean = false;
     export let boundsPadding: number = 15;
     export let exploreIconOnly: boolean = false;
     export let popups: boolean = true;
-
-    let photos: Photo[] = [];
-    async function getPhotos(ids: number[]) {
-        const res = await RunApi("/photo/set", {
-            method: "POST",
-            authorize: true,
-            params: {
-                photoIDs: ids
-            }
-        });
-        if (res.success) {
-            photos = res.data;
-        }
-        else {
-            console.error(res);
-        }
-    }
-    $: getPhotos(photoIDs)
 
     let mapElement: HTMLDivElement;
     let map: L.Map;
@@ -95,8 +77,8 @@
     }
     $: setInteractEnabled(interactEnabled)
 
-    function setMarkers(photoList: Photo[]) {
-        if (map == null) {
+    function setMarkers(photoList: Photo[], mapObject: L.Map) {
+        if (mapObject == null) {
             return;
         }
         if (markerCluster == null) {
@@ -106,7 +88,7 @@
             });
         }
 
-        map.removeLayer(markerCluster);
+        mapObject.removeLayer(markerCluster);
         mapMarkers.forEach((m) => {
             markerCluster.removeLayer(m);
         });
@@ -142,15 +124,15 @@
             markerCluster.addLayer(marker);
             return marker;
         });
-        map.addLayer(markerCluster);
+        mapObject.addLayer(markerCluster);
 
         if (coords.length > 0) {
-            map.fitBounds(L.latLngBounds(coords), {
+            mapObject.fitBounds(L.latLngBounds(coords), {
                 padding: [boundsPadding, boundsPadding]
             });
         }
     }
-    $: setMarkers(photos)
+    $: setMarkers(photos, map)
 </script>
 
 <div class="mapContainer">

@@ -66,20 +66,24 @@ def test_resize_comprehensiveness(server, req):
     stat_assert(res, 200)
     sizes = res.json()["sizes"]
 
+    res = req.get(server.api(f"/album/view/1"))
+    stat_assert(res, 200)
+    adata = res.json()
+
     for i in range(1, 11):
-        res = req.get(server.api(f"/photo/view/{i}"))
-        stat_assert(res, 200)
-        pdata = res.json()
+        pdata = list(filter(lambda x: x["id"] == i, adata["photos"]))[0]
         for s in sizes:
             ipath = get_img_path(s["label"], pdata["hash"], pdata["uniq"])
             res = req.head(server.access(ipath))
             stat_assert(res, 200)
 
 def test_orig_getback(server, req):
+    res = req.get(server.api(f"/album/view/1"))
+    stat_assert(res, 200)
+    adata = res.json()
+
     for i in range(1, 11):
-        res = req.get(server.api(f"/photo/view/{i}"))
-        stat_assert(res, 200)
-        pdata = res.json()
+        pdata = list(filter(lambda x: x["id"] == i, adata["photos"]))[0]
 
         with tempfile.TemporaryFile("w+b") as tf:
             with req.get(server.api(f"/photo/orig/{i}"), stream=True) as res:
@@ -92,10 +96,6 @@ def test_orig_getback(server, req):
                 md5.update(segment)
             assert md5.hexdigest() == pdata["hash"]
 
-def test_non_existent_image_is_nonexistent(server, req):
-    res = req.get(server.api("/photo/view/11"))
-    stat_assert(res, 404)
-
 def test_duplicate_allowed_but_unique(server, auth, req):
     fname = f"./test_corpus/jpeg/01.jpeg"
     with open(fname, "rb") as f:
@@ -107,11 +107,10 @@ def test_duplicate_allowed_but_unique(server, auth, req):
     stat_assert(res, 200)
     dupe_data = res.json()
 
-    res = req.get(
-        server.api("/photo/view/1"),
-    )
+    res = req.get(server.api(f"/album/view/1"))
     stat_assert(res, 200)
-    orig_data = res.json()
+    adata = res.json()
+    orig_data = list(filter(lambda x: x["id"] == 1, adata["photos"]))[0]
 
     assert orig_data["hash"] == dupe_data["hash"]
     assert orig_data["uniq"] != dupe_data["uniq"]

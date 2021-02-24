@@ -1,5 +1,7 @@
 /pozzo.DB
+/pozzo.DB.bak
 /public/photos
+/public/photos.bak
 /scripts/deploy.sh
 
 /dist

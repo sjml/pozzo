@@ -15,11 +15,9 @@ $router = new Router();
 $router->AddHandler("/delete", ["deletePhoto"], true);
 $router->AddHandler("/copy", ["copyPhoto"], true);
 $router->AddHandler("/move", ["movePhotos"], true);
-$router->AddHandler("/view", ["viewPhoto"]);
 $router->AddHandler("/tagset", ["getPhotosTagged"]);
 $router->AddHandler("/tag", ["tagPhotos"], true);
 $router->AddHandler("/untag", ["untagPhotos"], true);
-$router->AddHandler("/set", ["viewPhotoSet"]);
 $router->AddHandler("/orig", ["downloadOrig"]);
 
 $router->Route();
@@ -28,52 +26,6 @@ function output($obj, $code = 200) {
     http_response_code($code);
     header("Content-Type: application/json");
     echo json_encode($obj);
-}
-
-function viewPhoto() {
-    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
-    $photo = DB::GetPhoto($identifier);
-    if ($photo == null) {
-        output(["message" => "Photo not found"], 404);
-        return;
-    }
-
-    if ($photo["tags"] != "") {
-        $photo["tags"] = explode(", ", $photo["tags"]);
-    }
-    else {
-        $photo["tags"] = [];
-    }
-
-    output($photo);
-}
-
-function viewPhotoSet() {
-    $input = json_decode(file_get_contents("php://input"), true);
-    if (!isset($input["photoIDs"]) || !is_array($input["photoIDs"])) {
-        output(["message" => "Invalid or missing parameter 'photoIDs'"], 400);
-        return;
-    }
-    $photoIDs = array_filter($input["photoIDs"], "is_numeric");
-    if (count($photoIDs) != count($input["photoIDs"])) {
-        output(["message" => "Non-numeric values in photoIDs list"], 400);
-        return;
-    }
-
-    $photos = DB::GetPhotoSet($input["photoIDs"]);
-    foreach ($photos as $photo) {
-        if ($photo == null) {
-            continue;
-        }
-        if ($photo["tags"] != "") {
-            $photo["tags"] = explode(", ", $photo["tags"]);
-        }
-        else {
-            $photo["tags"] = [];
-        }
-    }
-
-    output($photos);
 }
 
 function downloadOrig() {

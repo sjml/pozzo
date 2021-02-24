@@ -186,7 +186,7 @@
 
     {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
         <div class="albumMap">
-            <PhotoMap photoIDs={$currentAlbumStore.photos.map(p => p.id)} />
+            <PhotoMap photos={$currentAlbumStore.photos} />
         </div>
     {/if}
 

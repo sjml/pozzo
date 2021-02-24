@@ -25,8 +25,6 @@ $message = [
             "/delete",
             "/copy",
             "/move",
-            "/view",
-            "/set",
             "/orig",
             "/tagset",
             "/tag",

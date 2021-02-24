@@ -3,7 +3,6 @@
     - video breaks nav?
     
 * immediate todos
-    - set tags to array in everything that returns a photo
     - UX niceties
         - edit photo title/description
         - add/remove tags from photo page and context menu
