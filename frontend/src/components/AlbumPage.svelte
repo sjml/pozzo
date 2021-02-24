@@ -223,9 +223,9 @@
                 on:moved={handlePhotoMove}
                 on:coverChanged={() => updateMetaData()}
             >
-            {#each $currentAlbumStore.photos as pstub, pi}
-                <a href="/album/{$currentAlbumStore.slug}/{pstub.id}">
-                    <NavPhoto size="medium" stub={pstub} layoutDims={layout.boxes[pi]} />
+            {#each $currentAlbumStore.photos as photo, pi}
+                <a href="/album/{$currentAlbumStore.slug}/{photo.id}">
+                    <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
                 </a>
             {/each}
             </NavCollection>

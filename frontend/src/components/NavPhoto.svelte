@@ -1,16 +1,16 @@
 <script lang="ts">
-    import type { PhotoStub } from "../pozzo.type";
+    import type { Photo } from "../pozzo.type";
     import { isLoggedInStore, navSelection } from "../stores";
     import { IsMetaKeyDownForEvent } from "../util";
-    import DoubleLoader from "./DoubleLoader.svelte";
+    import StagedLoader from "./StagedLoader.svelte";
 
-    export let stub: PhotoStub = null;
+    export let photo: Photo = null;
     export let layoutDims: any = null;
     export let size: string = "medium";
     export let textOverlay: string = null;
 
     let selected = false;
-    $: selected = $navSelection.indexOf(stub) >= 0;
+    $: selected = $navSelection.indexOf(photo) >= 0;
 
 
     function handleClick(evt: MouseEvent) {
@@ -22,10 +22,10 @@
         }
         evt.preventDefault();
         if (!selected) {
-            $navSelection = [...$navSelection, stub];
+            $navSelection = [...$navSelection, photo];
         }
         else {
-            $navSelection = $navSelection.filter(ps => ps.id != stub.id);
+            $navSelection = $navSelection.filter(ps => ps.id != photo.id);
         }
     }
 
@@ -34,7 +34,7 @@
             return;
         }
         if ($navSelection.length == 0) {
-            $navSelection = [...$navSelection, stub];
+            $navSelection = [photo];
         }
     }
 </script>
@@ -52,16 +52,16 @@
             <div class="textOverlay">{textOverlay}</div>
         </div>
     {/if}
-    {#if stub.hash && stub.uniq}
-        <DoubleLoader
-            stub={stub}
+    {#if photo.hash && photo.uniq}
+        <StagedLoader
+            photo={photo}
             size={size}
             altTitle={textOverlay}
             objectFit="cover"
             lazy={true}
         />
     {/if}
-    {#if stub.isVideo}
+    {#if photo.isVideo}
         <div class="videoIndicator">
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M128,24A104,104,0,1,0,232,128,104.12041,104.12041,0,0,0,128,24Zm36.4375,110.65625-48,32A7.99612,7.99612,0,0,1,104,160V96a7.99612,7.99612,0,0,1,12.4375-6.65625l48,32a7.99959,7.99959,0,0,1,0,13.3125Z"></path></svg>
         </div>

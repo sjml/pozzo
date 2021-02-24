@@ -1,8 +1,14 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onMount, onDestroy } from "svelte";
     import { fade } from "svelte/transition";
 
+    import { modalUp } from "../stores";
+
+
     const dispatch = createEventDispatcher();
+
+    onMount(() => $modalUp = true)
+    onDestroy(() => $modalUp = false)
 </script>
 
 

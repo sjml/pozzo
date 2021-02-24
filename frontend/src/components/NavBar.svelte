@@ -6,7 +6,7 @@
     import {
         currentAlbumStore,
         currentPhotoStore,
-        frontendStateStore,
+        fullScreen,
         siteData,
         metadataVisible
     } from "../stores";
@@ -140,7 +140,7 @@
         </div>
     {/if}
     <div class="fullscreenButton">
-        {#if $frontendStateStore.fullScreen}
+        {#if $fullScreen}
             <Button margin="0 5px 0 0" on:click={() => dispatch("fullScreenOff")} title="Exit Fullscreen">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="208 96 160 96 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polyline points="48 160 96 160 96 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polyline points="160 208 160 160 208 160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polyline points="96 48 96 96 48 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
             </Button>
@@ -162,6 +162,8 @@
         grid-row: 1;
         grid-column: 1 / span 2;
         height: 40px;
+        width: 100vw;
+        padding-right: 10px;
 
         background-color: var(--navbar-color);
         font-size: large;
@@ -173,10 +175,13 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+
+        transition-property: height, background-color;
+        transition-duration: 600ms;
     }
 
     nav.collapsed {
-        height: 5px;
+        height: 7px;
 
         background-color: var(--navbar-collapsed-color);
     }

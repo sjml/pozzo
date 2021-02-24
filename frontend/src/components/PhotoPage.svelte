@@ -4,12 +4,11 @@
 
     //// LOL the irony of this page of all pages not needing the Photo type
     // import type { Photo } from "../pozzo.type";
-    import { RunApi } from "../api";
     import { currentAlbumStore, currentPhotoStore, metadataVisible } from "../stores";
-    import { HumanBytes, TimestampToDateString } from "../util";
+    import { HumanBytes, TimestampToDateString, Fractionalize } from "../util";
     import Button from "./Button.svelte";
     import PhotoMap from "./PhotoMap.svelte";
-    import DoubleLoader from "./DoubleLoader.svelte";
+    import StagedLoader from "./StagedLoader.svelte";
     import VideoLoader from "./VideoLoader.svelte";
 
     const size = "large";
@@ -22,38 +21,31 @@
         {key: "lens", value: "Lens"},
         {key: "aperture", value: "Aperture", filter: (val) => `f/${val}`},
         {key: "iso", value: "ISO"},
-        {key: "shutterSpeed", value: "Shutter Speed"},
+        {key: "shutterSpeed", value: "Shutter Speed", filter: Fractionalize},
     ];
 
     export let photoIdentifier: string;
-    let photoID: number = null;
 
     onDestroy(() => {
         $currentPhotoStore = null;
     });
 
     $: {
-        photoID = parseInt(photoIdentifier);
-        if (isNaN(photoID)) {
-            photoID = null;
-            router.goto(`/album/${$currentAlbumStore.slug}`)
-        }
-        else {
-            getPhoto(photoID);
-        }
+        getPhoto(photoIdentifier);
     }
 
-    async function getPhoto(pid: number) {
-        const res = await RunApi(`/photo/view/${pid}`, {
-            authorize: true
-        });
-
-        if (res.success) {
-            $currentPhotoStore = res.data;
+    async function getPhoto(pid: string) {
+        const pidx = parseInt(pid);
+        if (isNaN(pidx)) {
+            router.goto(`/album/${$currentAlbumStore.slug}`);
+            return;
         }
-        else {
-            console.error(res);
+        const apidx = $currentAlbumStore.photos.findIndex(p => p.id == pidx);
+        if (apidx == -1) {
+            router.goto(`/album/${$currentAlbumStore.slug}`)
+            return;
         }
+        $currentPhotoStore = $currentAlbumStore.photos[apidx];
     }
 </script>
 
@@ -62,8 +54,9 @@
 {:else}
     <div class="fullPhoto">
         {#if !$currentPhotoStore.isVideo }
-            <DoubleLoader
-                stub={$currentPhotoStore}
+            <StagedLoader
+                photo={$currentPhotoStore}
+                lazy={false}
                 size={size}
                 objectFit="contain"
             />
@@ -181,5 +174,9 @@
     .mapLinks {
         text-align: right;
         margin: 5px 0;
+    }
+
+    .mapLinks a {
+        text-decoration: underline;
     }
 </style>

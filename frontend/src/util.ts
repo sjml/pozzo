@@ -23,6 +23,18 @@ export function TimestampToDateString(timestamp: number): string {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+export function Fractionalize(float: number): string {
+    // sloppy, really just meant to convert shutter speeds to 1/N
+    const inverse = 1 / float;
+    const int = Math.round(inverse);
+    if (Math.abs(int - inverse) < 0.0001) {
+        // close enough
+        return `1/${int}`;
+    }
+    // no other strategies, just make the float a little tider
+    return float.toFixed(5).replace(/0*$/, "");
+}
+
 // matching the backend logic from image.php's getImagePath function
 export function GetImgPath(size:string, hash: string, uniq: string, ext: string = "jpg"): string {
     const dirs = hash.match(/.{1,2}/g)

@@ -2,7 +2,7 @@
     import { createEventDispatcher, onMount } from "svelte";
 
     import type { FileUploadStatus } from "../pozzo.type";
-    import { frontendStateStore } from "../stores";
+    import { userStoppedUploadScroll } from "../stores";
     import { UploadFile } from "../api";
     import { HumanBytes } from "../util";
 
@@ -38,7 +38,7 @@
         }
         uploadStatus.status = 1;
         statusString = "Uploading…";
-        if (!$frontendStateStore.userStoppedUploadScroll) {
+        if (!$userStoppedUploadScroll) {
             visibleDiv.scrollIntoView({
                 behavior: "smooth",
                 block: "center"

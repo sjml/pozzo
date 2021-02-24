@@ -62,18 +62,18 @@ class DB {
 
 
         $prepCommand = "CREATE TABLE IF NOT EXISTS photos (";
-        $prepCommand .= "id INTEGER PRIMARY KEY"; // stub
+        $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", uploadTimeStamp DATETIME";
         $prepCommand .= ", uploadedBy INTEGER";
         $prepCommand .= ", originalFilename TEXT";
         $prepCommand .= ", size INTEGER";
         $prepCommand .= ", width INTEGER, height INTEGER";
-        $prepCommand .= ", title TEXT"; // stub
-        $prepCommand .= ", hash TEXT"; // stub
-        $prepCommand .= ", uniq TEXT"; // stub
-        $prepCommand .= ", blurHash TEXT"; // stub
-        $prepCommand .= ", aspect FLOAT"; // stub
-        $prepCommand .= ", isVideo BOOLEAN DEFAULT 0"; // stub
+        $prepCommand .= ", title TEXT";
+        $prepCommand .= ", hash TEXT";
+        $prepCommand .= ", uniq TEXT";
+        $prepCommand .= ", blurHash TEXT";
+        $prepCommand .= ", aspect FLOAT";
+        $prepCommand .= ", isVideo BOOLEAN DEFAULT 0";
 
         $prepCommand .= ", make TEXT";
         $prepCommand .= ", model TEXT";
@@ -83,8 +83,10 @@ class DB {
         $prepCommand .= ", tags TEXT";
         $prepCommand .= ", subjectArea TEXT";
 
-        // intentionally setting these as text so they don't need to be formatted
-        //   not planning to do math with these, so let's make it easier on ourselves
+        // set these as text in the hopes that the frontend wouldn't have to math,
+        //    but alas EXIF data is not consistent in how it reports these.
+        //    leaving as text because SQLite doesn't really care anyway and the
+        //    frontend can just deal with what it gets.
         $prepCommand .= ", aperture TEXT";
         $prepCommand .= ", iso TEXT";
         $prepCommand .= ", shutterSpeed TEXT";
@@ -350,9 +352,7 @@ class DB {
 
     static function GetPhotoSet($photoIDs) {
         $query =
-            "SELECT * FROM photos WHERE id IN (" .
-            implode(", ", $photoIDs) .
-            ")";
+            "SELECT * FROM photos WHERE id IN (" . implode(", ", $photoIDs) . ")";
         $statement = self::$pdb->prepare($query);
         $results = $statement->execute();
 
@@ -504,24 +504,40 @@ class DB {
     }
 
     static function GetAlbumList($includePrivate = false) {
-        $prepCommand = "SELECT albums.*";
-        $prepCommand .= ", COALESCE(photos.hash, null) as coverHash";
-        $prepCommand .= ", COALESCE(photos.uniq, null) as coverUniq";
-        $prepCommand .= ", COALESCE(photos.aspect, null) as coverAspect";
-        $prepCommand .= ", COALESCE(photos.blurHash, null) as coverBlurHash";
-        $prepCommand .= " FROM albums";
-        $prepCommand .=
-            " LEFT OUTER JOIN photos ON photos.id = albums.coverPhoto";
+        $albumFields = [
+            "albums.id AS albumId",
+            "albums.title as albumTitle",
+            "slug",
+            "isPrivate",
+            "description",
+            "ordering",
+            "coverPhoto",
+            "showMap"
+        ];
+        $prepCommand = "SELECT " . implode(", ", $albumFields);
+        $prepCommand .= ", '::', photos.*";
+        $prepCommand .= " FROM albums LEFT OUTER JOIN photos ON photos.id = albums.coverPhoto";
         if (!$includePrivate) {
-            $prepCommand .= " WHERE isPrivate != 1";
+            $prepCommand .= " WHERE albums.isPrivate != 1";
         }
-        $prepCommand .= " ORDER BY ordering ASC, id ASC";
+        $prepCommand .= " ORDER BY albums.ordering ASC, albums.id ASC";
         $statement = self::$pdb->prepare($prepCommand);
         $results = $statement->execute();
 
         $ret = [];
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-            array_push($ret, $row);
+            $albumData = array_slice($row, 0, count($albumFields));
+            $albumData["id"] = $albumData["albumId"];
+            $albumData["title"] = $albumData["albumTitle"];
+            unset($albumData["albumId"]);
+            unset($albumData["albumTitle"]);
+            if ($albumData["coverPhoto"] == -1) {
+                $albumData["coverPhoto"] = null;
+            }
+            else {
+                $albumData["coverPhoto"] = array_slice($row, (count($albumFields)+1));
+            }
+            array_push($ret, $albumData);
         }
         $results->finalize();
         return $ret;
@@ -609,15 +625,19 @@ class DB {
         $showMap,
         $coverPhoto
     ) {
+        $sg = new SlugGenerator();
+        $slug = $sg->generate($title);
+
         $query =
-            "UPDATE albums SET title = ?, description = ?, isPrivate = ?, showMap = ?, coverPhoto = ? WHERE id = ?";
+            "UPDATE albums SET title = ?, slug = ?, description = ?, isPrivate = ?, showMap = ?, coverPhoto = ? WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
-        $statement->bindParam(2, $description, SQLITE3_TEXT);
-        $statement->bindParam(3, $isPrivate, SQLITE3_INTEGER);
-        $statement->bindParam(4, $showMap, SQLITE3_INTEGER);
-        $statement->bindParam(5, $coverPhoto, SQLITE3_INTEGER);
-        $statement->bindParam(6, $id, SQLITE3_INTEGER);
+        $statement->bindParam(2, $slug, SQLITE3_TEXT);
+        $statement->bindParam(3, $description, SQLITE3_TEXT);
+        $statement->bindParam(4, $isPrivate, SQLITE3_INTEGER);
+        $statement->bindParam(5, $showMap, SQLITE3_INTEGER);
+        $statement->bindParam(6, $coverPhoto, SQLITE3_INTEGER);
+        $statement->bindParam(7, $id, SQLITE3_INTEGER);
         $result = $statement->execute();
         if (!$result) {
             return -1;
@@ -704,9 +724,7 @@ class DB {
         $query = "SELECT * FROM photos_albums WHERE album_id = ?";
         // $photoIDs has already been filtered to be array of numeric values
         $query .=
-            " and photo_id IN (" .
-            implode(", ", $photoIDs) .
-            ") ORDER BY ordering ASC";
+            " and photo_id IN (" . implode(", ", $photoIDs) . ") ORDER BY ordering ASC";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $fromAlbumID, SQLITE3_INTEGER);
         $beforeMoveResults = $statement->execute();
@@ -727,9 +745,7 @@ class DB {
         }
 
         $query =
-            "UPDATE albums SET coverPhoto = -1 WHERE id = ? AND coverPhoto in (" .
-            implode(", ", $photoIDs) .
-            ")";
+            "UPDATE albums SET coverPhoto = -1 WHERE id = ? AND coverPhoto in (" . implode(", ", $photoIDs) . ")";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $fromAlbumID, SQLITE3_INTEGER);
         $results = $statement->execute();
@@ -737,18 +753,10 @@ class DB {
         self::$pdb->exec("COMMIT TRANSACTION;");
     }
 
-    static function GetPhotosInAlbum($albumID, $getFullPhotos = false) {
-        $query = "SELECT photos_albums.ordering,";
-        if ($getFullPhotos) {
-            $query .= " photos.* FROM photos_albums ";
-        }
-        else {
-            $query .=
-                " photos.id, photos.title, photos.hash, photos.uniq, photos.blurHash, photos.aspect, photos.isVideo FROM photos_albums ";
-        }
+    static function GetPhotosInAlbum($albumID) {
+        $query = "SELECT photos_albums.ordering, photos.* FROM photos_albums ";
         $query .= "JOIN photos ON photos.id = photos_albums.photo_id ";
-        $query .=
-            "WHERE photos_albums.album_id = ? ORDER BY photos_albums.ordering";
+        $query .= "WHERE photos_albums.album_id = ? ORDER BY photos_albums.ordering";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
 
@@ -758,6 +766,12 @@ class DB {
             return $ret;
         }
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            if ($row["tags"] == "") {
+                $row["tags"] = [];
+            }
+            else {
+                $row["tags"] = explode(", ", $row["tags"]);
+            }
             array_push($ret, $row);
         }
         return $ret;
@@ -780,7 +794,7 @@ class DB {
         return true;
     }
 
-    static function FindAlbum($identifier, $includePhotoStubs = true) {
+    static function FindAlbum($identifier, $includePhotos = true) {
         if (is_numeric($identifier)) {
             $query = "SELECT * FROM albums WHERE id = ?";
             $statement = self::$pdb->prepare($query);
@@ -805,7 +819,7 @@ class DB {
             return false;
         }
 
-        if ($includePhotoStubs) {
+        if ($includePhotos) {
             $photos = self::GetPhotosInAlbum($albumData["id"]);
             $albumData["photos"] = $photos;
         }

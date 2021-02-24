@@ -9,11 +9,6 @@ export type SiteConfig = {
     simultaneousUploads: number,
 }
 
-export type FrontendState = {
-    fullScreen: boolean,
-    userStoppedUploadScroll: boolean,
-}
-
 export type ApiResult = {
     success: boolean,
     code: number,
@@ -34,23 +29,9 @@ export type FileUploadStatus = {
     startUploadCallback?: Function,
 }
 
-// only the data needed to render an image
-//   (and even the title just gets used as an alt
-//   tag so could get swapped out to something else)
-export type PhotoStub = {
-    id: number,
-    title?: string,
-    hash: string,
-    uniq: string,
-    blurHash: string,
-    aspect: number,
-    isVideo: boolean,
-}
-
 export type Photo = {
-    // recapitulates stub, but now title is required
+    // only things required to render
     id: number,
-    title: string,
     hash: string,
     uniq: string,
     blurHash: string,
@@ -58,6 +39,7 @@ export type Photo = {
     isVideo: boolean,
 
     // extended import data
+    title: string,
     uploadTimeStamp: number,
     uploadedBy: number,
     originalFilename: string,
@@ -89,11 +71,11 @@ export type Album = {
     slug: string,
     isPrivate: boolean,
     showMap: boolean,
-    coverPhoto: number,
+    coverPhoto: Photo|null,
     coverHash?: string,
     coverUniq?: string,
     coverAspect?: number,
     coverBlurHash?: string,
     highestIndex: number,
-    photos: PhotoStub[]
+    photos: Photo[]
 }

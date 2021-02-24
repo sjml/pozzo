@@ -1,16 +1,16 @@
 - bugs
-    - EXIF: aperture seems to not correspond to f-stop in all cameras :-/
-    - reordering larger album throws miscount error >:(
-
-immediate todos
+    - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
+    - video breaks nav?
+    
+* immediate todos
+    - set tags to array in everything that returns a photo
     - UX niceties
-        - do blur load when navigating pages (right now it's not smart enough to reset itself)
-        - fix shutter speed display
-        - edit photo title
+        - edit photo title/description
         - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
             - set the "don't leave" flag during any mutating operations
         - shift-click to select ranges
+        - bulk delete
     - requires backend support
         - album list context menu (delete / dissolve)
 
@@ -27,15 +27,13 @@ immediate todos
         - add license display option? (site config)
         - add little notification toasts for when people get redirected/bounced
         - transitions between albums and stuff
-        - accessibility checks
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
         - uploadzone should tell you when it rejects a file and why
 2. Backend pass
     - limit length of text things (titles, descriptions)
-    - pagination or just trust user to break stuff up into separate albums?
     - directly fetched photos need to check if they're in a public album
         - (basically all the /photo get endpoints)
-    - bulk delete
+    - get to 100% test coverage, just 'cause
 3. Frontend extra bonus points
     - can I do something clever to try and pull all the images from an album as you're viewing the individual pages?
         - something-something web workers? BLERGH.
@@ -45,14 +43,11 @@ immediate todos
 
 ## future
 * special handling for unsorted album? (automatically removing from it)
-    - "smart" albums in general? (let's not get crazy)
+    - "smart" albums in general? (just unsorted and tags)
     - option for copying to album instead of moving to it
         - trivial on the backend, but UX of "this photo is in multiple albums" is questionable
 * share buttons? :-/
     - no, but generate share cards
-* perf notes
-    - looked at lighthouse score (now low-90s) which isn't bad considering it's mostly big images
-        * set cache policy in .htaccess? (images should be easily cachable since their filenames *are* hashes... does the filepath become part of that?)
 * sweep through API responses and make sure there's some consistency
     - "error" vs "message", response codes, JSON schema, etc.
     - some names are plural, others singular; some take GET query params, others only post; a little messy all around

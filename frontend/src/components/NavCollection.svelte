@@ -2,7 +2,7 @@
     import { tick, createEventDispatcher } from "svelte";
 
     import type { PhotoStub } from "../pozzo.type";
-    import { currentAlbumStore, navSelection, isLoggedInStore } from "../stores";
+    import { currentAlbumStore, navSelection, isLoggedInStore, modalUp } from "../stores";
     import { IsMetaKeyDownForEvent } from "../util";
     import PhotoContextMenu from "./PhotoContextMenu.svelte";
 
@@ -60,7 +60,7 @@
         if (!$isLoggedInStore) {
             return;
         }
-        if (contextMenuVisible) {
+        if (contextMenuVisible || $modalUp) {
             return;
         }
         if (evt.key == "a" && IsMetaKeyDownForEvent(evt)) {

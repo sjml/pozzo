@@ -3,7 +3,7 @@
 
     import justifiedLayout from "justified-layout";
 
-    import type { Album, PhotoStub } from "../pozzo.type";
+    import type { Album, Photo } from "../pozzo.type";
     import { isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
     import Button from "./Button.svelte";
@@ -15,7 +15,7 @@
 
 
     let albumList: Album[];
-    let albumCoverStubs: PhotoStub[];
+    let albumCovers: Photo[];
 
 
     async function getAlbumList(loggedIn: boolean) {
@@ -35,14 +35,43 @@
         if (!alist) {
             return;
         }
-        albumCoverStubs = albumList.map((a) => ({
-            id: a.id,
-            title: a.title,
-            hash: a.coverHash,
-            uniq: a.coverUniq,
-            blurHash: a.coverBlurHash,
-            aspect: a.coverAspect || (4.0 / 3.0),
-        }));
+        albumCovers = albumList.map(a => {
+            if (a.coverPhoto) {
+                const pr = Object.assign({}, a.coverPhoto);
+                pr.id = a.id;
+                pr.title = a.title;
+                return pr;
+            }
+            // annoying to spec out all this nonsense :-/
+            return {
+                id: a.id,
+                title: a.title,
+                aspect: 4.0 / 3.0,
+                hash: "",
+                uniq: "",
+                blurHash: "",
+                isVideo: false,
+                uploadTimeStamp: 0,
+                uploadedBy: 0,
+                originalFilename: "",
+                size: 0,
+                width: 0,
+                height: 0,
+                tags: [],
+                make: null,
+                model: null,
+                lens: null,
+                mime: null,
+                creationDate: null,
+                subjectArea: null,
+                aperture: null,
+                iso: null,
+                shutterSpeed: null,
+                gpsLat: null,
+                gpsLon: null,
+                gpsAlt: null,
+            };
+        });
     }
     $: assembleStubs(albumList)
 
@@ -50,12 +79,17 @@
     let containerWidth: number;
     let layout = null;
 
-    function calculateLayout(width: number, stubs: PhotoStub[]) {
-        if (!width || !stubs) {
+    function calculateLayout(width: number, photos: Photo[]) {
+        if (!width || !photos) {
             return; // initial loads; don't worry yet
         }
 
-        const aspects = stubs.map((acs) => acs.aspect);
+        const aspects = photos.map((acs) => {
+            if (acs != null) {
+                return acs.aspect;
+            }
+            return 4.0 / 3.0;
+        });
 
         layout = justifiedLayout(aspects, {
             targetRowHeight: 300,
@@ -64,7 +98,7 @@
             widowLayoutStyle: "center",
         });
     }
-    $: if (albumList) calculateLayout(containerWidth, albumCoverStubs)
+    $: if (albumList) calculateLayout(containerWidth, albumCovers)
 
 
     let addingNew = false;
@@ -83,7 +117,7 @@
             authorize: true
         });
         if (res.success) {
-            albumCoverStubs = evt.detail.newStubs;
+            albumCovers = evt.detail.newStubs;
         }
         else {
             console.error(res);
@@ -131,7 +165,7 @@
     {#if albumList}
         {#if reordering}
             <EditableLayout
-                stubList={albumCoverStubs}
+                stubList={albumCovers}
                 on:reordered={handleAlbumReorder}
             />
         {:else}
@@ -144,11 +178,11 @@
             {/if}
 
             {#if layout}
-                <NavCollection stubs={albumCoverStubs}>
+                <NavCollection stubs={albumCovers}>
                 {#each albumList as album, ai}
                     <a href={`/album/${album.slug}`}>
                         <NavPhoto size="medium"
-                            stub={albumCoverStubs[ai]}
+                            photo={albumCovers[ai]}
                             layoutDims={layout.boxes[ai]}
                             textOverlay={album.title}
                         />

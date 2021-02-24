@@ -2,7 +2,7 @@
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
     import type { FileUploadStatus } from "../pozzo.type";
-    import { currentAlbumStore, frontendStateStore, siteData } from "../stores";
+    import { currentAlbumStore, siteData, userStoppedUploadScroll } from "../stores";
     import FileUploader from "./FileUploader.svelte";
     import Button from "./Button.svelte";
 
@@ -11,7 +11,7 @@
     export let fileList: File[];
 
     onMount(() => {
-        $frontendStateStore.userStoppedUploadScroll = false;
+        $userStoppedUploadScroll = false;
 
         let targetAlbumID = null;
         let offset = 1;
@@ -101,13 +101,13 @@
 
         await tick();
         await new Promise(p => setTimeout(p, 400));
-        $frontendStateStore.userStoppedUploadScroll = false;
+        $userStoppedUploadScroll = false;
         queueUploads();
     }
 </script>
 
 
-<div class="fileUploadList" on:click={() => $frontendStateStore.userStoppedUploadScroll = true}>
+<div class="fileUploadList" on:click={() => $userStoppedUploadScroll = true}>
     {#if awaitingConfirmation}
         <div class="confirm">
             {#if failedUploadCount > 0}
