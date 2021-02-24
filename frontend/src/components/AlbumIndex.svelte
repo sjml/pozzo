@@ -4,8 +4,6 @@
 
     import { currentAlbumStore, isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
-    import AlbumPage from "./AlbumPage.svelte";
-    import PhotoPage from "./PhotoPage.svelte";
 
     export let albumSlug: string;
 
@@ -41,10 +39,18 @@
 {#if $currentAlbumStore}
     <Route path="/*" firstmatch>
         <Route path="/:photoID" let:meta>
-            <PhotoPage photoIdentifier={meta.params.photoID} />
+            {#await import("./PhotoPage.svelte")}
+                Loading…
+            {:then {default: component}}
+                <svelte:component this={component} photoIdentifier={meta.params.photoID} />
+            {/await}
         </Route>
         <Route path="/">
-            <AlbumPage on:uploaded={() => getAlbum(albumSlug) } />
+            {#await import("./AlbumPage.svelte")}
+                Loading…
+            {:then {default: component}}
+                <svelte:component this={component} on:uploaded={() => getAlbum(albumSlug) } />
+            {/await}
         </Route>
     </Route>
 {/if}

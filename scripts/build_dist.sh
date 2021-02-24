@@ -43,7 +43,7 @@ popd > /dev/null
 
 # probably a better way to cache-bust, but here we are
 pushd $ROOT_DIR/dist/public > /dev/null
-  busts=(/css/pozzo-global.css /build/bundle.css /build/bundle.js)
+  busts=(/css/pozzo-global.css /build/bundle.css /build/main.js)
   for b in ${busts[@]}; do
     hash=$(md5sum .$b | awk '{print $1}')
     newname=${b%.*}.$hash.${b##*.}

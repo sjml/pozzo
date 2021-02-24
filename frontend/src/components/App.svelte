@@ -8,7 +8,6 @@
     import NavBar from "./NavBar.svelte";
     import SetupPage from "./SetupPage.svelte";
     import AlbumList from "./AlbumList.svelte";
-    import AlbumIndex from "./AlbumIndex.svelte";
     import NotFound from "./NotFound.svelte";
 
     onMount(setup);
@@ -72,7 +71,11 @@
         </Route>
 
         <Route path="/album/:albumSlug/*" let:meta>
-            <AlbumIndex albumSlug={meta.params.albumSlug} />
+            {#await import("./AlbumIndex.svelte")}
+                Loading…
+            {:then {default: component}}
+                <svelte:component this={component} albumSlug={meta.params.albumSlug} />
+            {/await}
         </Route>
 
         <Route path="/">
