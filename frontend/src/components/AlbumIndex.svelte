@@ -38,18 +38,18 @@
 
 {#if $currentAlbumStore}
     <Route path="/*" firstmatch>
-        <Route path="/:photoID" let:meta>
-            {#await import("./PhotoPage.svelte")}
-                Loading…
-            {:then {default: component}}
-                <svelte:component this={component} photoIdentifier={meta.params.photoID} />
-            {/await}
-        </Route>
         <Route path="/">
             {#await import("./AlbumPage.svelte")}
                 Loading…
             {:then {default: component}}
                 <svelte:component this={component} on:uploaded={() => getAlbum(albumSlug) } />
+            {/await}
+        </Route>
+        <Route path="/:photoID" let:meta>
+            {#await import("./PhotoPage.svelte")}
+                Loading…
+            {:then {default: component}}
+                <svelte:component this={component} photoIdentifier={meta.params.photoID} />
             {/await}
         </Route>
     </Route>
