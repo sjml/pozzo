@@ -8,11 +8,8 @@
     import { RunApi } from "../api";
     import NavPhoto from "./NavPhoto.svelte";
     import NavCollection from "./NavCollection.svelte";
-    import EditableLayout from "./EditableLayout.svelte";
     import Markdown from "./Markdown.svelte";
     import Button from "./Button.svelte";
-    import PhotoMap from "./PhotoMap.svelte";
-    import UploadZone from "./UploadZone.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -132,7 +129,9 @@
     <div>Loading…</div>
 {:else}
     {#if $isLoggedInStore && !reordering}
-        <UploadZone on:done={() => dispatch("uploaded")} />
+        {#await import("./UploadZone.svelte") then {default: component}}
+            <svelte:component this={component} on:done={() => dispatch("uploaded")} />
+        {/await}
     {/if}
 
     <div class="titleRow">
@@ -186,7 +185,9 @@
 
     {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
         <div class="albumMap">
-            <PhotoMap photos={$currentAlbumStore.photos} />
+            {#await import("./PhotoMap.svelte") then {default: component}}
+                <svelte:component this={component} photos={$currentAlbumStore.photos} />
+            {/await}
         </div>
     {/if}
 
@@ -203,10 +204,12 @@
     {/if}
 
     {#if reordering}
-        <EditableLayout
-            stubList={$currentAlbumStore.photos}
-            on:reordered={handlePhotoReorder}
-        />
+        {#await import("./EditableLayout.svelte") then {default: component}}
+            <svelte:component this={component}
+                stubList={$currentAlbumStore.photos}
+                on:reordered={handlePhotoReorder}
+            />
+        {/await}
     {:else}
         <div class="albumPhotos"
             bind:clientWidth={containerWidth}
@@ -243,8 +246,8 @@
     .albumPhotos {
         position: relative;
         height: 50px;
-        margin-left: auto;
-        margin-right: auto;
+        margin-left: 0px;
+        margin-right: 5px;
     }
 
     .titleRow {

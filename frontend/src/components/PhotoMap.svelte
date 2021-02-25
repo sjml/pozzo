@@ -147,7 +147,7 @@
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><circle cx="128" cy="128" r="92" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle><line x1="128" y1="36" x2="128" y2="76" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="36" y1="128" x2="76" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="128" y1="220" x2="128" y2="180" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="220" y1="128" x2="180" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
             {#if !exploreIconOnly}
-                Click/Tap to Explore
+                <div>Click/Tap to Explore</div>
             {/if}
         </div>
     {/if}
@@ -182,7 +182,11 @@
 
     .interactionIndicator svg {
         width: var(--button-size);
-        margin: 0;
+        margin: -2px 0 0 0;
+    }
+
+    .interactionIndicator div {
+        padding-right: 3px;
     }
 
     :global(.leaflet-container *) {

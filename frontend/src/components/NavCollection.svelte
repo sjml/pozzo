@@ -1,14 +1,13 @@
 <script lang="ts">
     import { tick, createEventDispatcher } from "svelte";
 
-    import type { PhotoStub } from "../pozzo.type";
+    import type { Photo } from "../pozzo.type";
     import { currentAlbumStore, navSelection, isLoggedInStore, modalUp } from "../stores";
     import { IsMetaKeyDownForEvent } from "../util";
-    import PhotoContextMenu from "./PhotoContextMenu.svelte";
 
     const dispatch = createEventDispatcher();
 
-    export let stubs: PhotoStub[] = [];
+    export let stubs: Photo[] = [];
 
     let contextMenuX = -1;
     let contextMenuY = -1;
@@ -44,11 +43,11 @@
     }
 
     function handleContextMenuCoverPhoto(evt: CustomEvent) {
-        if ($currentAlbumStore.coverPhoto == $navSelection[0].id) {
-            $currentAlbumStore.coverPhoto = -1;
+        if ($currentAlbumStore.coverPhoto == $navSelection[0]) {
+            $currentAlbumStore.coverPhoto = null;
         }
         else {
-            $currentAlbumStore.coverPhoto = $navSelection[0].id;
+            $currentAlbumStore.coverPhoto = $navSelection[0];
         }
         dispatch("coverChanged");
         contextMenuVisible = false;
@@ -80,16 +79,18 @@
 />
 
 {#if contextMenuVisible}
-    <PhotoContextMenu
-        posX={contextMenuX}
-        posY={contextMenuY}
+    {#await import("./PhotoContextMenu.svelte") then {default: component}}
+        <svelte:component this={component}
+            posX={contextMenuX}
+            posY={contextMenuY}
 
-        on:dismissed={() => contextMenuVisible = false}
+            on:dismissed={() => contextMenuVisible = false}
 
-        on:delete={handleContextMenuDelete}
-        on:move={handleContextMenuMove}
-        on:coverPhotoClicked={handleContextMenuCoverPhoto}
-    />
+            on:delete={handleContextMenuDelete}
+            on:move={handleContextMenuMove}
+            on:coverPhotoClicked={handleContextMenuCoverPhoto}
+        />
+    {/await}
 {/if}
 
 <slot/>

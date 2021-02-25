@@ -7,11 +7,9 @@
     import { isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
     import Button from "./Button.svelte";
-    import UploadZone from "./UploadZone.svelte";
     import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
     import NavCollection from "./NavCollection.svelte";
     import NavPhoto from "./NavPhoto.svelte";
-    import EditableLayout from "./EditableLayout.svelte";
 
 
     let albumList: Album[];
@@ -126,7 +124,9 @@
 </script>
 
 {#if $isLoggedInStore && !reordering}
-    <UploadZone on:done={onUploadDone} />
+    {#await import("./UploadZone.svelte") then {default: component}}
+        <svelte:component this={component} on:done={onUploadDone} />
+    {/await}
 {/if}
 
 {#if addingNew}
@@ -164,10 +164,12 @@
 
     {#if albumList}
         {#if reordering}
-            <EditableLayout
-                stubList={albumCovers}
-                on:reordered={handleAlbumReorder}
-            />
+            {#await import("./EditableLayout.svelte") then {default: component}}
+                <svelte:component this={component}
+                    stubList={albumCovers}
+                    on:reordered={handleAlbumReorder}
+                />
+            {/await}
         {:else}
         <div class="albumListDisplay"
             bind:clientWidth={containerWidth}

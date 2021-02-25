@@ -127,7 +127,7 @@ a:visited, a {
 /* Mixture of scrollbar style directives to work across browsers */
 * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--main-hs), 20%) var(--main-background-color);
+    scrollbar-color: hsl(var(--main-hs), 40%) var(--main-background-color);
 }
 
 *::-webkit-scrollbar {
@@ -139,7 +139,7 @@ a:visited, a {
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--main-hs), 20%);
+    background-color: hsl(var(--main-hs), 40%);
     border-radius: 20px;
     border: 3px solid var(--main-background-color);
 }

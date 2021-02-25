@@ -1,8 +1,11 @@
 - bugs
     - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
-    - video breaks nav?
+    - video breaks nav? (or maybe is just stealing keystrokes)
     
 * immediate todos
+    - play with code-splitting; figure out how to combine it with a router such that we don't get all the sliding around that's currently happening
+    - re-org EXIF data display
+    - test if all the upheaval has left the editing frontend in a workable state
     - UX niceties
         - edit photo title/description
         - add/remove tags from photo page and context menu

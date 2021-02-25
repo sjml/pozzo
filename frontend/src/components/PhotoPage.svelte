@@ -7,7 +7,6 @@
     import { currentAlbumStore, currentPhotoStore, metadataVisible } from "../stores";
     import { HumanBytes, TimestampToDateString, Fractionalize } from "../util";
     import Button from "./Button.svelte";
-    import PhotoMap from "./PhotoMap.svelte";
     import StagedLoader from "./StagedLoader.svelte";
     import VideoLoader from "./VideoLoader.svelte";
 
@@ -83,7 +82,14 @@
             </div>
             {#if $currentPhotoStore.gpsLat && $currentPhotoStore.gpsLon}
                 <div class="photoMap">
-                    <PhotoMap photos={[$currentPhotoStore]} exploreIconOnly={true} popups={false} />
+                    {#await import("./PhotoMap.svelte") then {default: component}}
+                        <svelte:component
+                            this={component}
+                            photos={[$currentPhotoStore]}
+                            exploreIconOnly={true}
+                            popups={false}
+                        />
+                    {/await}
                 </div>
                 <div class="mapLinks">
                     {"{"} <a target="_" href="https://www.openstreetmap.org/?mlat={$currentPhotoStore.gpsLat}&mlon={$currentPhotoStore.gpsLon}#map=18/{$currentPhotoStore.gpsLat}/{$currentPhotoStore.gpsLon}">OpenStreetMap</a>

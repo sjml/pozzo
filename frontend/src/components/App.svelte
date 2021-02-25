@@ -6,8 +6,8 @@
     import { currentAlbumStore, currentPhotoStore, fullScreen, siteData } from "../stores";
     import { RunApi } from "../api";
     import NavBar from "./NavBar.svelte";
-    import SetupPage from "./SetupPage.svelte";
     import AlbumList from "./AlbumList.svelte";
+    import AlbumIndex from "./AlbumIndex.svelte";
     import NotFound from "./NotFound.svelte";
 
     onMount(setup);
@@ -67,15 +67,13 @@
 
     <Route path="/*" firstmatch>
         <Route path="/setup">
-            <SetupPage />
+            {#await import("./SetupPage.svelte") then {default: component}}
+                <svelte:component this={component} />
+            {/await}
         </Route>
 
         <Route path="/album/:albumSlug/*" let:meta>
-            {#await import("./AlbumIndex.svelte")}
-                Loading…
-            {:then {default: component}}
-                <svelte:component this={component} albumSlug={meta.params.albumSlug} />
-            {/await}
+            <AlbumIndex albumSlug={meta.params.albumSlug} />
         </Route>
 
         <Route path="/">
@@ -100,7 +98,7 @@
 <style>
     .container {
         height: 100vh;
-        padding-right: 5px;
+        padding-right: 0px;
 
         display: grid;
         grid-template-columns: 1fr auto;

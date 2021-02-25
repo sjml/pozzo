@@ -21,7 +21,7 @@ class DB {
             }
 
             self::$pdb = new SQLite3(self::DB_PATH);
-            self::$pdb->busyTimeout(2000);
+            self::$pdb->busyTimeout(10000);
             self::$pdb->enableExceptions(true);
             self::$pdb->query("PRAGMA foreign_keys = ON;");
             if ($creationNeeded) {

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount, createEventDispatcher, tick } from "svelte";
 
-    import type { PhotoStub, Album } from "../pozzo.type";
+    import type { Album } from "../pozzo.type";
     import { currentAlbumStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import Button from "./Button.svelte";
