@@ -60,7 +60,7 @@
                 isPrivate: $currentAlbumStore.isPrivate,
                 description: $currentAlbumStore.description,
                 title: $currentAlbumStore.title,
-                coverPhoto: $currentAlbumStore.coverPhoto,
+                coverPhoto: $currentAlbumStore.coverPhoto.id,
             },
             method: "POST",
             authorize: true

@@ -8,8 +8,7 @@
     import "../../lib/Leaflet.markercluster/dist/leaflet.markercluster";
     import "../../lib/Leaflet.markercluster/dist/MarkerCluster.css";
 
-    import type { Photo, PhotoStub } from "../pozzo.type";
-    import { RunApi } from "../api";
+    import type { Photo } from "../pozzo.type";
     import { currentAlbumStore } from "../stores";
     import { GetImgPath } from "../util";
 
