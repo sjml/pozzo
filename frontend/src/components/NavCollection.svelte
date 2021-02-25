@@ -79,8 +79,8 @@
 />
 
 {#if contextMenuVisible}
-    {#await import("./PhotoContextMenu.svelte") then {default: component}}
-        <svelte:component this={component}
+    {#await import("./PhotoContextMenu.svelte") then {default: photoContextMenu}}
+        <svelte:component this={photoContextMenu}
             posX={contextMenuX}
             posY={contextMenuY}
 

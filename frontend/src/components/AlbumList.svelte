@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { router } from "tinro";
+    import { navigateTo, Link } from "yrv";
 
     import justifiedLayout from "justified-layout";
 
@@ -7,10 +7,8 @@
     import { isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
     import Button from "./Button.svelte";
-    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
     import NavCollection from "./NavCollection.svelte";
     import NavPhoto from "./NavPhoto.svelte";
-
 
     let albumList: Album[];
     let albumCovers: Photo[];
@@ -104,7 +102,7 @@
 
     function onUploadDone(evt: CustomEvent) {
         if (evt.detail.numFiles > 0) {
-            router.goto("/album/unsorted");
+            navigateTo("/album/unsorted");
         }
     }
 
@@ -124,16 +122,18 @@
 </script>
 
 {#if $isLoggedInStore && !reordering}
-    {#await import("./UploadZone.svelte") then {default: component}}
-        <svelte:component this={component} on:done={onUploadDone} />
+    {#await import("./UploadZone.svelte") then {default: uploadZone}}
+        <svelte:component this={uploadZone} on:done={onUploadDone} />
     {/await}
 {/if}
 
 {#if addingNew}
-    <NewAlbumPrompt
-        on:dismissed={() => addingNew = false}
-        on:done={() => {addingNew = false; getAlbumList($isLoggedInStore);}}
-    />
+    {#await import("./NewAlbumPrompt.svelte") then {default: newAlbumPrompt}}
+        <svelte:component this={newAlbumPrompt}
+            on:dismissed={() => addingNew = false}
+            on:done={() => {addingNew = false; getAlbumList($isLoggedInStore);}}
+        />
+    {/await}
 {/if}
 
 <div class="albumList">
@@ -164,8 +164,8 @@
 
     {#if albumList}
         {#if reordering}
-            {#await import("./EditableLayout.svelte") then {default: component}}
-                <svelte:component this={component}
+            {#await import("./EditableLayout.svelte") then {default: editableLayout}}
+                <svelte:component this={editableLayout}
                     stubList={albumCovers}
                     on:reordered={handleAlbumReorder}
                 />
@@ -182,13 +182,13 @@
             {#if layout}
                 <NavCollection stubs={albumCovers}>
                 {#each albumList as album, ai}
-                    <a href={`/album/${album.slug}`}>
+                    <Link href={`/album/${album.slug}`}>
                         <NavPhoto size="medium"
                             photo={albumCovers[ai]}
                             layoutDims={layout.boxes[ai]}
                             textOverlay={album.title}
                         />
-                    </a>
+                    </Link>
                 {/each}
                 </NavCollection>
             {/if}

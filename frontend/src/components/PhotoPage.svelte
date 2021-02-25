@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import { router } from "tinro";
+    import { navigateTo } from "yrv";
 
     //// LOL the irony of this page of all pages not needing the Photo type
     // import type { Photo } from "../pozzo.type";
@@ -36,12 +36,12 @@
     async function getPhoto(pid: string) {
         const pidx = parseInt(pid);
         if (isNaN(pidx)) {
-            router.goto(`/album/${$currentAlbumStore.slug}`);
+            navigateTo(`/album/${$currentAlbumStore.slug}`);
             return;
         }
         const apidx = $currentAlbumStore.photos.findIndex(p => p.id == pidx);
         if (apidx == -1) {
-            router.goto(`/album/${$currentAlbumStore.slug}`)
+            navigateTo(`/album/${$currentAlbumStore.slug}`)
             return;
         }
         $currentPhotoStore = $currentAlbumStore.photos[apidx];
@@ -73,7 +73,7 @@
             <tr><td class="label">Uploaded: </td><td>{$currentPhotoStore.uploadTimeStamp}</td></tr>
             </table>
             <div class="dlOrig">
-                <a href="/api/photo/orig/{$currentPhotoStore.id}" tinro-ignore>
+                <a href="/api/photo/orig/{$currentPhotoStore.id}">
                     <Button margin="0 10px 0 0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
                         <div>Download Original</div>
@@ -82,9 +82,8 @@
             </div>
             {#if $currentPhotoStore.gpsLat && $currentPhotoStore.gpsLon}
                 <div class="photoMap">
-                    {#await import("./PhotoMap.svelte") then {default: component}}
-                        <svelte:component
-                            this={component}
+                    {#await import("./PhotoMap.svelte") then {default: photoMap}}
+                        <svelte:component this={photoMap}
                             photos={[$currentPhotoStore]}
                             exploreIconOnly={true}
                             popups={false}

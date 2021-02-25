@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import { Link } from "yrv";
 
     import justifiedLayout from "justified-layout";
 
@@ -60,7 +61,7 @@
                 isPrivate: $currentAlbumStore.isPrivate,
                 description: $currentAlbumStore.description,
                 title: $currentAlbumStore.title,
-                coverPhoto: $currentAlbumStore.coverPhoto,
+                coverPhoto: $currentAlbumStore.coverPhoto.id,
             },
             method: "POST",
             authorize: true
@@ -129,8 +130,8 @@
     <div>Loading…</div>
 {:else}
     {#if $isLoggedInStore && !reordering}
-        {#await import("./UploadZone.svelte") then {default: component}}
-            <svelte:component this={component} on:done={() => dispatch("uploaded")} />
+        {#await import("./UploadZone.svelte") then {default: uploadZone}}
+            <svelte:component this={uploadZone} on:done={() => dispatch("uploaded")} />
         {/await}
     {/if}
 
@@ -185,8 +186,8 @@
 
     {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
         <div class="albumMap">
-            {#await import("./PhotoMap.svelte") then {default: component}}
-                <svelte:component this={component} photos={$currentAlbumStore.photos} />
+            {#await import("./PhotoMap.svelte") then {default: photoMap}}
+                <svelte:component this={photoMap} photos={$currentAlbumStore.photos} />
             {/await}
         </div>
     {/if}
@@ -204,8 +205,8 @@
     {/if}
 
     {#if reordering}
-        {#await import("./EditableLayout.svelte") then {default: component}}
-            <svelte:component this={component}
+        {#await import("./EditableLayout.svelte") then {default: editableLayout}}
+            <svelte:component this={editableLayout}
                 stubList={$currentAlbumStore.photos}
                 on:reordered={handlePhotoReorder}
             />
@@ -221,17 +222,25 @@
         {/if}
 
         {#if layout}
-            <NavCollection stubs={$currentAlbumStore.photos}
-                on:deleted={handlePhotoDeletion}
-                on:moved={handlePhotoMove}
-                on:coverChanged={() => updateMetaData()}
-            >
-            {#each $currentAlbumStore.photos as photo, pi}
-                <a href="/album/{$currentAlbumStore.slug}/{photo.id}">
-                    <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
-                </a>
-            {/each}
-            </NavCollection>
+            {#if $isLoggedInStore}
+                <NavCollection stubs={$currentAlbumStore.photos}
+                    on:deleted={handlePhotoDeletion}
+                    on:moved={handlePhotoMove}
+                    on:coverChanged={() => updateMetaData()}
+                >
+                {#each $currentAlbumStore.photos as photo, pi}
+                    <Link href="/album/{$currentAlbumStore.slug}/{photo.id}">
+                        <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
+                    </Link>
+                {/each}
+                </NavCollection>
+            {:else}
+                {#each $currentAlbumStore.photos as photo, pi}
+                    <Link href="/album/{$currentAlbumStore.slug}/{photo.id}">
+                        <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
+                    </Link>
+                {/each}
+            {/if}
         {/if}
         </div>
     {/if}

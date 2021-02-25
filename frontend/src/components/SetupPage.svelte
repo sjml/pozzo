@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { router } from "tinro";
+    import { navigateTo } from "yrv";
 
     import { siteData, loginCredentialStore } from "../stores";
     import { RunApi } from "../api";
@@ -12,7 +12,7 @@
     onMount(() => {
         sitenameInput.focus();
     })
-    $: if ($siteData.siteTitle !== false) router.goto("/")
+    $: if ($siteData.siteTitle !== false) navigateTo("/")
 
     let attemptingConfig: boolean = false;
     let sitenameField: string = "";
@@ -33,7 +33,7 @@
         if (res.success) {
             $siteData.siteTitle = sitenameField;
             $loginCredentialStore = res.data.key;
-            router.goto("/");
+            navigateTo("/");
         }
         else {
             configMessage = "Something went wrong. :(";

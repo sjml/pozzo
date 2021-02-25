@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import { router } from "tinro";
+    import { navigateTo, Link } from "yrv";
 
     import type { Photo, Album } from "../pozzo.type";
     import {
@@ -44,10 +44,10 @@
 
     function handleKeyDown(evt: KeyboardEvent) {
         if (evt.key == "ArrowLeft" && prevPhotoLink != null) {
-            router.goto(prevPhotoLink);
+            navigateTo(prevPhotoLink);
         }
         else if (evt.key == "ArrowRight" && nextPhotoLink != null) {
-            router.goto(nextPhotoLink);
+            navigateTo(nextPhotoLink);
         }
     }
 
@@ -64,18 +64,18 @@
 >
     <div class="fullBreadcrumbs">
         <div class="homeLink">
-            <a href="/">
+            <Link href="/">
                 {$siteData.siteTitle || "Pozzo"}
-            </a>
+            </Link>
         </div>
 
         {#if $currentAlbumStore}
             <div class="backLink">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 {#if $currentPhotoStore}
-                    <a href={`/album/${$currentAlbumStore.slug}`}>
+                    <Link href={`/album/${$currentAlbumStore.slug}`}>
                         {$currentAlbumStore.title}
-                    </a>
+                    </Link>
                 {:else}
                     {$currentAlbumStore.title}
                 {/if}
@@ -93,15 +93,15 @@
     <div class="backButton">
         <div class="backLink">
             {#if $currentPhotoStore}
-                <a href={`/album/${$currentAlbumStore.slug}`}>
+                <Link href={`/album/${$currentAlbumStore.slug}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$currentAlbumStore.title}
-                </a>
+                </Link>
             {:else if $currentAlbumStore}
-                <a href="/">
+                <Link href="/">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$siteData.siteTitle || "Pozzo"}
-                </a>
+                </Link>
             {:else}
                 <h2>{$siteData.siteTitle || "Pozzo"}</h2>
             {/if}
@@ -111,24 +111,46 @@
     <div class="spacer" />
 
     {#if $currentPhotoStore}
-        <Button
-            title={prevPhotoLink == null ? "(No Previous Photo)" : "Previous Photo"}
-            margin="0 5px 0 0"
-            isDisabled={prevPhotoLink == null}
-        >
-            <a href={prevPhotoLink}>
+        {#if prevPhotoLink == null}
+            <Button
+                title="(No Previous Photo)"
+                margin="0 5px 0 0"
+                isDisabled={true}
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M114.34277,229.65723l-96-96a8.003,8.003,0,0,1,0-11.31446l96-96A8.00065,8.00065,0,0,1,128,32V72h80a16.01833,16.01833,0,0,1,16,16v80a16.01833,16.01833,0,0,1-16,16H128v40a8.00066,8.00066,0,0,1-13.65723,5.65723Z"></path></svg>
-            </a>
-        </Button>
-        <Button
-            title={nextPhotoLink == null ? "(No Next Photo)" : "Next Photo"}
-            margin="0 5px 0 0"
-            isDisabled={nextPhotoLink == null}
-        >
-            <a href={nextPhotoLink}>
+            </Button>
+        {:else}
+            <Button
+                title="Previous Photo"
+                margin="0 5px 0 0"
+                isDisabled={false}
+            >
+                <Link href={prevPhotoLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M114.34277,229.65723l-96-96a8.003,8.003,0,0,1,0-11.31446l96-96A8.00065,8.00065,0,0,1,128,32V72h80a16.01833,16.01833,0,0,1,16,16v80a16.01833,16.01833,0,0,1-16,16H128v40a8.00066,8.00066,0,0,1-13.65723,5.65723Z"></path></svg>
+                </Link>
+            </Button>
+        {/if}
+
+        {#if nextPhotoLink == null}
+            <Button
+                title="(No Next Photo)"
+                margin="0 5px 0 0"
+                isDisabled={true}
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M132.93848,231.39062A8,8,0,0,1,128,224V184H48a16.01833,16.01833,0,0,1-16-16V88A16.01833,16.01833,0,0,1,48,72h80V32a8.00065,8.00065,0,0,1,13.65723-5.65723l96,96a8.003,8.003,0,0,1,0,11.31446l-96,96A8.002,8.002,0,0,1,132.93848,231.39062Z"></path></svg>
-            </a>
-        </Button>
+            </Button>
+        {:else}
+            <Button
+                title="Next Photo"
+                margin="0 5px 0 0"
+                isDisabled={false}
+            >
+                <Link href={nextPhotoLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M132.93848,231.39062A8,8,0,0,1,128,224V184H48a16.01833,16.01833,0,0,1-16-16V88A16.01833,16.01833,0,0,1,48,72h80V32a8.00065,8.00065,0,0,1,13.65723-5.65723l96,96a8.003,8.003,0,0,1,0,11.31446l-96,96A8.002,8.002,0,0,1,132.93848,231.39062Z"></path></svg>
+                </Link>
+            </Button>
+        {/if}
+
         <div class="metaDataToggle">
             <Button margin="0 5px 0 0"
                 title={`${$metadataVisible ? "Hide" : "View"} Metadata`}
@@ -218,7 +240,7 @@
         margin: auto;
     }
 
-    .backLink a {
+    .backLink :global(a) {
         display: flex;
         align-items: center;
     }

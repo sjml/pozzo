@@ -5,7 +5,6 @@
     import { currentAlbumStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import Button from "./Button.svelte";
-    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -57,10 +56,12 @@
 />
 
 {#if newAlbumPromptShowing}
-    <NewAlbumPrompt
-        on:dismissed={() => newAlbumPromptShowing = false}
-        on:done={(evt) => dispatch("move", {targetAlbumID: evt.detail.newAlbumID})}
-    />
+    {#await import("./NewAlbumPrompt.svelte") then {default: newAlbumPrompt}}
+        <svelte:component this={newAlbumPrompt}
+            on:dismissed={() => newAlbumPromptShowing = false}
+            on:done={(evt) => dispatch("move", {targetAlbumID: evt.detail.newAlbumID})}
+        />
+    {/await}
 {/if}
 
 <div
@@ -73,7 +74,7 @@
         <Button on:click={() => dispatch("coverPhotoClicked", {})}>
             <div class="cover menuItem">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="200 176 127.993 136 56 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><path d="M200,224l-72.0074-40L56,224V40a8,8,0,0,1,8-8H192a8,8,0,0,1,8,8Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-                <div>{$currentAlbumStore.coverPhoto == $navSelection[0].id ? "Unset" : "Set"} as Cover Photo</div>
+                <div>{$currentAlbumStore.coverPhoto.id == $navSelection[0].id ? "Unset" : "Set"} as Cover Photo</div>
             </div>
         </Button>
     {/if}

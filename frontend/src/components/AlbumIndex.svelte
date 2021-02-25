@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import { Route, router } from "tinro";
+    import { Route, navigateTo, router } from "yrv";
 
     import { currentAlbumStore, isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
@@ -13,7 +13,7 @@
 
     $: {
         if ($currentAlbumStore && $currentAlbumStore.isPrivate && !$isLoggedInStore) {
-            router.goto("/");
+            navigateTo("/");
         }
     }
 
@@ -26,7 +26,7 @@
         }
         else {
             if (res.code == 404) {
-                router.goto("/");
+                navigateTo("/");
             }
             else {
                 console.error(res);
@@ -37,21 +37,15 @@
 </script>
 
 {#if $currentAlbumStore}
-    <Route path="/*" firstmatch>
-        <Route path="/">
-            {#await import("./AlbumPage.svelte")}
-                Loading…
-            {:then {default: component}}
-                <svelte:component this={component} on:uploaded={() => getAlbum(albumSlug) } />
-            {/await}
-        </Route>
-        <Route path="/:photoID" let:meta>
-            {#await import("./PhotoPage.svelte")}
-                Loading…
-            {:then {default: component}}
-                <svelte:component this={component} photoIdentifier={meta.params.photoID} />
-            {/await}
-        </Route>
+    <Route exact
+        component={() => import("./AlbumPage.svelte")}
+        on:uploaded={() => getAlbum(albumSlug) }
+    />
+
+    <Route path="/:photoID"
+        component={() => import("./PhotoPage.svelte")}
+        photoIdentifier={$router.params.photoID}
+    >
     </Route>
 {/if}
 
