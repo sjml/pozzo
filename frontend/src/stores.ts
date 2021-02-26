@@ -19,7 +19,6 @@ export const siteData = writable<SiteConfig>(
 export const metadataVisible = writable<boolean>(false);
 export const fullScreen = writable<boolean>(false);
 export const userStoppedUploadScroll = writable<boolean>(false);
-export const modalUp = writable<boolean>(false);
 
 export const currentAlbumStore = writable<Album>(null);
 export const currentPhotoStore = writable<Photo>(null);

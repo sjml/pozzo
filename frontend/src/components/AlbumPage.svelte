@@ -1,11 +1,13 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import { Link } from "svelte-routing";
 
     import justifiedLayout from "justified-layout";
 
     import type { Album } from "../pozzo.type";
     import { currentAlbumStore, isLoggedInStore, navSelection } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
     import NavPhoto from "./NavPhoto.svelte";
     import NavCollection from "./NavCollection.svelte";
     import Markdown from "./Markdown.svelte";
@@ -88,7 +90,7 @@
             }
         }
 
-        $currentAlbumStore.photos = evt.detail.newStubs;
+        $currentAlbumStore.photos = evt.detail.newPhotos;
     }
 
     async function handlePhotoMove(evt:CustomEvent) {
@@ -102,7 +104,7 @@
             authorize: true
         });
         if (res.success) {
-            $currentAlbumStore.photos = evt.detail.newStubs;
+            $currentAlbumStore.photos = evt.detail.newPhotos;
         }
         else {
             console.error(res);
@@ -111,12 +113,12 @@
 
     async function handlePhotoReorder(evt: CustomEvent) {
         const res = await RunApi(`/album/reorder/${$currentAlbumStore.id}`, {
-            params: {newOrdering: evt.detail.newStubs.map(ps => ps.id)},
+            params: {newOrdering: evt.detail.newPhotos.map(ps => ps.id)},
             method: "POST",
             authorize: true
         });
         if (res.success) {
-            $currentAlbumStore.photos = evt.detail.newStubs;
+            $currentAlbumStore.photos = evt.detail.newPhotos;
         }
         else {
             console.error(res);
@@ -129,9 +131,9 @@
     <div>Loading…</div>
 {:else}
     {#if $isLoggedInStore && !reordering}
-        {#await import("./UploadZone.svelte") then {default: component}}
-            <svelte:component this={component} on:done={() => dispatch("uploaded")} />
-        {/await}
+        <LazyLoad loader={"UploadZone"}
+            on:done={() => dispatch("uploaded")}
+        />
     {/if}
 
     <div class="titleRow">
@@ -185,9 +187,9 @@
 
     {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
         <div class="albumMap">
-            {#await import("./PhotoMap.svelte") then {default: component}}
-                <svelte:component this={component} photos={$currentAlbumStore.photos} />
-            {/await}
+            <LazyLoad loader={"PhotoMap"}
+                photos={$currentAlbumStore.photos}
+            />
         </div>
     {/if}
 
@@ -204,12 +206,10 @@
     {/if}
 
     {#if reordering}
-        {#await import("./EditableLayout.svelte") then {default: component}}
-            <svelte:component this={component}
-                stubList={$currentAlbumStore.photos}
-                on:reordered={handlePhotoReorder}
-            />
-        {/await}
+        <LazyLoad loader={"EditableLayout"}
+            photoList={$currentAlbumStore.photos}
+            on:reordered={handlePhotoReorder}
+        />
     {:else}
         <div class="albumPhotos"
             bind:clientWidth={containerWidth}
@@ -221,17 +221,25 @@
         {/if}
 
         {#if layout}
-            <NavCollection stubs={$currentAlbumStore.photos}
-                on:deleted={handlePhotoDeletion}
-                on:moved={handlePhotoMove}
-                on:coverChanged={() => updateMetaData()}
-            >
-            {#each $currentAlbumStore.photos as photo, pi}
-                <a href="/album/{$currentAlbumStore.slug}/{photo.id}">
-                    <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
-                </a>
-            {/each}
-            </NavCollection>
+            {#if $isLoggedInStore}
+                <NavCollection photos={$currentAlbumStore.photos}
+                    on:deleted={handlePhotoDeletion}
+                    on:moved={handlePhotoMove}
+                    on:coverChanged={() => updateMetaData()}
+                >
+                {#each $currentAlbumStore.photos as photo, pi}
+                    <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">
+                        <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
+                    </Link>
+                {/each}
+                </NavCollection>
+            {:else}
+                {#each $currentAlbumStore.photos as photo, pi}
+                    <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">
+                        <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
+                    </Link>
+                {/each}
+            {/if}
         {/if}
         </div>
     {/if}

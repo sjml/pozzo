@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import { Route, router } from "tinro";
+    import { Router, Route, navigate } from "svelte-routing";
 
     import { currentAlbumStore, isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
 
     export let albumSlug: string;
 
@@ -13,7 +14,7 @@
 
     $: {
         if ($currentAlbumStore && $currentAlbumStore.isPrivate && !$isLoggedInStore) {
-            router.goto("/");
+            navigate("/");
         }
     }
 
@@ -26,7 +27,7 @@
         }
         else {
             if (res.code == 404) {
-                router.goto("/");
+                navigate("/");
             }
             else {
                 console.error(res);
@@ -37,21 +38,14 @@
 </script>
 
 {#if $currentAlbumStore}
-    <Route path="/*" firstmatch>
-        <Route path="/">
-            {#await import("./AlbumPage.svelte")}
-                Loading…
-            {:then {default: component}}
-                <svelte:component this={component} on:uploaded={() => getAlbum(albumSlug) } />
-            {/await}
+    <Router>
+        <Route>
+            <LazyLoad loader={"AlbumPage"} on:uploaded={() => getAlbum(albumSlug) } />
         </Route>
-        <Route path="/:photoID" let:meta>
-            {#await import("./PhotoPage.svelte")}
-                Loading…
-            {:then {default: component}}
-                <svelte:component this={component} photoIdentifier={meta.params.photoID} />
-            {/await}
+
+        <Route path="/:photoID" let:params>
+            <LazyLoad loader={"PhotoPage"} photoIdentifier={params.photoID} />
         </Route>
-    </Route>
+    </Router>
 {/if}
 

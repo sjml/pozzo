@@ -1,16 +1,15 @@
 <script lang="ts">
-    import { router } from "tinro";
+    import { Link, navigate } from "svelte-routing";
 
     import justifiedLayout from "justified-layout";
 
     import type { Album, Photo } from "../pozzo.type";
     import { isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
     import Button from "./Button.svelte";
-    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
     import NavCollection from "./NavCollection.svelte";
     import NavPhoto from "./NavPhoto.svelte";
-
 
     let albumList: Album[];
     let albumCovers: Photo[];
@@ -29,7 +28,7 @@
     }
     $: getAlbumList($isLoggedInStore)
 
-    function assembleStubs(alist: Album[]) {
+    function assemblePreviews(alist: Album[]) {
         if (!alist) {
             return;
         }
@@ -71,7 +70,7 @@
             };
         });
     }
-    $: assembleStubs(albumList)
+    $: assemblePreviews(albumList)
 
 
     let containerWidth: number;
@@ -104,18 +103,18 @@
 
     function onUploadDone(evt: CustomEvent) {
         if (evt.detail.numFiles > 0) {
-            router.goto("/album/unsorted");
+            navigate("/album/unsorted");
         }
     }
 
     async function handleAlbumReorder(evt: CustomEvent) {
         const res = await RunApi("/album/reorderList/", {
-            params: {newOrdering: evt.detail.newStubs.map(ps => ps.id)},
+            params: {newOrdering: evt.detail.newPhotos.map(ps => ps.id)},
             method: "POST",
             authorize: true
         });
         if (res.success) {
-            albumCovers = evt.detail.newStubs;
+            albumCovers = evt.detail.newPhotos;
         }
         else {
             console.error(res);
@@ -124,13 +123,11 @@
 </script>
 
 {#if $isLoggedInStore && !reordering}
-    {#await import("./UploadZone.svelte") then {default: component}}
-        <svelte:component this={component} on:done={onUploadDone} />
-    {/await}
+    <LazyLoad loader={"UploadZone"} on:done={onUploadDone} />
 {/if}
 
 {#if addingNew}
-    <NewAlbumPrompt
+    <LazyLoad loader={"NewAlbumPrompt"}
         on:dismissed={() => addingNew = false}
         on:done={() => {addingNew = false; getAlbumList($isLoggedInStore);}}
     />
@@ -164,12 +161,10 @@
 
     {#if albumList}
         {#if reordering}
-            {#await import("./EditableLayout.svelte") then {default: component}}
-                <svelte:component this={component}
-                    stubList={albumCovers}
-                    on:reordered={handleAlbumReorder}
-                />
-            {/await}
+            <LazyLoad loader={"EditableLayout"}
+                photoList={albumCovers}
+                on:reordered={handleAlbumReorder}
+            />
         {:else}
         <div class="albumListDisplay"
             bind:clientWidth={containerWidth}
@@ -180,15 +175,15 @@
             {/if}
 
             {#if layout}
-                <NavCollection stubs={albumCovers}>
+                <NavCollection photos={albumCovers}>
                 {#each albumList as album, ai}
-                    <a href={`/album/${album.slug}`}>
+                    <Link to={`/album/${album.slug}`}>
                         <NavPhoto size="medium"
                             photo={albumCovers[ai]}
                             layoutDims={layout.boxes[ai]}
                             textOverlay={album.title}
                         />
-                    </a>
+                    </Link>
                 {/each}
                 </NavCollection>
             {/if}

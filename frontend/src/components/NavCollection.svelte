@@ -2,12 +2,13 @@
     import { tick, createEventDispatcher } from "svelte";
 
     import type { Photo } from "../pozzo.type";
-    import { currentAlbumStore, navSelection, isLoggedInStore, modalUp } from "../stores";
+    import { currentAlbumStore, navSelection, isLoggedInStore } from "../stores";
     import { IsMetaKeyDownForEvent } from "../util";
+    import LazyLoad from "./LazyLoad.svelte";
 
     const dispatch = createEventDispatcher();
 
-    export let stubs: Photo[] = [];
+    export let photos: Photo[] = [];
 
     let contextMenuX = -1;
     let contextMenuY = -1;
@@ -29,15 +30,15 @@
 
 
     function handleContextMenuDelete(evt: CustomEvent) {
-        stubs = stubs.filter(s => $navSelection.indexOf(s) < 0);
-        dispatch("deleted", {newStubs: stubs});
+        photos = photos.filter(s => $navSelection.indexOf(s) < 0);
+        dispatch("deleted", {newPhotos: photos});
         contextMenuVisible = false;
         $navSelection = [];
     }
 
     function handleContextMenuMove(evt: CustomEvent) {
-        stubs = stubs.filter(s => $navSelection.indexOf(s) < 0);
-        dispatch("moved", {newStubs: stubs, targetAlbumID: evt.detail.targetAlbumID});
+        photos = photos.filter(s => $navSelection.indexOf(s) < 0);
+        dispatch("moved", {newPhotos: photos, targetAlbumID: evt.detail.targetAlbumID});
         contextMenuVisible = false;
         $navSelection = [];
     }
@@ -59,11 +60,11 @@
         if (!$isLoggedInStore) {
             return;
         }
-        if (contextMenuVisible || $modalUp) {
+        if (contextMenuVisible) {
             return;
         }
         if (evt.key == "a" && IsMetaKeyDownForEvent(evt)) {
-            $navSelection = stubs;
+            $navSelection = photos;
             evt.preventDefault();
         }
         if (evt.key == "d" && IsMetaKeyDownForEvent(evt)) {
@@ -79,18 +80,16 @@
 />
 
 {#if contextMenuVisible}
-    {#await import("./PhotoContextMenu.svelte") then {default: component}}
-        <svelte:component this={component}
-            posX={contextMenuX}
-            posY={contextMenuY}
+    <LazyLoad loader={"PhotoContextMenu"}
+        posX={contextMenuX}
+        posY={contextMenuY}
 
-            on:dismissed={() => contextMenuVisible = false}
+        on:dismissed={() => contextMenuVisible = false}
 
-            on:delete={handleContextMenuDelete}
-            on:move={handleContextMenuMove}
-            on:coverPhotoClicked={handleContextMenuCoverPhoto}
-        />
-    {/await}
+        on:delete={handleContextMenuDelete}
+        on:move={handleContextMenuMove}
+        on:coverPhotoClicked={handleContextMenuCoverPhoto}
+    />
 {/if}
 
 <slot/>

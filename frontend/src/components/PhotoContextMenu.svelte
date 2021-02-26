@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher, tick } from "svelte";
+    import { onMount, createEventDispatcher } from "svelte";
 
     import type { Album } from "../pozzo.type";
     import { currentAlbumStore, navSelection } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
     import Button from "./Button.svelte";
-    import NewAlbumPrompt from "./NewAlbumPrompt.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -57,7 +57,7 @@
 />
 
 {#if newAlbumPromptShowing}
-    <NewAlbumPrompt
+    <LazyLoad loader={"NewAlbumPrompt"}
         on:dismissed={() => newAlbumPromptShowing = false}
         on:done={(evt) => dispatch("move", {targetAlbumID: evt.detail.newAlbumID})}
     />

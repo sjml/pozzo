@@ -1,12 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Route, router } from "tinro";
+    import { Router, Route } from "svelte-routing";
 
     import { currentAlbumStore, currentPhotoStore, fullScreen, siteData } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
     import NavBar from "./NavBar.svelte";
     import AlbumList from "./AlbumList.svelte";
-    import AlbumIndex from "./AlbumIndex.svelte";
     import NotFound from "./NotFound.svelte";
 
     onMount(setup);
@@ -17,7 +17,7 @@
             Object.assign($siteData, res.data);
             $siteData.siteTitle = $siteData.siteTitle;
             if ($siteData.siteTitle == false) {
-                router.goto("/setup");
+                // router.goto("/setup");
             }
         }
         else {
@@ -62,27 +62,25 @@
 </svelte:head>
 
 <div class="container">
-    <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
-
-    <Route path="/*" firstmatch>
-        <Route path="/setup">
-            {#await import("./SetupPage.svelte") then {default: component}}
-                <svelte:component this={component} />
-            {/await}
-        </Route>
-
-        <Route path="/album/:albumSlug/*" let:meta>
-            <AlbumIndex albumSlug={meta.params.albumSlug} />
-        </Route>
+    <Router>
+        <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
 
         <Route path="/">
             <AlbumList />
         </Route>
 
-        <Route fallback>
+        <Route path="/setup">
+            <LazyLoad loader={"SetupPage"} />
+        </Route>
+
+        <Route path="/album/:albumSlug/*" let:params>
+            <LazyLoad loader={"AlbumIndex"} albumSlug={params.albumSlug} />
+        </Route>
+
+        <Route>
             <NotFound />
         </Route>
-    </Route>
+    </Router>
 
     {#if $currentPhotoStore == null}
         <div class="promo">
