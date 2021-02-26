@@ -1,11 +1,12 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import { navigateTo } from "yrv";
+    import { navigate } from "svelte-routing";
 
     //// LOL the irony of this page of all pages not needing the Photo type
     // import type { Photo } from "../pozzo.type";
     import { currentAlbumStore, currentPhotoStore, metadataVisible } from "../stores";
     import { HumanBytes, TimestampToDateString, Fractionalize } from "../util";
+    import LazyLoad from "./LazyLoad.svelte";
     import Button from "./Button.svelte";
     import StagedLoader from "./StagedLoader.svelte";
     import VideoLoader from "./VideoLoader.svelte";
@@ -36,12 +37,12 @@
     async function getPhoto(pid: string) {
         const pidx = parseInt(pid);
         if (isNaN(pidx)) {
-            navigateTo(`/album/${$currentAlbumStore.slug}`);
+            navigate(`/album/${$currentAlbumStore.slug}`);
             return;
         }
         const apidx = $currentAlbumStore.photos.findIndex(p => p.id == pidx);
         if (apidx == -1) {
-            navigateTo(`/album/${$currentAlbumStore.slug}`)
+            navigate(`/album/${$currentAlbumStore.slug}`)
             return;
         }
         $currentPhotoStore = $currentAlbumStore.photos[apidx];
@@ -82,13 +83,11 @@
             </div>
             {#if $currentPhotoStore.gpsLat && $currentPhotoStore.gpsLon}
                 <div class="photoMap">
-                    {#await import("./PhotoMap.svelte") then {default: photoMap}}
-                        <svelte:component this={photoMap}
-                            photos={[$currentPhotoStore]}
-                            exploreIconOnly={true}
-                            popups={false}
-                        />
-                    {/await}
+                    <LazyLoad loader={"PhotoMap"}
+                        photos={[$currentPhotoStore]}
+                        exploreIconOnly={true}
+                        popups={false}
+                    />
                 </div>
                 <div class="mapLinks">
                     {"{"} <a target="_" href="https://www.openstreetmap.org/?mlat={$currentPhotoStore.gpsLat}&mlon={$currentPhotoStore.gpsLon}#map=18/{$currentPhotoStore.gpsLat}/{$currentPhotoStore.gpsLon}">OpenStreetMap</a>

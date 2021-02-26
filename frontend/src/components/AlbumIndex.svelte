@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import { Route, navigateTo, router } from "yrv";
+    import { Router, Route, navigate } from "svelte-routing";
 
     import { currentAlbumStore, isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
 
     export let albumSlug: string;
 
@@ -13,7 +14,7 @@
 
     $: {
         if ($currentAlbumStore && $currentAlbumStore.isPrivate && !$isLoggedInStore) {
-            navigateTo("/");
+            navigate("/");
         }
     }
 
@@ -26,7 +27,7 @@
         }
         else {
             if (res.code == 404) {
-                navigateTo("/");
+                navigate("/");
             }
             else {
                 console.error(res);
@@ -37,15 +38,14 @@
 </script>
 
 {#if $currentAlbumStore}
-    <Route exact
-        component={() => import("./AlbumPage.svelte")}
-        on:uploaded={() => getAlbum(albumSlug) }
-    />
+    <Router>
+        <Route>
+            <LazyLoad loader={"AlbumPage"} on:uploaded={() => getAlbum(albumSlug) } />
+        </Route>
 
-    <Route path="/:photoID"
-        component={() => import("./PhotoPage.svelte")}
-        photoIdentifier={$router.params.photoID}
-    >
-    </Route>
+        <Route path="/:photoID" let:params>
+            <LazyLoad loader={"PhotoPage"} photoIdentifier={params.photoID} />
+        </Route>
+    </Router>
 {/if}
 

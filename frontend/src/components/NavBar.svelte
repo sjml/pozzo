@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import { navigateTo, Link } from "yrv";
+    import { Link, navigate } from "svelte-routing";
 
     import type { Photo, Album } from "../pozzo.type";
     import {
@@ -44,10 +44,10 @@
 
     function handleKeyDown(evt: KeyboardEvent) {
         if (evt.key == "ArrowLeft" && prevPhotoLink != null) {
-            navigateTo(prevPhotoLink);
+            navigate(prevPhotoLink);
         }
         else if (evt.key == "ArrowRight" && nextPhotoLink != null) {
-            navigateTo(nextPhotoLink);
+            navigate(nextPhotoLink);
         }
     }
 
@@ -64,7 +64,7 @@
 >
     <div class="fullBreadcrumbs">
         <div class="homeLink">
-            <Link href="/">
+            <Link to="/">
                 {$siteData.siteTitle || "Pozzo"}
             </Link>
         </div>
@@ -73,7 +73,7 @@
             <div class="backLink">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 {#if $currentPhotoStore}
-                    <Link href={`/album/${$currentAlbumStore.slug}`}>
+                    <Link to={`/album/${$currentAlbumStore.slug}`}>
                         {$currentAlbumStore.title}
                     </Link>
                 {:else}
@@ -93,12 +93,12 @@
     <div class="backButton">
         <div class="backLink">
             {#if $currentPhotoStore}
-                <Link href={`/album/${$currentAlbumStore.slug}`}>
+                <Link to={`/album/${$currentAlbumStore.slug}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$currentAlbumStore.title}
                 </Link>
             {:else if $currentAlbumStore}
-                <Link href="/">
+                <Link to="/">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$siteData.siteTitle || "Pozzo"}
                 </Link>
@@ -125,7 +125,7 @@
                 margin="0 5px 0 0"
                 isDisabled={false}
             >
-                <Link href={prevPhotoLink}>
+                <Link to={prevPhotoLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M114.34277,229.65723l-96-96a8.003,8.003,0,0,1,0-11.31446l96-96A8.00065,8.00065,0,0,1,128,32V72h80a16.01833,16.01833,0,0,1,16,16v80a16.01833,16.01833,0,0,1-16,16H128v40a8.00066,8.00066,0,0,1-13.65723,5.65723Z"></path></svg>
                 </Link>
             </Button>
@@ -145,7 +145,7 @@
                 margin="0 5px 0 0"
                 isDisabled={false}
             >
-                <Link href={nextPhotoLink}>
+                <Link to={nextPhotoLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M132.93848,231.39062A8,8,0,0,1,128,224V184H48a16.01833,16.01833,0,0,1-16-16V88A16.01833,16.01833,0,0,1,48,72h80V32a8.00065,8.00065,0,0,1,13.65723-5.65723l96,96a8.003,8.003,0,0,1,0,11.31446l-96,96A8.002,8.002,0,0,1,132.93848,231.39062Z"></path></svg>
                 </Link>
             </Button>

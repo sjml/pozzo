@@ -1,12 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Router, Route, router } from "yrv";
+    import { Router, Route } from "svelte-routing";
 
     import { currentAlbumStore, currentPhotoStore, fullScreen, siteData } from "../stores";
     import { RunApi } from "../api";
+    import LazyLoad from "./LazyLoad.svelte";
     import NavBar from "./NavBar.svelte";
     import AlbumList from "./AlbumList.svelte";
-    import AlbumIndex from "./AlbumIndex.svelte";
     import NotFound from "./NotFound.svelte";
 
     onMount(setup);
@@ -53,7 +53,6 @@
             }
         }
     }
-    router.subscribe(e => {console.log(e)});
 </script>
 
 <svelte:head>
@@ -63,20 +62,24 @@
 </svelte:head>
 
 <div class="container">
-    <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
-
     <Router>
-        <Route exact path="/">
+        <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
+
+        <Route path="/">
             <AlbumList />
         </Route>
 
-        <Route path="/setup" component={() => import("./SetupPage.svelte")} />
-
-        <Route path="/album/:albumSlug" let:router>
-            <AlbumIndex albumSlug={router.params.albumSlug} />
+        <Route path="/setup">
+            <LazyLoad loader={"SetupPage"} />
         </Route>
 
-        <Route fallback><NotFound /></Route>
+        <Route path="/album/:albumSlug/*" let:params>
+            <LazyLoad loader={"AlbumIndex"} albumSlug={params.albumSlug} />
+        </Route>
+
+        <Route>
+            <NotFound />
+        </Route>
     </Router>
 
     {#if $currentPhotoStore == null}

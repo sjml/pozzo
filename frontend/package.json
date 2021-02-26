@@ -41,11 +41,12 @@
     "svelte": "^3.32.1",
     "svelte-check": "^1.0.0",
     "svelte-dnd-action": "^0.8.9",
+    "svelte-loadable": "^1.5.1",
     "svelte-preprocess": "^4.0.0",
+    "svelte-routing": "^1.5.0",
     "tinro": "^0.5.12",
     "tslib": "^2.0.0",
-    "typescript": "^3.9.3",
-    "yrv": "^0.0.35"
+    "typescript": "^3.9.3"
   },
   "dependencies": {
     "sirv-cli": "^1.0.11"
