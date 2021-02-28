@@ -1,39 +1,11 @@
-Make a simple little Python test script that runs requests against the backend.
-Have it test looking for every possible return code from the endpoints.
+running list of tests that still need to be written as I think of them, awaiting the day I feel like it
 
-✅ -- check written and currently passing
-
-backend functionality tests
-    ✅ setup site (create user)
-    ✅ cannot setup site again
-    ✅ can't log in without credentials
-    ✅ can't log in with wrong credentials
-    ✅ can log in with right credentials
-    ✅ login check serves new usable token
-    ✅ can't upload without credentials
-    ✅ can upload with credentials
-    ✅ cannot upload incorrect file type
-    ✅ cannot upload incorrect image type
-    ✅ upload 10 pictures, verify hashes
-    ✅ verify that all declared sizes exist for all images
-    ✅ download original image and confirm it has same hash as upload
-    ✅ all uploads should be in unsorted
-    ✅ create new album
-    ✅ move 5 pictures to that album
-    ✅ create another new album (set to private)
-    ✅ credentialed user can see album
-    ✅ non-credentialed cannot
-    ✅ non-credentialed cannot edit album metadata
-    ✅ credentialed can edit album metadata
-    ✅ reorder images in album
-    ✅ reorder album list
-    ✅ non-credentialed cannot delete album
-    ✅ credentialed can delete album
     delete individual image
         - no longer in album
         - upload image, should go at end rather than in the gap
     delete album + images
         - images are gone from server
+    deleting groups
     once exif import has been revised, check stored column data for images and make sure it matches expectations
 
 found by code coverage:
@@ -46,8 +18,3 @@ found by code coverage:
     - copy photos to album by slug
     - edit non-existent album
     - reorder non-existent album
-
-perf/size
-    don't let import time of realistic-sized album rise above X
-    don't let lighthouse score of realistic-sized album drop below 90
-    don't let javascript bundle size rise above X

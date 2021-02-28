@@ -18,7 +18,7 @@ $router->AddHandler("/remove", ["removePhoto"], true);
 $router->AddHandler("/delete", ["deleteAlbum"], true);
 $router->AddHandler("/edit", ["editMetadata"], true);
 $router->AddHandler("/reorderList", ["reorderAlbumList"], true);
-$router->AddHandler("/reorder", ["reorderAlbum"], true);
+$router->AddHandler("/reorderGroups", ["reorderGroups"], true);
 
 $router->Route();
 
@@ -144,9 +144,17 @@ function removePhoto() {
 
     $successCount = 0;
     foreach ($input["removals"] as $removalInst) {
-        $result = DB::RemovePhotoFromAlbum(
+        if (!array_key_exists("photoID", $removalInst) || !is_numeric($removalInst["photoID"])) {
+            output(["message" => "Invalid or missing parameter 'photoID' in instruction array. Copy may be partially complete."], 400);
+            return;
+        }
+        if (!array_key_exists("groupID", $removalInst) || !is_numeric($removalInst["groupID"])) {
+            output(["message" => "Invalid or missing parameter 'groupID' in instruction array. Copy may be partially complete."], 400);
+            return;
+        }
+        $result = DB::RemovePhotoFromGroup(
             $removalInst["photoID"],
-            $removalInst["albumID"],
+            $removalInst["groupID"],
         );
         if ($result == 1) {
             $successCount += 1;
@@ -160,7 +168,14 @@ function removePhoto() {
     ]);
 }
 
-function reorderAlbum() {
+function reorderGroups() {
+    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
+    $album = DB::FindAlbum($identifier, true);
+    if ($album == false) {
+        output(["message" => "Album not found"], 404);
+        return;
+    }
+
     $input = json_decode(file_get_contents("php://input"), true);
 
     if (!isset($input["newOrdering"]) || !is_array($input["newOrdering"])) {
@@ -169,29 +184,19 @@ function reorderAlbum() {
     }
     $newOrdering = $input["newOrdering"];
 
-    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
-    $album = DB::FindAlbum($identifier, true, false);
-    if ($album == false) {
-        output(["message" => "Album not found"], 404);
-        return;
+    $albumGroupIDs = [];
+    foreach ($album["photoGroups"] as $group) {
+        array_push($albumGroupIDs, $group["id"]);
     }
 
-    $existingPids = [];
-    foreach ($album["photos"] as $photoData) {
-        array_push($existingPids, $photoData["id"]);
-    }
-
-    if (count($existingPids) != count($newOrdering)) {
+    if (count($albumGroupIDs) != count($newOrdering)) {
         output(["message" => "Miscount of ordering data"], 400);
         return;
     }
 
-    foreach ($newOrdering as $pid) {
-        if (!in_array($pid, $existingPids)) {
-            output(
-                ["message" => "Misplaced order index", "badIndex" => $pid],
-                400,
-            );
+    foreach ($newOrdering as $gid) {
+        if (!in_array($gid, $albumGroupIDs)) {
+            output(["message" => "Misplaced order index", "badIndex" => $gid], 400);
             return;
         }
     }
@@ -202,8 +207,8 @@ function reorderAlbum() {
         return;
     }
 
-    $result = DB::ReorderAlbum($album["id"], $newOrdering);
-    output(["message" => "Reordered album"]);
+    $result = DB::ReorderAlbumGroups($newOrdering);
+    output(["message" => "Reordered groups within album"]);
 }
 
 function reorderAlbumList() {

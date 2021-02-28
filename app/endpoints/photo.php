@@ -13,7 +13,7 @@ require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
 $router->AddHandler("/delete", ["deletePhoto"], true);
-$router->AddHandler("/copy", ["copyPhoto"], true);
+$router->AddHandler("/copy", ["copyPhotos"], true);
 $router->AddHandler("/move", ["movePhotos"], true);
 $router->AddHandler("/tagset", ["getPhotosTagged"]);
 $router->AddHandler("/tag", ["tagPhotos"], true);
@@ -82,33 +82,41 @@ function deletePhoto() {
     output(["message" => "Photo deleted", "data" => $result]);
 }
 
-function copyPhoto() {
+function copyPhotos() {
     $input = json_decode(file_get_contents("php://input"), true);
     if (!isset($input["copies"]) || !is_array($input["copies"])) {
         output(["message" => "Invalid or missing parameter 'copies'"], 400);
         return;
     }
 
-    // inefficient given how AddPhotoToAlbum works, but this is not the bottleneck
+    // inefficient given how AddPhotoToGroup works, but this is not the bottleneck
     $statuses = [];
     $numErrors = 0;
     foreach ($input["copies"] as $copyInst) {
-        $result = DB::AddPhotoToAlbum(
+        if (!array_key_exists("photoID", $copyInst) || !is_numeric($copyInst["photoID"])) {
+            output(["message" => "Invalid or missing parameter 'photoID' in instruction array. Copy may be partially complete."], 400);
+            return;
+        }
+        if (!array_key_exists("groupID", $copyInst) || !is_numeric($copyInst["groupID"])) {
+            output(["message" => "Invalid or missing parameter 'groupID' in instruction array. Copy may be partially complete."], 400);
+            return;
+        }
+        $result = DB::AddPhotoToGroup(
             $copyInst["photoID"],
-            $copyInst["albumID"],
+            $copyInst["groupID"],
             null,
         );
         if ($result) {
             array_push($statuses, [
                 "photoID" => $copyInst["photoID"],
-                "albumID" => $copyInst["albumID"],
+                "groupID" => $copyInst["groupID"],
                 "success" => true,
             ]);
         }
         else {
             array_push($statuses, [
                 "photoID" => $copyInst["photoID"],
-                "albumID" => $copyInst["albumID"],
+                "groupID" => $copyInst["groupID"],
                 "success" => false,
             ]);
         }
@@ -131,16 +139,16 @@ function movePhotos() {
         output(["message" => "Non-numeric values in photoIDs list"], 400);
         return;
     }
-    if (!isset($input["fromAlbumID"]) || !is_numeric($input["fromAlbumID"])) {
+    if (!isset($input["fromGroupID"]) || !is_numeric($input["fromGroupID"])) {
         output(
-            ["message" => "Missing or non-numeric value for 'fromAlbumID'"],
+            ["message" => "Missing or non-numeric value for 'fromGroupID'"],
             400,
         );
         return;
     }
-    if (!isset($input["toAlbumID"]) || !is_numeric($input["toAlbumID"])) {
+    if (!isset($input["toGroupID"]) || !is_numeric($input["toGroupID"])) {
         output(
-            ["message" => "Missing or non-numeric value for 'toAlbumID'"],
+            ["message" => "Missing or non-numeric value for 'toGroupID'"],
             400,
         );
         return;
@@ -148,8 +156,8 @@ function movePhotos() {
 
     $result = DB::MovePhotos(
         $photoIDs,
-        $input["fromAlbumID"],
-        $input["toAlbumID"],
+        $input["fromGroupID"],
+        $input["toGroupID"],
     );
     output(["message" => "Photos moved."]);
 }

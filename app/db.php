@@ -138,17 +138,13 @@ class DB {
         $statement = self::$pdb->prepare($prepCommand);
         $statement->execute();
 
-        $unsortedIdx = self::CreateAlbum("[unsorted]");
-        self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
 
-
-        $prepCommand = "CREATE TABLE IF NOT EXISTS photos_albums (";
-        $prepCommand .= "photo_id INTEGER NOT NULL";
+        $prepCommand = "CREATE TABLE IF NOT EXISTS groups (";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", album_id INTEGER NOT NULL";
         $prepCommand .= ", ordering INTEGER";
-        $prepCommand .=
-            ", CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, album_id)";
-        $prepCommand .= ", FOREIGN KEY(photo_id) REFERENCES photos(id)";
+        $prepCommand .= ", description TEXT";
+        $prepCommand .= ", showMap BOOLEAN";
         $prepCommand .= ", FOREIGN KEY(album_id) REFERENCES albums(id)";
         $prepCommand .= ")";
 
@@ -156,12 +152,14 @@ class DB {
         $statement->execute();
 
 
-        $prepCommand = "CREATE TABLE IF NOT EXISTS interstitials (";
-        $prepCommand .= "id INTEGER PRIMARY KEY";
-        $prepCommand .= ", album_id INTEGER";
-        $prepCommand .= ", before INTEGER";
-        $prepCommand .= ", text TEXT";
-        $prepCommand .= ", FOREIGN KEY(album_id) REFERENCES albums(id)";
+        $prepCommand = "CREATE TABLE IF NOT EXISTS photos_groups (";
+        $prepCommand .= "photo_id INTEGER NOT NULL";
+        $prepCommand .= ", group_id INTEGER NOT NULL";
+        $prepCommand .= ", ordering INTEGER";
+        $prepCommand .=
+            ", CONSTRAINT PK_photo_album PRIMARY KEY (photo_id, group_id)";
+        $prepCommand .= ", FOREIGN KEY(photo_id) REFERENCES photos(id)";
+        $prepCommand .= ", FOREIGN KEY(group_id) REFERENCES groups(id)";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -193,6 +191,9 @@ class DB {
         $statement->execute();
 
 
+
+        $unsortedIdx = self::CreateAlbum("[unsorted]");
+        self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
 
         self::SetConfig("app_key", Auth::GenerateKey(), "string");
         self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
@@ -363,7 +364,7 @@ class DB {
             return -1;
         }
 
-        $query = "DELETE FROM photos_albums WHERE photo_id = ?";
+        $query = "DELETE FROM photos_groups WHERE photo_id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
@@ -544,6 +545,187 @@ class DB {
         return true;
     }
 
+    static function CreateGroup($albumID, $fromGroup=-1, $photoIDs=null) {
+        self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
+
+        // $albumID has been pre-filtered to be guaranteed numeric
+        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM groups WHERE album_id = " . $albumID . ";");
+        if ($order == null) {
+            $order = 0;
+        }
+        $order += 1;
+
+        $prepCommand = "INSERT INTO groups (album_id, ordering, description, showMap)";
+        $prepCommand .= " VALUES (?," . $order . ", '', 0);";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+        $statement->execute();
+
+        $id = self::$pdb->lastInsertRowID();
+
+        self::$pdb->exec("COMMIT TRANSACTION;");
+
+        if ($fromGroup != -1) {
+            if ($photoIDs == null) {
+                $photoIDs = [];
+            }
+            $order = 0;
+            $prepCommand = "UPDATE photos_groups SET ";
+            $prepCommand .= " group_id = ?, ordering = ?";
+            $prepCommand .= " WHERE photo_id = ? AND group_id = ?";
+            $statement = self::$pdb->prepare($prepCommand);
+            $statement->bindParam(1, $id, SQLITE3_INTEGER);
+
+            foreach ($photoIDs as $pid) {
+                $order += 1;
+                $statement->bindParam(2, $order, SQLITE3_INTEGER);
+                $statement->bindParam(3, $pid, SQLITE3_INTEGER);
+                $statement->bindParam(4, $fromGroup, SQLITE3_INTEGER);
+                $statement->execute();
+                $statement->reset();
+            }
+        }
+
+        return $id;
+    }
+
+    static function GetGroup($groupID) {
+        $query = "SELECT * FROM groups WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $groupID, SQLITE3_INTEGER);
+        $result = $statement->execute();
+
+        $group = $result->fetchArray(SQLITE3_ASSOC);
+        if ($group == false) {
+            return null;
+        }
+        $group["photos"] = [];
+
+        $query = "SELECT photos_groups.group_id, ";
+        $query .= "'::', photos.* FROM photos_groups ";
+        $query .= "JOIN photos ON photos.id = photos_groups.photo_id ";
+        $query .= "WHERE photos_groups.group_id = ?";
+        $query .= "ORDER BY photos_groups.ordering";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $groupID, SQLITE3_INTEGER);
+        $results = $statement->execute();
+
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            $row = array_slice($row, 2);
+
+            if ($row["tags"] == "") {
+                $row["tags"] = [];
+            }
+            else {
+                $row["tags"] = explode(", ", $row["tags"]);
+            }
+            array_push($group["photos"], $row);
+        }
+        return $group;
+    }
+
+    static function AddPhotoToGroup($photoID, $groupID, $order) {
+        self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
+        if ($order == null) {
+            $query =
+                "SELECT MAX(ordering) FROM photos_groups WHERE group_id = ?;";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $groupID, SQLITE3_INTEGER);
+            $results = $statement->execute();
+            $max = $results->fetchArray(SQLITE3_NUM)[0];
+            if ($max == null) {
+                $max = 0;
+            }
+            $order = $max + 1;
+        }
+
+        $statement = self::$pdb->prepare(
+            "INSERT INTO photos_groups (photo_id, group_id, ordering) VALUES(?, ?, ?)",
+        );
+        $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $groupID, SQLITE3_INTEGER);
+        $statement->bindParam(3, $order, SQLITE3_INTEGER);
+        try {
+            $result = $statement->execute();
+            self::$pdb->exec("COMMIT TRANSACTION;");
+            if ($result == false) {
+                return false;
+            }
+        } catch (\Throwable $th) {
+            self::$pdb->exec("COMMIT TRANSACTION;");
+            return false;
+        }
+        return true;
+    }
+
+    static function UpdateGroupMeta($id, $description, $showMap) {
+        $query = "UPDATE groups SET description = ?, showMap = ? WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $description, SQLITE3_TEXT);
+        $statement->bindParam(2, $showMap, SQLITE3_INTEGER);
+        $statement->bindParam(3, $id, SQLITE3_INTEGER);
+        $result = $statement->execute();
+        if (!$result) {
+            return -1;
+        }
+        return 1;
+    }
+
+    static function MoveGroup($groupID, $toAlbumID) {
+        // $toAlbumID pre-filtered guaranteed to be numeric
+        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM groups WHERE album_id = " . $toAlbumID . ";");
+        if ($order == null) {
+            $order = 0;
+        }
+        $order += 1;
+
+        $query = "UPDATE groups SET album_id = ?, ordering = ? WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $toAlbumID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $order, SQLITE3_INTEGER);
+        $statement->bindParam(3, $groupID, SQLITE3_INTEGER);
+        $result = $statement->execute();
+        if (!$result) {
+            return false;
+        }
+        return true;
+    }
+
+    static function MergeGroup($absorbingGroupID, $absorbedGroupID) {
+        // $absorbingGroupID pre-filtered guaranteed to be numeric
+        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM photos_groups WHERE group_id = " . $absorbingGroupID . ";");
+        if ($order == null) {
+            $order = 0;
+        }
+        $order += 1;
+
+        $pquery = "SELECT photo_id FROM photos_groups WHERE group_id = ? ORDER BY ordering ASC";
+        $pstatement = self::$pdb->prepare($pquery);
+        $pstatement->bindParam(1, $absorbedGroupID, SQLITE3_INTEGER);
+        $results = $pstatement->execute();
+        $pids = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            array_push($pids, $row["photo_id"]);
+        }
+
+        $query = "UPDATE photos_groups SET group_id = ?, ordering = ? WHERE group_id = ? AND photo_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $absorbingGroupID, SQLITE3_INTEGER);
+        $statement->bindParam(3, $absorbedGroupID, SQLITE3_INTEGER);
+        foreach ($pids as $pid) {
+            $statement->bindParam(2, $order, SQLITE3_INTEGER);
+            $statement->bindParam(4, $pid, SQLITE3_INTEGER);
+            $statement->execute();
+            $statement->reset();
+            $order += 1;
+        }
+
+        $query = "DELETE FROM groups WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $absorbedGroupID, SQLITE3_INTEGER);
+        $statement->execute();
+    }
+
     static function CreateAlbum($title, $isPrivate = false) {
         if (is_numeric($title)) {
             return -2;
@@ -552,12 +734,20 @@ class DB {
         $sg = new SlugGenerator();
         $slug = $sg->generate($title);
 
+        self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
+        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM albums;");
+        if ($order == null) {
+            $order = 0;
+        }
+        $order += 1;
+
         $prepCommand =
-            "INSERT INTO albums(title, slug, description, isPrivate, showMap, coverPhoto) VALUES(?, ?, '', ?, 0, -1)";
+            "INSERT INTO albums(title, slug, description, isPrivate, showMap, coverPhoto, ordering) VALUES(?, ?, '', ?, 0, -1, ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $slug, SQLITE3_TEXT);
         $statement->bindParam(3, $isPrivate, SQLITE3_INTEGER);
+        $statement->bindParam(4, $order, SQLITE3_INTEGER);
         try {
             $result = $statement->execute();
             if (!$result) {
@@ -568,19 +758,9 @@ class DB {
         }
         $id = self::$pdb->lastInsertRowID();
 
-        self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
-        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM albums;");
-        if ($order == null) {
-            $order = 0;
-        }
-        $order += 1;
-        $statement = self::$pdb->prepare(
-            "UPDATE albums SET ordering = ? WHERE id = ?",
-        );
-        $statement->bindParam(1, $order, SQLITE3_INTEGER);
-        $statement->bindParam(2, $id, SQLITE3_INTEGER);
-        $statement->execute();
         self::$pdb->exec("COMMIT TRANSACTION;");
+
+        self::CreateGroup($id);
 
         return $id;
     }
@@ -591,7 +771,13 @@ class DB {
             return -1;
         }
 
-        $query = "DELETE FROM photos_albums WHERE album_id = ?";
+        $query = "DELETE FROM photos_groups";
+        $query .= " WHERE group_id IN (SELECT id FROM groups WHERE album_id = ?)";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $albumData["id"], SQLITE3_INTEGER);
+        $results = $statement->execute();
+
+        $query = "DELETE FROM groups WHERE album_id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
@@ -637,68 +823,62 @@ class DB {
             $albumID = self::GetConfig("unsorted_album_index");
         }
 
-        self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
-        if ($order == null) {
-            $query =
-                "SELECT MAX(ordering) FROM photos_albums WHERE album_id = ?;";
-            $statement = self::$pdb->prepare($query);
-            $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
-            $results = $statement->execute();
-            $max = $results->fetchArray(SQLITE3_NUM)[0];
-            if ($max == null) {
-                $max = 0;
-            }
-            $order = $max + 1;
-        }
-
-        $statement = self::$pdb->prepare(
-            "INSERT INTO photos_albums (photo_id, album_id, ordering) VALUES(?, ?, ?)",
-        );
-        $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
-        $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
-        $statement->bindParam(3, $order, SQLITE3_INTEGER);
-        try {
-            $result = $statement->execute();
-            self::$pdb->exec("COMMIT TRANSACTION;");
-            if ($result == false) {
-                return false;
-            }
-        } catch (\Throwable $th) {
-            self::$pdb->exec("COMMIT TRANSACTION;");
-            return false;
-        }
-        return true;
-    }
-
-    static function RemovePhotoFromAlbum($photoID, $albumID) {
-        $query = "SELECT coverPhoto FROM albums WHERE id = ?";
+        $query = "SELECT id FROM groups WHERE album_id = ? ORDER BY ordering DESC LIMIT 1;";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+        $results = $statement->execute();
+        $targetGroupID = $results->fetchArray(SQLITE3_NUM)[0];
+
+        return self::AddPhotoToGroup($photoID, $targetGroupID, $order);
+    }
+
+
+    static function RemovePhotoFromGroup($photoID, $groupID) {
+        $query = "SELECT id, coverPhoto FROM albums WHERE id IN (SELECT album_id FROM groups WHERE id = ?)";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $groupID, SQLITE3_INTEGER);
         $result = $statement->execute();
-        $coverPhotoID = $result->fetchArray(SQLITE3_ASSOC)["coverPhoto"];
+        $retData = $result->fetchArray(SQLITE3_ASSOC);
+        $coverPhotoID = $retData["coverPhoto"];
         if ($coverPhotoID == $photoID) {
             $query = "UPDATE albums SET coverPhoto = -1 WHERE id = ?";
             $statement = self::$pdb->prepare($query);
-            $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
+            $statement->bindParam(1, $retData["id"], SQLITE3_INTEGER);
             $statement->execute();
         }
 
         $query =
-            "DELETE FROM photos_albums WHERE (photo_id = ? AND album_id = ?)";
+            "DELETE FROM photos_groups WHERE (photo_id = ? AND group_id = ?)";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $photoID, SQLITE3_INTEGER);
-        $statement->bindParam(2, $albumID, SQLITE3_INTEGER);
+        $statement->bindParam(2, $groupID, SQLITE3_INTEGER);
         $results = $statement->execute();
         $changes = self::$pdb->changes();
         return $changes;
     }
 
-    static function MovePhotos($photoIDs, $fromAlbumID, $toAlbumID) {
+    static function ReorderAlbumGroups($newOrdering) {
+        // there is almost certainly some clever SQL I could write to do this all
+        //   in one statement...
+        $prepCommand =
+            "UPDATE groups SET ordering = ? WHERE id = ?";
+        $statement = self::$pdb->prepare($prepCommand);
+        foreach ($newOrdering as $i => $pid) {
+            $orderIdx = $i + 1; // PHP gets cranky passing arithmetic results directly :-/
+            $statement->bindParam(1, $orderIdx, SQLITE3_INTEGER);
+            $statement->bindParam(2, $pid, SQLITE3_INTEGER);
+            $statement->execute();
+            $statement->reset();
+        }
+        return true;
+    }
+
+    static function MovePhotos($photoIDs, $fromGroupID, $toGroupID) {
         self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
 
-        $query = "SELECT MAX(ordering) FROM photos_albums WHERE album_id = ?;";
+        $query = "SELECT MAX(ordering) FROM photos_groups WHERE group_id = ?;";
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $toAlbumID, SQLITE3_INTEGER);
+        $statement->bindParam(1, $toGroupID, SQLITE3_INTEGER);
         $results = $statement->execute();
         $max = $results->fetchArray(SQLITE3_NUM)[0];
         if ($max == null) {
@@ -707,20 +887,20 @@ class DB {
 
         // doing a fresh selection instead of relying on the order they were passed in
         //   (which may be the order they were selected in a GUI or something; want to
-        //    maintain the set ordering from the source album)
-        $query = "SELECT * FROM photos_albums WHERE album_id = ?";
+        //    maintain the set ordering from the source group)
+        $query = "SELECT * FROM photos_groups WHERE group_id = ?";
         // $photoIDs has already been filtered to be array of numeric values
         $query .=
             " and photo_id IN (" . implode(", ", $photoIDs) . ") ORDER BY ordering ASC";
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $fromAlbumID, SQLITE3_INTEGER);
+        $statement->bindParam(1, $fromGroupID, SQLITE3_INTEGER);
         $beforeMoveResults = $statement->execute();
 
         $moveQuery =
-            "UPDATE photos_albums SET album_id = ?, ordering = ? WHERE photo_id = ? AND album_id = ?;";
+            "UPDATE photos_groups SET group_id = ?, ordering = ? WHERE photo_id = ? AND group_id = ?;";
         $moveStatement = self::$pdb->prepare($moveQuery);
-        $moveStatement->bindParam(1, $toAlbumID, SQLITE3_INTEGER);
-        $moveStatement->bindParam(4, $fromAlbumID, SQLITE3_INTEGER);
+        $moveStatement->bindParam(1, $toGroupID, SQLITE3_INTEGER);
+        $moveStatement->bindParam(4, $fromGroupID, SQLITE3_INTEGER);
         $current = $max + 1;
         // could this be more clever?
         while ($row = $beforeMoveResults->fetchArray(SQLITE3_ASSOC)) {
@@ -731,46 +911,79 @@ class DB {
             $current += 1;
         }
 
-        $query =
-            "UPDATE albums SET coverPhoto = -1 WHERE id = ? AND coverPhoto in (" . implode(", ", $photoIDs) . ")";
+        $query = "SELECT id, coverPhoto FROM albums WHERE id IN (SELECT album_id FROM groups WHERE id = ?)";
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $fromAlbumID, SQLITE3_INTEGER);
-        $results = $statement->execute();
+        $statement->bindParam(1, $fromGroupID, SQLITE3_INTEGER);
+        $result = $statement->execute();
+        $retData = $result->fetchArray(SQLITE3_ASSOC);
+        $coverPhotoID = $retData["coverPhoto"];
+        if (array_search($coverPhotoID, $photoIDs) !== false) {
+            $query = "UPDATE albums SET coverPhoto = -1 WHERE id = ?";
+            $statement = self::$pdb->prepare($query);
+            $statement->bindParam(1, $retData["id"], SQLITE3_INTEGER);
+            $statement->execute();
+        }
 
         self::$pdb->exec("COMMIT TRANSACTION;");
     }
 
+
     static function GetPhotosInAlbum($albumID) {
-        $query = "SELECT photos_albums.ordering, photos.* FROM photos_albums ";
-        $query .= "JOIN photos ON photos.id = photos_albums.photo_id ";
-        $query .= "WHERE photos_albums.album_id = ? ORDER BY photos_albums.ordering";
+        // could do most of this in one SQL call, but not while also finding empty groups,
+        //   which needs to happen for initial population (and probably to help make sure
+        //   they dont accidentally accumulate silently).
+
+        $query = "SELECT * FROM groups WHERE album_id = ? ORDER BY ordering";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
-
         $results = $statement->execute();
-        $ret = [];
+
+        $photoGroups = [];
         if ($results == false) {
-            return $ret;
+            return $photoGroups;
         }
+        $groupIDs = [];
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            array_push($groupIDs, $row["id"]);
+            $photoGroups[$row["id"]] = [
+                "id" => $row["id"],
+                "description" => $row["description"],
+                "showMap" => $row["showMap"],
+                "photos" => [],
+            ];
+        }
+
+        $query = "SELECT photos_groups.group_id, ";
+        $query .= "'::', photos.* FROM photos_groups ";
+        $query .= "JOIN photos ON photos.id = photos_groups.photo_id ";
+        $query .= "WHERE photos_groups.group_id IN (" . implode(", ", $groupIDs) . ")";
+        $query .= "ORDER BY photos_groups.ordering";
+        $statement = self::$pdb->prepare($query);
+        $results = $statement->execute();
+
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            $gid = $row["group_id"];
+
+            $row = array_slice($row, 2);
+
             if ($row["tags"] == "") {
                 $row["tags"] = [];
             }
             else {
                 $row["tags"] = explode(", ", $row["tags"]);
             }
-            array_push($ret, $row);
+            array_push($photoGroups[$gid]["photos"], $row);
         }
-        return $ret;
+        return array_values($photoGroups);
     }
 
-    static function ReorderAlbum($albumID, $newOrdering) {
+    static function ReorderGroup($groupID, $newOrdering) {
         // there is almost certainly some clever SQL I could write to do this all
         //   in one statement...
         $prepCommand =
-            "UPDATE photos_albums SET ordering = ? WHERE photo_id = ? AND album_id = ?";
+            "UPDATE photos_groups SET ordering = ? WHERE photo_id = ? AND group_id = ?";
         $statement = self::$pdb->prepare($prepCommand);
-        $statement->bindParam(3, $albumID, SQLITE3_INTEGER);
+        $statement->bindParam(3, $groupID, SQLITE3_INTEGER);
         foreach ($newOrdering as $i => $pid) {
             $orderIdx = $i + 1; // PHP gets cranky passing arithmetic results directly :-/
             $statement->bindParam(1, $orderIdx, SQLITE3_INTEGER);
@@ -808,7 +1021,7 @@ class DB {
 
         if ($includePhotos) {
             $photos = self::GetPhotosInAlbum($albumData["id"]);
-            $albumData["photos"] = $photos;
+            $albumData["photoGroups"] = $photos;
         }
 
         return $albumData;

@@ -69,9 +69,10 @@ def test_resize_comprehensiveness(server, req):
     res = req.get(server.api(f"/album/view/1"))
     stat_assert(res, 200)
     adata = res.json()
+    plist = adata["photoGroups"][0]["photos"]
 
     for i in range(1, 11):
-        pdata = list(filter(lambda x: x["id"] == i, adata["photos"]))[0]
+        pdata = list(filter(lambda x: x["id"] == i, plist))[0]
         for s in sizes:
             ipath = get_img_path(s["label"], pdata["hash"], pdata["uniq"])
             res = req.head(server.access(ipath))
@@ -81,9 +82,10 @@ def test_orig_getback(server, req):
     res = req.get(server.api(f"/album/view/1"))
     stat_assert(res, 200)
     adata = res.json()
+    plist = adata["photoGroups"][0]["photos"]
 
     for i in range(1, 11):
-        pdata = list(filter(lambda x: x["id"] == i, adata["photos"]))[0]
+        pdata = list(filter(lambda x: x["id"] == i, plist))[0]
 
         with tempfile.TemporaryFile("w+b") as tf:
             with req.get(server.api(f"/photo/orig/{i}"), stream=True) as res:
@@ -110,7 +112,9 @@ def test_duplicate_allowed_but_unique(server, auth, req):
     res = req.get(server.api(f"/album/view/1"))
     stat_assert(res, 200)
     adata = res.json()
-    orig_data = list(filter(lambda x: x["id"] == 1, adata["photos"]))[0]
+    plist = adata["photoGroups"][0]["photos"]
+
+    orig_data = list(filter(lambda x: x["id"] == 1, plist))[0]
 
     assert orig_data["hash"] == dupe_data["hash"]
     assert orig_data["uniq"] != dupe_data["uniq"]

@@ -1,9 +1,29 @@
 - bugs
     - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
     - video breaks nav? (or maybe is just stealing keystrokes)
-    
-* immediate todos
+
+- granularity pass
+    - frontend
+        - first get degenerate albums rendering again (with single group)
+        - then multiple groups
+        - editing metadata
+        - splitting from context menu
+        - merging from metadata menu
+        - photopage navigation
+            - insert interstitials as you swipe
+        - then uploads (maybe just always add to last group; could be ok)
+        - then editablelayout / reordering stuff
+
+dynamic albums (can't have groups, but can take metadata):
+    - all
+    - unsorted
+    - tag albums
+    - remove manual unsorted
+
+* todos
+    - examine markdown options
     - re-org EXIF data display
+    - darken overlay letter background or maybe add small outline; stuff still bleeds out
     - test if all the upheaval has left the editing frontend in a workable state
     - UX niceties
         - edit photo title/description
@@ -31,6 +51,11 @@
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
         - uploadzone should tell you when it rejects a file and why
 2. Backend pass
+    - reorg tests to move all group ops to their own file
+    - groups need to be guarded against their album privacy (do with photo pass)
+    - reorg API (buncha group functions hang off album right now)
+        - then document API
+    - see if db's copypasta can be reduced without going full ORM
     - limit length of text things (titles, descriptions)
     - directly fetched photos need to check if they're in a public album
         - (basically all the /photo get endpoints)

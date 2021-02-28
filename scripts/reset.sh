@@ -3,5 +3,5 @@
 cd "$(dirname "$0")"
 cd ..
 
-rm pozzo.DB
+rm -f pozzo.DB
 rm -rf public/photos

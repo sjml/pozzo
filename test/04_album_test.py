@@ -21,7 +21,9 @@ def test_album_view(server, req):
     stat_assert(res, 200)
     adata = res.json()
     assert adata["title"] == "[unsorted]"
-    assert len(adata["photos"]) == 11
+    assert len(adata["photoGroups"]) == 1
+    plist = adata["photoGroups"][0]["photos"]
+    assert len(plist) == 11
 
 def test_album_view_by_slug(server, req):
     res = req.get(
@@ -30,7 +32,8 @@ def test_album_view_by_slug(server, req):
     stat_assert(res, 200)
     adata = res.json()
     assert adata["title"] == "[unsorted]"
-    assert len(adata["photos"]) == 11
+    plist = adata["photoGroups"][0]["photos"]
+    assert len(plist) == 11
 
 def test_nonexistent_album_is_nonexistent(server, req):
     res = req.post(
@@ -69,7 +72,9 @@ def test_create_album(server, auth, req):
         server.api("/album/view/2")
     )
     stat_assert(res, 200)
-    assert len(res.json()["photos"]) == 0
+    assert len(res.json()["photoGroups"]) == 1
+    assert res.json()["photoGroups"][0]["id"] == 2
+    assert len(res.json()["photoGroups"][0]["photos"]) == 0
 
 def test_album_unique_name(server, auth, req):
     res = req.post(
@@ -100,7 +105,7 @@ def test_copy_photos(server, auth, req):
     )
     stat_assert(res, 400)
 
-    copyInsts = [{"photoID": x, "albumID": 2} for x in range(1,6)]
+    copyInsts = [{"photoID": x, "groupID": 2} for x in range(1,6)]
     res = req.post(
         server.api("/photo/copy"),
         headers=auth,
@@ -116,7 +121,8 @@ def test_copy_photos(server, auth, req):
     )
     stat_assert(res, 200)
     adata = res.json()
-    assert len(adata["photos"]) == 5
+    plist = adata["photoGroups"][0]["photos"]
+    assert len(plist) == 5
 
 def test_remove_photos_auth(server, req):
     res = req.post(
@@ -131,7 +137,7 @@ def test_remove_photos(server, auth, req):
     )
     stat_assert(res, 400)
 
-    removeInsts = [{"photoID": x, "albumID": 1} for x in range(1,6)]
+    removeInsts = [{"photoID": x, "groupID": 1} for x in range(1,6)]
     res = req.post(
         server.api("/album/remove"),
         headers=auth,
@@ -145,7 +151,7 @@ def test_remove_photos(server, auth, req):
         server.api("/album/view/1")
     )
     stat_assert(res, 200)
-    assert len(res.json()["photos"]) == 6
+    assert len(res.json()["photoGroups"][0]["photos"]) == 6
 
 def test_create_private_album(server, auth, req):
     res = req.post(
@@ -307,79 +313,6 @@ def test_delete_nonexistent_album(server, auth, req):
     )
     stat_assert(res, 404)
 
-def test_reorder_album_auth(server, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        json={"newOrdering": [5,4,3,2,1]}
-    )
-    stat_assert(res, 401)
-
-def test_reorder_album_missing_params(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        headers=auth
-    )
-    stat_assert(res, 400)
-
-def test_reorder_album_not_enough(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        headers=auth,
-        json={"newOrdering": [5,4,3]}
-    )
-    stat_assert(res, 400)
-    assert "Miscount" in res.json()["message"]
-
-def test_reorder_album_too_much(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        headers=auth,
-        json={"newOrdering": [7,6,5,4,3,2,1]}
-    )
-    stat_assert(res, 400)
-    assert "Miscount" in res.json()["message"]
-
-def test_reorder_album_bad_index(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        headers=auth,
-        json={"newOrdering": [5,4,3,2,7]}
-    )
-    stat_assert(res, 400)
-    assert "Misplaced" in res.json()["message"]
-
-def test_reorder_album_non_unique(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        headers=auth,
-        json={"newOrdering": [5,4,4,3,2]}
-    )
-    stat_assert(res, 400)
-    assert "Non-unique" in res.json()["message"]
-
-def test_reorder_album_nonexistent(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/7"),
-        headers=auth,
-        json={"newOrdering": [5,4,3,2,1]}
-    )
-    stat_assert(res, 404)
-
-def test_reorder_album(server, auth, req):
-    res = req.post(
-        server.api("/album/reorder/2"),
-        headers=auth,
-        json={"newOrdering": [5,4,3,2,1]}
-    )
-    stat_assert(res, 200)
-
-    res = req.get(
-        server.api("/album/view/2")
-    )
-    stat_assert(res, 200)
-    order = [p["id"] for p in res.json()["photos"]]
-    assert order == [5,4,3,2,1]
-
 def test_reorder_album_list_auth(server, req):
     res = req.post(
         server.api("/album/reorderList"),
@@ -475,7 +408,8 @@ def test_ordered_upload(server, auth, req):
     stat_assert(res, 200)
     adata = res.json()
     assert adata["id"] == 4
-    assert len(adata["photos"]) == 2
-    assert adata["photos"][0]["id"] == 13
-    assert adata["photos"][1]["id"] == 12
+    gdata = adata["photoGroups"][0]
+    assert len(gdata["photos"]) == 2
+    assert gdata["photos"][0]["id"] == 13
+    assert gdata["photos"][1]["id"] == 12
 

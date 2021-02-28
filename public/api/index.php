@@ -18,7 +18,7 @@ function error_handler($errno, $errstr, $errfile, $errline) {
     http_response_code(500);
     header("Content-Type: application/json");
     echo json_encode([
-        "message" => "server-side error",
+        "message" => "Server Error",
         "code" => $errno,
         "error" => $errstr,
         "file" => $errfile,
@@ -32,7 +32,7 @@ function exception_handler($exc) {
     http_response_code(500);
     header("Content-Type: application/json");
     echo json_encode([
-        "message" => "server-side error",
+        "message" => "Server Error",
         "code" => $exc->getCode(),
         "error" => $exc->getMessage(),
         "file" => $exc->getFile(),
@@ -80,6 +80,10 @@ $router->AddHandler("/album", [
 $router->AddHandler("/photo", [
     "require",
     __DIR__ . "/../../app/endpoints/photo.php",
+]);
+$router->AddHandler("/group", [
+    "require",
+    __DIR__ . "/../../app/endpoints/group.php",
 ]);
 $router->AddHandler("/reset", [
     "require",
