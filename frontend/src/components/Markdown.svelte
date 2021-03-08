@@ -1,24 +1,26 @@
-<script lang="ts">
-    import { onMount } from "svelte";
-
-    import marked from "marked";
-    import DOMPurify from "dompurify";
-
-    export let markdown: string = "";
+<script lang="ts" context="module">
+    import MarkdownIt from "markdown-it";
 
     let md = null;
-    let rendered: string = "";
 
-    onMount(() => {
-        marked.setOptions({
-            smartypants: true,
+    function initMarkdown() {
+        md = MarkdownIt({
+            typographer: true,
+            xhtmlOut: true,
         });
-    });
-
-    function render(s: string) {
-        return DOMPurify.sanitize(marked(s));
     }
+</script>
 
+<script lang="ts">
+    export let markdown: string = "";
+
+    let rendered: string = "";
+    function render(s: string) {
+        if (md == null) {
+            initMarkdown();
+        }
+        return md.render(s);
+    }
     $: rendered = render(markdown)
 </script>
 

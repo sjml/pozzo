@@ -4,7 +4,6 @@
 
 - granularity pass
     - frontend
-        - restore "no photos in this album" notice
         - restore setcoverphoto, delete, and move photo handlers
         - then re-handle uploads (maybe just always add to last group; could be ok)
 
@@ -17,7 +16,6 @@ dynamic albums (can't have groups, but can take metadata):
 
 
 * todos
-    - examine markdown options
     - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
     - re-org EXIF data display
     - darken overlay letter background or maybe add small outline; stuff still bleeds out

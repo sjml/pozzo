@@ -242,15 +242,20 @@
         </div>
     {/if}
 
-
-    {#each $currentAlbumStore.photoGroups as pg, pgi}
-        <PhotoGroup photoGroup={pg} photoGroupIndex={pgi}
-            on:splitGroup={handleSplitGroup}
-            on:makeNewGroup={handleMakeNewGroup}
-            on:shiftGroup={handleShiftGroup}
-            on:mergeUp={handleMergeUp}
-        />
-    {/each}
+    {#if $currentPerusalStore.photoSet.length > 0}
+        {#each $currentAlbumStore.photoGroups as pg, pgi}
+            <PhotoGroup photoGroup={pg} photoGroupIndex={pgi}
+                on:splitGroup={handleSplitGroup}
+                on:makeNewGroup={handleMakeNewGroup}
+                on:shiftGroup={handleShiftGroup}
+                on:mergeUp={handleMergeUp}
+            />
+        {/each}
+    {:else}
+        <div class="description">
+            (There are no photos in this album… yet.)
+        </div>
+    {/if}
 
 {/if}
 </div>
