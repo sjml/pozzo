@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import { SiteConfig, Album, Photo, PerusalList } from './pozzo.type';
+import type { SiteConfig, Album, Photo, PerusalData } from './pozzo.type';
 
 export const siteData = writable<SiteConfig>(
     {
@@ -22,8 +22,7 @@ export const fullScreen = writable<boolean>(false);
 export const userStoppedUploadScroll = writable<boolean>(false);
 
 export const currentAlbumStore = writable<Album>(null);
-export const currentPhotoStore = writable<Photo>(null);
-export const currentPerusalStore = writable<PerusalList>(null);
+export const currentPerusalStore = writable<PerusalData>(null);
 
 export const navSelection = writable<Photo[]>([]);
 

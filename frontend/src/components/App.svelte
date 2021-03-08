@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { Router, Route, navigate } from "svelte-routing";
 
-    import { currentAlbumStore, currentPhotoStore, currentPerusalStore, fullScreen, siteData } from "../stores";
+    import { currentAlbumStore, currentPerusalStore, fullScreen, siteData } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
     import NavBar from "./NavBar.svelte";
@@ -47,8 +47,8 @@
             if ($currentAlbumStore) {
                 title += ` | ${$currentAlbumStore.title}`;
 
-                if ($currentPhotoStore) {
-                    title += ` | ${$currentPhotoStore.title}`;
+                if ($currentPerusalStore?.currentPhoto) {
+                    title += ` | ${$currentPerusalStore.currentPhoto.title}`;
                 }
             }
         }

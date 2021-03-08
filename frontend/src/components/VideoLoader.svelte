@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    import type { Photo } from "../pozzo.type";
     import { GetImgPath } from "../util";
 
     export let photoWhichIsReallyAVideo: Photo;

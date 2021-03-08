@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import { Link, navigate } from "svelte-routing";
 
-    import type { Photo, Album, PerusalList } from "../pozzo.type";
+    import type { Photo, Album, PerusalData } from "../pozzo.type";
     import {
         currentAlbumStore,
         currentPerusalStore,
@@ -19,24 +19,24 @@
     let prevLink: string = null;
     let nextLink: string = null;
 
-    function findNeighbors(pl: PerusalList, a: Album) {
-        if (a == null || pl == null || pl.currentIdx < 0) {
+    function findNeighbors(pd: PerusalData, a: Album) {
+        if (a == null || pd == null || pd.currentIdx < 0) {
             prevLink = null;
             nextLink = null;
             return;
         }
-        if (pl.currentIdx == 0) {
+        if (pd.currentIdx == 0) {
             prevLink = null;
         }
         else {
-            const prevNode = pl.nodes[pl.currentIdx - 1];
+            const prevNode = pd.nodes[pd.currentIdx - 1];
             prevLink = `/album/${a.slug}/${prevNode.hasOwnProperty("hash") ? "" : "g"}${prevNode.id}`;
         }
-        if (pl.currentIdx == pl.nodes.length-1) {
+        if (pd.currentIdx == pd.nodes.length-1) {
             nextLink = null;
         }
         else {
-            const nextNode = pl.nodes[pl.currentIdx + 1];
+            const nextNode = pd.nodes[pd.currentIdx + 1];
             nextLink = `/album/${a.slug}/${nextNode.hasOwnProperty("hash") ? "" : "g"}${nextNode.id}`;
         }
     }
@@ -80,10 +80,10 @@
             </div>
         {/if}
 
-        {#if $currentPerusalStore?.currentIdx >= 0}
+        {#if $currentPerusalStore?.currentPhoto}
             <div class="backLink">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                <!-- {$currentPhotoStore.title} -->
+                {$currentPerusalStore.currentPhoto.title}
             </div>
         {/if}
     </div>
@@ -195,6 +195,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        white-space: nowrap;
 
         transition-property: height, background-color;
         transition-duration: 600ms;

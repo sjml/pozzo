@@ -88,7 +88,10 @@ export type Album = {
     photoGroups: PhotoGroup[],
 }
 
-export type PerusalList = {
+export type PerusalData = {
     currentIdx: number,
+    currentPhoto: Photo|null,
+    currentGroup: PhotoGroup|null,
+    photoSet: Photo[],
     nodes: (Photo|PhotoGroup)[],
 }

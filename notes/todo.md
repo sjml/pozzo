@@ -4,9 +4,7 @@
 
 - granularity pass
     - frontend
-        - $currentPhotoStore.title
-        - once that's in, restore album map
-            - and "no photos in this album" notice
+        - restore "no photos in this album" notice
         - restore setcoverphoto, delete, and move photo handlers
         - then re-handle uploads (maybe just always add to last group; could be ok)
 
@@ -25,6 +23,7 @@ dynamic albums (can't have groups, but can take metadata):
     - darken overlay letter background or maybe add small outline; stuff still bleeds out
     - test if all the upheaval has left the editing frontend in a workable state
     - UX niceties
+        - make navbar breadcrumbs collapsible (down to icons)
         - edit photo title/description
         - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)

@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
 
     import type { Photo } from "../pozzo.type";
-    import { currentAlbumStore, isLoggedInStore, navSelection } from "../stores";
+    import { currentAlbumStore, currentPerusalStore, isLoggedInStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
     import PhotoGroup from "./PhotoGroup.svelte";
@@ -211,7 +211,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="201.14971" y1="127.30467" x2="223.95961" y2="166.81257" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="154.18201" y1="149.26298" x2="161.29573" y2="189.60689" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="101.72972" y1="149.24366" x2="94.61483" y2="189.59423" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="54.80859" y1="127.27241" x2="31.88882" y2="166.97062" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M31.99943,104.87509C48.81193,125.68556,79.63353,152,128,152c48.36629,0,79.18784-26.31424,96.00039-47.12468" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
                 {/if}
             </Button>
-            <!-- {#if $currentAlbumStore.photos.length > 0}
+            {#if $currentPerusalStore.photoSet.length > 0}
                 <Button
                     margin="0 0 0 10px"
                     isToggled={$currentAlbumStore.showMap}
@@ -220,7 +220,7 @@
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                 </Button>
-            {/if} -->
+            {/if}
             <div class="spacer"></div>
             <!-- delete album button goes here -->
         {/if}
@@ -234,13 +234,13 @@
         </div>
     {/if}
 
-    <!-- {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
+    {#if $currentAlbumStore.showMap && $currentPerusalStore.photoSet.length > 0}
         <div class="albumMap">
             <LazyLoad loader={"PhotoMap"}
-                photos={$currentAlbumStore.photos}
+                photos={$currentPerusalStore.photoSet}
             />
         </div>
-    {/if} -->
+    {/if}
 
 
     {#each $currentAlbumStore.photoGroups as pg, pgi}

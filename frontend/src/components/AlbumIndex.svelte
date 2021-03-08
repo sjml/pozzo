@@ -11,6 +11,7 @@
 
     onDestroy(() => {
         $currentAlbumStore = null;
+        $currentPerusalStore = null;
     });
 
     $: {
@@ -45,7 +46,10 @@
         }
         $currentPerusalStore = {
             currentIdx: -1,
-            nodes: []
+            currentPhoto: null,
+            currentGroup: null,
+            photoSet: [],
+            nodes: [],
         };
         album.photoGroups.forEach(pg => {
             if (pg.description.length > 0) {
@@ -53,6 +57,7 @@
             }
             pg.photos.forEach(p => {
                 $currentPerusalStore.nodes = [...$currentPerusalStore.nodes, p];
+                $currentPerusalStore.photoSet = [...$currentPerusalStore.photoSet, p];
             })
         });
     }
