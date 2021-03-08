@@ -28,6 +28,7 @@
     use:dndzone={{
         items: photoList,
         flipDurationMs: animationDuration,
+        dropTargetStyle: {},
     }}
     on:consider={dragAndDropConsider}
     on:finalize={dragAndDropFinalize}

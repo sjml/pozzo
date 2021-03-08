@@ -2,6 +2,8 @@
     import Loadable from "svelte-loadable";
     import { register } from "svelte-loadable";
 
+    // unfortunately have to manually pass on any dispatched events
+    //   from these sub-components
     const registeredLoaders = {
         "AlbumIndex" : register({
             loader: () => import("./AlbumIndex.svelte"),
@@ -42,13 +44,22 @@
     };
 
     export let loader: string;
-    let passedProps;
-    $: {
-        let {loader, ...remaining} = $$props;
-        passedProps = remaining;
-    }
 </script>
 
-<Loadable loader={registeredLoaders[loader]} let:component={loadedComponent}>
-    <svelte:component this={loadedComponent} {...passedProps} />
+<Loadable loader={registeredLoaders[loader]} let:component={loadedComponent} >
+    <svelte:component this={loadedComponent} {...$$restProps}
+        on:structuralChange
+        on:uploaded
+
+        on:reordered
+
+        on:done
+        on:dismissed
+
+        on:coverPhotoClicked
+        on:move
+        on:delete
+        on:splitGroup
+        on:makeNewGroup
+    />
 </Loadable>

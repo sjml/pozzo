@@ -17,6 +17,7 @@ export const siteData = writable<SiteConfig>(
 
 // UI twiddlers
 export const metadataVisible = writable<boolean>(false);
+export const modalUp = writable<boolean>(false);
 export const fullScreen = writable<boolean>(false);
 export const userStoppedUploadScroll = writable<boolean>(false);
 

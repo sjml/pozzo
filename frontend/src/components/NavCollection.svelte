@@ -2,7 +2,7 @@
     import { tick, createEventDispatcher } from "svelte";
 
     import type { Photo } from "../pozzo.type";
-    import { currentAlbumStore, navSelection, isLoggedInStore } from "../stores";
+    import { currentAlbumStore, navSelection, isLoggedInStore, modalUp } from "../stores";
     import { IsMetaKeyDownForEvent } from "../util";
     import LazyLoad from "./LazyLoad.svelte";
 
@@ -60,22 +60,21 @@
         if (!$isLoggedInStore) {
             return;
         }
-        if (contextMenuVisible) {
+        if ($modalUp) {
             return;
         }
         if (evt.key == "a" && IsMetaKeyDownForEvent(evt)) {
-            $navSelection = photos;
+            $navSelection = $navSelection.concat(photos);
             evt.preventDefault();
         }
         if (evt.key == "d" && IsMetaKeyDownForEvent(evt)) {
-            $navSelection = [];
+            $navSelection = $navSelection.filter(p => photos.indexOf(p) < 0);
             evt.preventDefault();
         }
     }
 </script>
 
 <svelte:body
-    on:contextmenu={handleRightClick}
     on:keydown={handleKeyDown}
 />
 
@@ -89,7 +88,14 @@
         on:delete={handleContextMenuDelete}
         on:move={handleContextMenuMove}
         on:coverPhotoClicked={handleContextMenuCoverPhoto}
+
+        on:splitGroup={(evt) => {contextMenuVisible = false; dispatch("splitGroup", evt.detail)}}
+        on:makeNewGroup={(evt) => {contextMenuVisible = false; dispatch("makeNewGroup", evt.detail)}}
     />
 {/if}
 
-<slot/>
+<div class="navCollection"
+    on:contextmenu={handleRightClick}
+>
+    <slot/>
+</div>

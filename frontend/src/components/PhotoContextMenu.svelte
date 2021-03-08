@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher } from "svelte";
+    import { onMount, createEventDispatcher, onDestroy } from "svelte";
 
     import type { Album } from "../pozzo.type";
     import { currentAlbumStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
     import Button from "./Button.svelte";
+    import Overlay from "./Overlay.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -26,19 +27,6 @@
         }
     }
 
-    function onBodyClick(evt: MouseEvent) {
-        if (newAlbumPromptShowing) {
-            return;
-        }
-        if (   evt.clientX < posX
-            || evt.clientX > posX + contextMenuDiv.clientWidth
-            || evt.clientY < posY
-            || evt.clientY > posY + contextMenuDiv.clientHeight
-        ) {
-            dispatch("dismissed");
-        }
-    }
-
     onMount(() => {
         getAlbumList();
 
@@ -50,11 +38,14 @@
         }
     });
 
+    onDestroy(() => {
+        if ($navSelection.length == 1) {
+            $navSelection = [];
+        }
+    })
+
 </script>
 
-<svelte:body
-    on:click={onBodyClick}
-/>
 
 {#if newAlbumPromptShowing}
     <LazyLoad loader={"NewAlbumPrompt"}
@@ -62,6 +53,13 @@
         on:done={(evt) => dispatch("move", {targetAlbumID: evt.detail.newAlbumID})}
     />
 {/if}
+
+<Overlay
+    on:clickedOutside={() => dispatch("dismissed")}
+    isInvisible={true}
+    zIndex={1300}
+    fadeTime={0}
+/>
 
 <div
     bind:this={contextMenuDiv}
@@ -74,6 +72,21 @@
             <div class="cover menuItem">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="200 176 127.993 136 56 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><path d="M200,224l-72.0074-40L56,224V40a8,8,0,0,1,8-8H192a8,8,0,0,1,8,8Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
                 <div>{$currentAlbumStore.coverPhoto.id == $navSelection[0].id ? "Unset" : "Set"} as Cover Photo</div>
+            </div>
+        </Button>
+    {/if}
+    {#if $navSelection.length == 1}
+        <Button on:click={() => dispatch("splitGroup", {})}>
+            <div class="splitGroup menuItem">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="88" y1="128" x2="12" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="44 96 12 128 44 160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="168" y1="128" x2="244" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="212 160 244 128 212 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
+                <div>Split Group Here</div>
+            </div>
+        </Button>
+    {:else}
+        <Button on:click={() => dispatch("makeNewGroup", {})}>
+            <div class="makeNewGroup menuItem">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="168 167.993 216 167.993 216 39.993 88 39.993 88 87.993" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline><rect x="39.99902" y="87.99414" width="128" height="128" stroke-width="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" fill="none"></rect></svg>
+                <div>Make Separate Group</div>
             </div>
         </Button>
     {/if}

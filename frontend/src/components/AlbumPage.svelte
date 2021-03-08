@@ -1,37 +1,15 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import { Link } from "svelte-routing";
 
-    import justifiedLayout from "justified-layout";
-
-    import type { Album } from "../pozzo.type";
+    import type { Photo } from "../pozzo.type";
     import { currentAlbumStore, isLoggedInStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
-    import NavPhoto from "./NavPhoto.svelte";
-    import NavCollection from "./NavCollection.svelte";
+    import PhotoGroup from "./PhotoGroup.svelte";
     import Markdown from "./Markdown.svelte";
     import Button from "./Button.svelte";
 
     const dispatch = createEventDispatcher();
-
-
-    let containerWidth: number;
-    let layout = null;
-    function calculateLayout(a: Album, width: number) {
-        if (!width || !$currentAlbumStore) {
-            return; // initial loads; don't worry yet
-        }
-        const aspects = a.photos.map(p => p.aspect);
-        layout = justifiedLayout(aspects, {
-            targetRowHeight: 300,
-            containerWidth: width,
-            containerPadding: 10,
-            widowLayoutStyle: "center",
-        });
-    }
-    $: calculateLayout($currentAlbumStore, containerWidth)
-
 
     let editingDescTitle = false;
     let rawTitle: string;
@@ -75,50 +53,121 @@
         }
     }
 
-    async function handlePhotoDeletion(evt: CustomEvent) {
-        for (let p of $navSelection) {
-            const delRes = await RunApi("/photo/delete", {
-                authorize: true,
-                method: "POST",
-                params: {
-                    photoID: p.id
-                }
-            });
-            if (!delRes.success) {
-                console.error("Could not delete photo", delRes);
-                return;
-            }
-        }
+    // async function handlePhotoDeletion(evt: CustomEvent) {
+    //     for (let p of $navSelection) {
+    //         const delRes = await RunApi("/photo/delete", {
+    //             authorize: true,
+    //             method: "POST",
+    //             params: {
+    //                 photoID: p.id
+    //             }
+    //         });
+    //         if (!delRes.success) {
+    //             console.error("Could not delete photo", delRes);
+    //             return;
+    //         }
+    //     }
 
-        $currentAlbumStore.photos = evt.detail.newPhotos;
-    }
+    //     $currentAlbumStore.photos = evt.detail.newPhotos;
+    // }
 
-    async function handlePhotoMove(evt:CustomEvent) {
-        const res = await RunApi(`/photo/move`, {
+    // async function handlePhotoMove(evt:CustomEvent) {
+    //     const res = await RunApi(`/photo/move`, {
+    //         params: {
+    //             photoIDs: $navSelection.map(ps => ps.id),
+    //             fromAlbumID: $currentAlbumStore.id,
+    //             toAlbumID: evt.detail.targetAlbumID
+    //         },
+    //         method: "POST",
+    //         authorize: true
+    //     });
+    //     if (res.success) {
+    //         $currentAlbumStore.photos = evt.detail.newPhotos;
+    //     }
+    //     else {
+    //         console.error(res);
+    //     }
+    // }
+
+    async function newGroup(fromGroupID: number, offshoots: Photo[]) {
+        const res = await RunApi("/group/new", {
             params: {
-                photoIDs: $navSelection.map(ps => ps.id),
-                fromAlbumID: $currentAlbumStore.id,
-                toAlbumID: evt.detail.targetAlbumID
+                albumID: $currentAlbumStore.id,
+                fromGroup: fromGroupID,
+                photoIDs: offshoots.map(p => p.id)
             },
             method: "POST",
             authorize: true
         });
         if (res.success) {
-            $currentAlbumStore.photos = evt.detail.newPhotos;
+            dispatch("structuralChange");
         }
         else {
             console.error(res);
         }
     }
 
-    async function handlePhotoReorder(evt: CustomEvent) {
-        const res = await RunApi(`/album/reorder/${$currentAlbumStore.id}`, {
-            params: {newOrdering: evt.detail.newPhotos.map(ps => ps.id)},
+    function handleSplitGroup(evt: CustomEvent) {
+        // assume only one item in nav selection
+        const splitPointID = $navSelection[0].id;
+        const offshoots: Photo[] = [];
+        evt.detail.originGroup.photos.forEach(p => {
+            if (p.id == splitPointID) {
+                offshoots.push(p);
+            }
+            else if (offshoots.length > 0) {
+                offshoots.push(p);
+            }
+        });
+
+        newGroup(evt.detail.originGroup.id, offshoots);
+    }
+
+    function handleMakeNewGroup(evt: CustomEvent) {
+        newGroup(evt.detail.originGroup.id, $navSelection);
+    }
+
+    async function handleShiftGroup(evt: CustomEvent) {
+        // intentionally creating new array instead of in-place splicing to trigger
+        //   reactions to change
+        const plucked = $currentAlbumStore.photoGroups.splice(evt.detail.groupIdx, 1)[0];
+        $currentAlbumStore.photoGroups =
+            $currentAlbumStore.photoGroups.slice(0, evt.detail.groupIdx + evt.detail.movement)
+            .concat(plucked)
+            .concat($currentAlbumStore.photoGroups.slice(evt.detail.groupIdx + evt.detail.movement));
+
+        const res = await RunApi(`/album/reorderGroups/${$currentAlbumStore.id}`, {
+            params: {
+                newOrdering: $currentAlbumStore.photoGroups.map(pg => pg.id)
+            },
+            method: "POST",
+            authorize: true
+        });
+
+        if (res.success) {
+            // no-op
+        }
+        else {
+            console.error(res);
+        }
+    }
+
+    async function handleMergeUp(evt: CustomEvent) {
+        if (evt.detail.groupIdx == 0) {
+            console.error("Invalid merge index.");
+            return;
+        }
+        const absorbedGroup = $currentAlbumStore.photoGroups[evt.detail.groupIdx];
+        const absorbingGroup = $currentAlbumStore.photoGroups[evt.detail.groupIdx-1];
+        const res = await RunApi(`/group/merge/${absorbedGroup.id}`, {
+            params: {
+                into: absorbingGroup.id,
+            },
             method: "POST",
             authorize: true
         });
         if (res.success) {
-            $currentAlbumStore.photos = evt.detail.newPhotos;
+            dispatch("structuralChange");
         }
         else {
             console.error(res);
@@ -151,7 +200,6 @@
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M92.68629,216H48a8,8,0,0,1-8-8V163.31371a8,8,0,0,1,2.34315-5.65686l120-120a8,8,0,0,1,11.3137,0l44.6863,44.6863a8,8,0,0,1,0,11.3137l-120,120A8,8,0,0,1,92.68629,216Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><line x1="136" y1="64" x2="192" y2="120" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="44" y1="156" x2="100" y2="212" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
             </Button>
-            <div class="spacer"></div>
             <Button
                 margin="0 0 0 10px"
                 title={$currentAlbumStore.isPrivate ? "Make Public" : "Make Private"}
@@ -163,7 +211,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="201.14971" y1="127.30467" x2="223.95961" y2="166.81257" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="154.18201" y1="149.26298" x2="161.29573" y2="189.60689" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="101.72972" y1="149.24366" x2="94.61483" y2="189.59423" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="54.80859" y1="127.27241" x2="31.88882" y2="166.97062" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M31.99943,104.87509C48.81193,125.68556,79.63353,152,128,152c48.36629,0,79.18784-26.31424,96.00039-47.12468" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
                 {/if}
             </Button>
-            {#if $currentAlbumStore.photos.length > 0}
+            <!-- {#if $currentAlbumStore.photos.length > 0}
                 <Button
                     margin="0 0 0 10px"
                     isToggled={$currentAlbumStore.showMap}
@@ -172,90 +220,44 @@
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                 </Button>
-            {/if}
+            {/if} -->
+            <div class="spacer"></div>
+            <!-- delete album button goes here -->
         {/if}
     </div>
 
     {#if editingDescTitle}
         <textarea cols="500" rows="10" class="description editing" bind:value={rawDescription}></textarea>
     {:else}
-        <div class="description"
-        >
+        <div class="description">
             <Markdown markdown={$currentAlbumStore.description} />
         </div>
     {/if}
 
-    {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
+    <!-- {#if $currentAlbumStore.showMap && $currentAlbumStore.photos.length > 0}
         <div class="albumMap">
             <LazyLoad loader={"PhotoMap"}
                 photos={$currentAlbumStore.photos}
             />
         </div>
-    {/if}
+    {/if} -->
 
-    {#if $isLoggedInStore && $currentAlbumStore.photos.length > 1}
-        <div class="reorderButton" class:toggled={reordering}>
-            <Button
-                margin="0 0 0 10px"
-                on:click={() => {reordering = !reordering}}
-                title={`${reordering ? "Exit" : "Enter"} Reorder Mode`}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="192 144 224 176 192 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="32" y1="176" x2="224" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="64 112 32 80 64 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="224.00006" y1="80" x2="32.00006" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line></svg>
-            </Button>
-        </div>
-    {/if}
 
-    {#if reordering}
-        <LazyLoad loader={"EditableLayout"}
-            photoList={$currentAlbumStore.photos}
-            on:reordered={handlePhotoReorder}
+    {#each $currentAlbumStore.photoGroups as pg, pgi}
+        <PhotoGroup photoGroup={pg} photoGroupIndex={pgi}
+            on:splitGroup={handleSplitGroup}
+            on:makeNewGroup={handleMakeNewGroup}
+            on:shiftGroup={handleShiftGroup}
+            on:mergeUp={handleMergeUp}
         />
-    {:else}
-        <div class="albumPhotos"
-            bind:clientWidth={containerWidth}
-            style={`height: ${layout?.containerHeight || 0}px;`}
-        >
+    {/each}
 
-        {#if $currentAlbumStore.photos.length == 0}
-            <div>(No photos in this album… yet.)</div>
-        {/if}
-
-        {#if layout}
-            {#if $isLoggedInStore}
-                <NavCollection photos={$currentAlbumStore.photos}
-                    on:deleted={handlePhotoDeletion}
-                    on:moved={handlePhotoMove}
-                    on:coverChanged={() => updateMetaData()}
-                >
-                {#each $currentAlbumStore.photos as photo, pi}
-                    <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">
-                        <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
-                    </Link>
-                {/each}
-                </NavCollection>
-            {:else}
-                {#each $currentAlbumStore.photos as photo, pi}
-                    <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">
-                        <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
-                    </Link>
-                {/each}
-            {/if}
-        {/if}
-        </div>
-    {/if}
 {/if}
 </div>
 
 <style>
     .album {
         width: 100%;
-    }
-
-    .albumPhotos {
-        position: relative;
-        height: 50px;
-        margin-left: 0px;
-        margin-right: 5px;
     }
 
     .titleRow {
@@ -296,17 +298,6 @@
         height: 400px;
         width: 100%;
         margin: 10px 0px;
-    }
-
-    .reorderButton {
-        margin-left: 30px;
-        max-width: 50px;
-
-        padding: 10px 0 5px 0;
-    }
-
-    .reorderButton.toggled {
-        background-color: var(--edit-color);
     }
 
     .description {

@@ -40,7 +40,10 @@
 {#if $currentAlbumStore}
     <Router>
         <Route>
-            <LazyLoad loader={"AlbumPage"} on:uploaded={() => getAlbum(albumSlug) } />
+            <LazyLoad loader={"AlbumPage"}
+                on:uploaded={() => getAlbum(albumSlug) }
+                on:structuralChange={() => getAlbum(albumSlug)}
+            />
         </Route>
 
         <Route path="/:photoID" let:params>

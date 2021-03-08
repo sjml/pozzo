@@ -4,21 +4,21 @@
 
 - granularity pass
     - frontend
-        - first get degenerate albums rendering again (with single group)
-        - then multiple groups
-        - editing metadata
-        - splitting from context menu
-        - merging from metadata menu
         - photopage navigation
             - insert interstitials as you swipe
-        - then uploads (maybe just always add to last group; could be ok)
-        - then editablelayout / reordering stuff
+            - so album does some smart assembly on load
+        - once that's in, restore album map
+            - and "no photos in this album" notice
+        - restore setcoverphoto, delete, and move photo handlers
+        - then re-handle uploads (maybe just always add to last group; could be ok)
 
 dynamic albums (can't have groups, but can take metadata):
     - all
     - unsorted
+    - delete groups/albums
     - tag albums
     - remove manual unsorted
+
 
 * todos
     - examine markdown options
@@ -38,8 +38,6 @@ dynamic albums (can't have groups, but can take metadata):
 0. Granularity
     - album collections
         - open question -- how to set cover photo?
-    - sub-groups within albums
-        - can probably just manage as interstitial descriptions that the frontend will break up
 1. Frontend pass
     - clean up hacks
         - check for all console error statements and handle gracefully in UI
@@ -53,6 +51,7 @@ dynamic albums (can't have groups, but can take metadata):
 2. Backend pass
     - reorg tests to move all group ops to their own file
     - groups need to be guarded against their album privacy (do with photo pass)
+    - don't trust pre-filtering for params
     - reorg API (buncha group functions hang off album right now)
         - then document API
     - see if db's copypasta can be reduced without going full ORM

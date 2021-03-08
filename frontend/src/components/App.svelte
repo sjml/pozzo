@@ -117,6 +117,8 @@
     }
 
     .promo a {
+        padding-right: 10px;
+
         opacity: 0.2;
         transition-property: opacity;
         transition-duration: 200ms;

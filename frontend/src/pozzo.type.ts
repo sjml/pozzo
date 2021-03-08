@@ -64,6 +64,14 @@ export type Photo = {
     gpsAlt: number|null,
 }
 
+export type PhotoGroup = {
+    id: number,
+    description: string,
+    showMap: boolean,
+    ordering: number,
+    photos: Photo[],
+}
+
 export type Album = {
     id: number,
     title: string,
@@ -77,5 +85,5 @@ export type Album = {
     coverAspect?: number,
     coverBlurHash?: string,
     highestIndex: number,
-    photos: Photo[]
+    photoGroups: PhotoGroup[],
 }

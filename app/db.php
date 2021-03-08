@@ -549,11 +549,16 @@ class DB {
         self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
 
         // $albumID has been pre-filtered to be guaranteed numeric
-        $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM groups WHERE album_id = " . $albumID . ";");
-        if ($order == null) {
-            $order = 0;
+        if ($fromGroup == -1) {
+            $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM groups WHERE album_id = " . $albumID . ";");
+            if ($order == null) {
+                $order = 0;
+            }
+            $order += 1;
         }
-        $order += 1;
+        else {
+            $order = self::$pdb->querySingle("SELECT ordering FROM groups WHERE id = " . $fromGroup . ";");
+        }
 
         $prepCommand = "INSERT INTO groups (album_id, ordering, description, showMap)";
         $prepCommand .= " VALUES (?," . $order . ", '', 0);";
@@ -933,7 +938,7 @@ class DB {
         //   which needs to happen for initial population (and probably to help make sure
         //   they dont accidentally accumulate silently).
 
-        $query = "SELECT * FROM groups WHERE album_id = ? ORDER BY ordering";
+        $query = "SELECT * FROM groups WHERE album_id = ? ORDER BY ordering, id";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
         $results = $statement->execute();

@@ -178,8 +178,8 @@ def test_create_group_from_other(server, auth, req):
     g1 = adata["photoGroups"][1]
     g2 = adata["photoGroups"][2]
     assert len(g0["photos"]) == 2
-    assert len(g1["photos"]) == 0
-    assert len(g2["photos"]) == 3
+    assert len(g1["photos"]) == 3
+    assert len(g2["photos"]) == 0
 
 
 def test_group_metadata_auth(server, req):
@@ -213,13 +213,13 @@ def test_group_metadata(server, auth, req):
     stat_assert(res, 200)
     adata = res.json()
     gdata = adata["photoGroups"][1]
-    assert gdata["id"] == 5
+    assert gdata["id"] == 6
 
     assert adata["description"] == ""
     assert adata["showMap"] == False
 
     res = req.post(
-        server.api("/group/edit/5"),
+        server.api("/group/edit/6"),
         headers=auth,
         json={
             "description": "**New description for a group.**",
@@ -234,7 +234,7 @@ def test_group_metadata(server, auth, req):
     stat_assert(res, 200)
     adata = res.json()
     gdata = adata["photoGroups"][1]
-    assert gdata["id"] == 5
+    assert gdata["id"] == 6
 
     assert gdata["description"] == "**New description for a group.**"
     assert gdata["showMap"] == True
@@ -385,7 +385,7 @@ def test_reorder_album_groups(server, auth, req):
     )
     stat_assert(res, 200)
     glist = [g["id"] for g in res.json()["photoGroups"]]
-    assert glist == [2,5,6]
+    assert glist == [2,6,5]
 
     res = req.post(
         server.api("/album/reorderGroups/2"),

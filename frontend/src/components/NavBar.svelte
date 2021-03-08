@@ -41,6 +41,7 @@
             nextPhotoLink = `/album/${a.slug}/${a.photos[currIdx + 1].id}`;
         }
     }
+    $: findNeighbors($currentPhotoStore, $currentAlbumStore)
 
     function handleKeyDown(evt: KeyboardEvent) {
         if (evt.key == "ArrowLeft" && prevPhotoLink != null) {
@@ -50,8 +51,6 @@
             navigate(nextPhotoLink);
         }
     }
-
-    $: findNeighbors($currentPhotoStore, $currentAlbumStore)
 </script>
 
 <svelte:window
