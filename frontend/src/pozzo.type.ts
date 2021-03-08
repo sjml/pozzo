@@ -87,3 +87,8 @@ export type Album = {
     highestIndex: number,
     photoGroups: PhotoGroup[],
 }
+
+export type PerusalList = {
+    currentIdx: number,
+    nodes: (Photo|PhotoGroup)[],
+}

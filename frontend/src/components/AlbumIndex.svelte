@@ -2,7 +2,8 @@
     import { onDestroy } from "svelte";
     import { Router, Route, navigate } from "svelte-routing";
 
-    import { currentAlbumStore, isLoggedInStore } from "../stores";
+    import type { Album } from "../pozzo.type";
+    import { currentAlbumStore, currentPerusalStore, isLoggedInStore } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
 
@@ -35,6 +36,27 @@
         }
     }
     $: getAlbum(albumSlug)
+
+    // TODO: should this be done with a derived store instead of here?
+    async function updatePerusals(album: Album) {
+        if (album == null) {
+            $currentPerusalStore = null;
+            return;
+        }
+        $currentPerusalStore = {
+            currentIdx: -1,
+            nodes: []
+        };
+        album.photoGroups.forEach(pg => {
+            if (pg.description.length > 0) {
+                $currentPerusalStore.nodes = [...$currentPerusalStore.nodes, pg];
+            }
+            pg.photos.forEach(p => {
+                $currentPerusalStore.nodes = [...$currentPerusalStore.nodes, p];
+            })
+        });
+    }
+    $: updatePerusals($currentAlbumStore)
 </script>
 
 {#if $currentAlbumStore}
@@ -46,8 +68,8 @@
             />
         </Route>
 
-        <Route path="/:photoID" let:params>
-            <LazyLoad loader={"PhotoPage"} photoIdentifier={params.photoID} />
+        <Route path="/:perusalIdentifier" let:params>
+            <LazyLoad loader={"PerusalPage"} perusalIdentifier={params.perusalIdentifier} />
         </Route>
     </Router>
 {/if}

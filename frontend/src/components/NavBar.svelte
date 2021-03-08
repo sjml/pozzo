@@ -2,10 +2,10 @@
     import { createEventDispatcher } from "svelte";
     import { Link, navigate } from "svelte-routing";
 
-    import type { Photo, Album } from "../pozzo.type";
+    import type { Photo, Album, PerusalList } from "../pozzo.type";
     import {
         currentAlbumStore,
-        currentPhotoStore,
+        currentPerusalStore,
         fullScreen,
         siteData,
         metadataVisible
@@ -16,39 +16,38 @@
     const dispatch = createEventDispatcher();
 
     let collapsed = false;
-    let prevPhotoLink: string = null;
-    let nextPhotoLink: string = null;
+    let prevLink: string = null;
+    let nextLink: string = null;
 
-    function findNeighbors(p: Photo, a: Album) {
-        if (p == null || a == null) {
+    function findNeighbors(pl: PerusalList, a: Album) {
+        if (a == null || pl == null || pl.currentIdx < 0) {
+            prevLink = null;
+            nextLink = null;
             return;
         }
-        const currIdx = a.photos.findIndex((ap) => ap.id == p.id);
-        if (currIdx == -1) {
-            console.error("photo not in album!");
-            return;
-        }
-        if (currIdx == 0) {
-            prevPhotoLink = null;
+        if (pl.currentIdx == 0) {
+            prevLink = null;
         }
         else {
-            prevPhotoLink = `/album/${a.slug}/${a.photos[currIdx - 1].id}`;
+            const prevNode = pl.nodes[pl.currentIdx - 1];
+            prevLink = `/album/${a.slug}/${prevNode.hasOwnProperty("hash") ? "" : "g"}${prevNode.id}`;
         }
-        if (currIdx == a.photos.length-1) {
-            nextPhotoLink = null;
+        if (pl.currentIdx == pl.nodes.length-1) {
+            nextLink = null;
         }
         else {
-            nextPhotoLink = `/album/${a.slug}/${a.photos[currIdx + 1].id}`;
+            const nextNode = pl.nodes[pl.currentIdx + 1];
+            nextLink = `/album/${a.slug}/${nextNode.hasOwnProperty("hash") ? "" : "g"}${nextNode.id}`;
         }
     }
-    $: findNeighbors($currentPhotoStore, $currentAlbumStore)
+    $: findNeighbors($currentPerusalStore, $currentAlbumStore)
 
     function handleKeyDown(evt: KeyboardEvent) {
-        if (evt.key == "ArrowLeft" && prevPhotoLink != null) {
-            navigate(prevPhotoLink);
+        if (evt.key == "ArrowLeft" && prevLink != null) {
+            navigate(prevLink);
         }
-        else if (evt.key == "ArrowRight" && nextPhotoLink != null) {
-            navigate(nextPhotoLink);
+        else if (evt.key == "ArrowRight" && nextLink != null) {
+            navigate(nextLink);
         }
     }
 </script>
@@ -71,7 +70,7 @@
         {#if $currentAlbumStore}
             <div class="backLink">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                {#if $currentPhotoStore}
+                {#if $currentPerusalStore?.currentIdx >= 0}
                     <Link to={`/album/${$currentAlbumStore.slug}`}>
                         {$currentAlbumStore.title}
                     </Link>
@@ -81,17 +80,17 @@
             </div>
         {/if}
 
-        {#if $currentPhotoStore}
+        {#if $currentPerusalStore?.currentIdx >= 0}
             <div class="backLink">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                {$currentPhotoStore.title}
+                <!-- {$currentPhotoStore.title} -->
             </div>
         {/if}
     </div>
 
     <div class="backButton">
         <div class="backLink">
-            {#if $currentPhotoStore}
+            {#if $currentPerusalStore?.currentIdx >= 0}
                 <Link to={`/album/${$currentAlbumStore.slug}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$currentAlbumStore.title}
@@ -109,8 +108,8 @@
 
     <div class="spacer" />
 
-    {#if $currentPhotoStore}
-        {#if prevPhotoLink == null}
+    {#if $currentPerusalStore?.currentIdx >= 0}
+        {#if prevLink == null}
             <Button
                 title="(No Previous Photo)"
                 margin="0 5px 0 0"
@@ -124,13 +123,13 @@
                 margin="0 5px 0 0"
                 isDisabled={false}
             >
-                <Link to={prevPhotoLink}>
+                <Link to={prevLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M114.34277,229.65723l-96-96a8.003,8.003,0,0,1,0-11.31446l96-96A8.00065,8.00065,0,0,1,128,32V72h80a16.01833,16.01833,0,0,1,16,16v80a16.01833,16.01833,0,0,1-16,16H128v40a8.00066,8.00066,0,0,1-13.65723,5.65723Z"></path></svg>
                 </Link>
             </Button>
         {/if}
 
-        {#if nextPhotoLink == null}
+        {#if nextLink == null}
             <Button
                 title="(No Next Photo)"
                 margin="0 5px 0 0"
@@ -144,7 +143,7 @@
                 margin="0 5px 0 0"
                 isDisabled={false}
             >
-                <Link to={nextPhotoLink}>
+                <Link to={nextLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M132.93848,231.39062A8,8,0,0,1,128,224V184H48a16.01833,16.01833,0,0,1-16-16V88A16.01833,16.01833,0,0,1,48,72h80V32a8.00065,8.00065,0,0,1,13.65723-5.65723l96,96a8.003,8.003,0,0,1,0,11.31446l-96,96A8.002,8.002,0,0,1,132.93848,231.39062Z"></path></svg>
                 </Link>
             </Button>

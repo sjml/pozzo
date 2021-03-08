@@ -2,16 +2,17 @@
     import { onMount } from "svelte";
 
     import { GetImgPath } from "../util";
-    import { currentPhotoStore } from "../stores";
+
+    export let photoWhichIsReallyAVideo: Photo;
 
     let vidSrc: string;
     let posterSrc: string;
 
     onMount(() => {
-        posterSrc = GetImgPath("large", $currentPhotoStore.hash, $currentPhotoStore.uniq);
+        posterSrc = GetImgPath("large", photoWhichIsReallyAVideo.hash, photoWhichIsReallyAVideo.uniq);
 
-        const ext = $currentPhotoStore.originalFilename.split(".").pop();
-        vidSrc = GetImgPath("orig", $currentPhotoStore.hash, $currentPhotoStore.uniq, ext);
+        const ext = photoWhichIsReallyAVideo.originalFilename.split(".").pop();
+        vidSrc = GetImgPath("orig", photoWhichIsReallyAVideo.hash, photoWhichIsReallyAVideo.uniq, ext);
     });
 
 </script>

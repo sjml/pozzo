@@ -29,9 +29,9 @@
             loader: () => import("./PhotoMap.svelte"),
             resolve: () => "PhotoMap"
         }),
-        "PhotoPage" : register({
-            loader: () => import("./PhotoPage.svelte"),
-            resolve: () => "PhotoPage"
+        "PerusalPage" : register({
+            loader: () => import("./PerusalPage.svelte"),
+            resolve: () => "PerusalPage"
         }),
         "SetupPage" : register({
             loader: () => import("./SetupPage.svelte"),

@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Router, Route } from "svelte-routing";
+    import { Router, Route, navigate } from "svelte-routing";
 
-    import { currentAlbumStore, currentPhotoStore, fullScreen, siteData } from "../stores";
+    import { currentAlbumStore, currentPhotoStore, currentPerusalStore, fullScreen, siteData } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
     import NavBar from "./NavBar.svelte";
@@ -17,7 +17,7 @@
             Object.assign($siteData, res.data);
             $siteData.siteTitle = $siteData.siteTitle;
             if ($siteData.siteTitle == false) {
-                // router.goto("/setup");
+                navigate("/setup");
             }
         }
         else {
@@ -82,7 +82,7 @@
         </Route>
     </Router>
 
-    {#if $currentPhotoStore == null}
+    {#if $currentPerusalStore == null || $currentPerusalStore.currentIdx < 0}
         <div class="promo">
             {#if $siteData.promo}
                 <a href="https://github.com/sjml/pozzo" target="_">

@@ -4,9 +4,7 @@
 
 - granularity pass
     - frontend
-        - photopage navigation
-            - insert interstitials as you swipe
-            - so album does some smart assembly on load
+        - $currentPhotoStore.title
         - once that's in, restore album map
             - and "no photos in this album" notice
         - restore setcoverphoto, delete, and move photo handlers
@@ -22,6 +20,7 @@ dynamic albums (can't have groups, but can take metadata):
 
 * todos
     - examine markdown options
+    - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
     - re-org EXIF data display
     - darken overlay letter background or maybe add small outline; stuff still bleeds out
     - test if all the upheaval has left the editing frontend in a workable state
