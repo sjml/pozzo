@@ -160,6 +160,7 @@ function shutdownAll() {
     console.log(colors.blue("Shutting down PHP"));
     phpServer.kill(0);
   }
+  process.exit();
 }
 
 process.on('SIGINT', shutdownAll);

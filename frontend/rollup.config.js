@@ -13,7 +13,10 @@ function serve() {
   let server;
 
   function toExit() {
-    if (server) server.kill(0);
+    if (server) {
+      server.on("exit", () => {process.exit()});
+      server.kill('SIGINT');
+    }
   }
 
   return {
@@ -35,6 +38,7 @@ function serve() {
         shell: true
       });
 
+      process.on('SIGINT', toExit);
       process.on('SIGTERM', toExit);
       process.on('exit', toExit);
     }
