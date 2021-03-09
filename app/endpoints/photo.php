@@ -16,7 +16,8 @@ $router->AddHandler("/delete", ["deletePhotos"], true);
 $router->AddHandler("/copy", ["copyPhotos"], true);
 $router->AddHandler("/move", ["movePhotos"], true);
 $router->AddHandler("/orig", ["downloadOrig"]);
-$router->AddHandler("/tagset", ["getPhotosTagged"]);
+// $router->AddHandler("/allTags", ["getAllTags"]);
+$router->AddHandler("/tagSet", ["getPhotosTagged"]);
 $router->AddHandler("/tag", ["tagPhotos"], true);
 $router->AddHandler("/untag", ["untagPhotos"], true);
 
@@ -241,3 +242,7 @@ function getPhotosTagged() {
 
     output(DB::GetPhotosTagged($tags[0]));
 }
+
+// function getAllTags() {
+//     output(DB::GetTagList());
+// }

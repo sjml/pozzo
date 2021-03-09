@@ -73,6 +73,10 @@ $router->AddHandler("/login", [
     "require",
     __DIR__ . "/../../app/endpoints/login.php",
 ]);
+$router->AddHandler("/dynamic", [
+    "require",
+    __DIR__ . "/../../app/endpoints/dynamic.php",
+]);
 $router->AddHandler("/album", [
     "require",
     __DIR__ . "/../../app/endpoints/album.php",

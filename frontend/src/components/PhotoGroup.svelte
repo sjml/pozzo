@@ -1,8 +1,10 @@
+<script context="module">
+    import justifiedLayout from "justified-layout";
+</script>
+
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { Link } from "svelte-routing";
-
-    import justifiedLayout from "justified-layout";
 
     import type { PhotoGroup } from "../pozzo.type";
     import { isLoggedInStore, currentAlbumStore } from "../stores";

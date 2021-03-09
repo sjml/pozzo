@@ -3,14 +3,15 @@
     - video breaks nav? (or maybe is just stealing keystrokes)
 
 dynamic albums (can't have groups, but can take metadata):
-    - all
-    - unsorted
+    - frontend show all/unsorted
     - delete groups/albums
     - tag albums
-    - remove manual unsorted
 
 
 * todos
+    - privacy guards 
+        - all/unsorted should probably be private by default
+        - dyn visibility shouldn't affect filtering but rather be affected *by* it
     - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
     - re-org EXIF data display
     - darken overlay letter background or maybe add small outline; stuff still bleeds out
@@ -26,6 +27,7 @@ dynamic albums (can't have groups, but can take metadata):
     - requires backend support
         - album list context menu (delete / dissolve)
         - groups need to be guarded against their album privacy (do with photo pass)
+            - make guards consistently part of db response instead of frontend having to remember to filter (cf the albumlist fetch explicitly saying whether to get privates or not)
 
 0. Granularity
     - album collections
@@ -40,6 +42,7 @@ dynamic albums (can't have groups, but can take metadata):
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
         - uploadzone should tell you when it rejects a file and why
 2. Backend pass
+    - centralize output functions
     - reorg tests to move all group ops to their own file
     - don't trust pre-filtering for params
     - reorg API (buncha group functions hang off album right now)

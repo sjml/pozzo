@@ -11,7 +11,7 @@ $_REQUEST["POZZO_REQUEST"] = preg_replace(
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
-$router->AddHandler("/list", ["albumList"]); // give list of albums
+$router->AddHandler("/list", ["albumList"]);
 $router->AddHandler("/new", ["newAlbum"], true);
 $router->AddHandler("/view", ["viewAlbum"]);
 $router->AddHandler("/remove", ["removePhoto"], true);

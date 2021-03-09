@@ -124,6 +124,20 @@ class DB {
         $statement->execute();
 
 
+        $prepCommand = "CREATE TABLE IF NOT EXISTS dynamicAlbums (";
+        $prepCommand .= "id INTEGER PRIMARY KEY";
+        $prepCommand .= ", title TEXT UNIQUE";
+        $prepCommand .= ", slug TEXT UNIQUE";
+        $prepCommand .= ", isPrivate BOOLEAN";
+        $prepCommand .= ", description TEXT";
+        $prepCommand .= ", coverPhoto INTEGER";
+        $prepCommand .= ", showMap BOOLEAN";
+        $prepCommand .= ")";
+
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->execute();
+
+
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", title TEXT UNIQUE";
@@ -191,9 +205,33 @@ class DB {
         $statement->execute();
 
 
+        $sg = new SlugGenerator();
 
-        $unsortedIdx = self::CreateAlbum("[unsorted]");
+        $prepCommand = "INSERT INTO dynamicAlbums (title, slug, description, isPrivate, coverPhoto, showMap) VALUES (?, ?, ?, 0, -1, 0);";
+        $statement = self::$pdb->prepare($prepCommand);
+
+        $albumName = "[unsorted]";
+        $albumSlug = $sg->generate($albumName);
+        $albumDesc = "All photos that have not been added to an album";
+        $statement->bindParam(1, $albumName, SQLITE3_TEXT);
+        $statement->bindParam(2, $albumSlug, SQLITE3_TEXT);
+        $statement->bindParam(3, $albumDesc, SQLITE3_TEXT);
+        $statement->execute();
+        $statement->reset();
+        $unsortedIdx = self::$pdb->lastInsertRowID();
         self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
+
+        $albumName = "[all]";
+        $albumSlug = $sg->generate($albumName);
+        $albumDesc = "All photos";
+        $statement->bindParam(1, $albumName, SQLITE3_TEXT);
+        $statement->bindParam(2, $albumSlug, SQLITE3_TEXT);
+        $statement->bindParam(3, $albumDesc, SQLITE3_TEXT);
+        $statement->execute();
+        $statement->reset();
+        $allIdx = self::$pdb->lastInsertRowID();
+        self::SetConfig("all_album_index", $allIdx, "integer");
+
 
         self::SetConfig("app_key", Auth::GenerateKey(), "string");
         self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
@@ -323,7 +361,9 @@ class DB {
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
 
-        self::AddPhotoToAlbum($photoData["id"], $albumID, $order);
+        if ($albumID != null && $order != null) {
+            self::AddPhotoToAlbum($photoData["id"], $albumID, $order);
+        }
 
         if ($photoData["tags"] != "") {
             $tags = explode(", ", $photoData["tags"]);
@@ -333,6 +373,46 @@ class DB {
         }
 
         return $photoData["id"];
+    }
+
+    static function GetAllPhotos($filter = true) {
+        $results = self::$pdb->query("SELECT * FROM photos");
+
+        $ret = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            if ($row["tags"] == "") {
+                $row["tags"] = [];
+            }
+            else {
+                $row["tags"] = explode(", ", $row["tags"]);
+            }
+            array_push($ret, $row);
+        }
+
+        if ($filter) {
+            $ret = self::FilterPhotoList($ret);
+        }
+        return $ret;
+    }
+
+    static function GetUnsortedPhotos($filter = true) {
+        $results = self::$pdb->query("SELECT * FROM photos WHERE id NOT IN (SELECT DISTINCT photo_id FROM photos_groups)");
+
+        $ret = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            if ($row["tags"] == "") {
+                $row["tags"] = [];
+            }
+            else {
+                $row["tags"] = explode(", ", $row["tags"]);
+            }
+            array_push($ret, $row);
+        }
+
+        if ($filter) {
+            $ret = self::FilterPhotoList($ret);
+        }
+        return $ret;
     }
 
     static function GetPhoto($id) {
@@ -485,6 +565,19 @@ class DB {
         return $taggedPhotos;
     }
 
+    static function GetTagList() {
+        $query = "SELECT tags.id, tags.tag as tag_id,";
+        $query .= " COUNT(photos_tags.tag_id) as count FROM tags";
+        $query .= " LEFT JOIN photos_tags ON photos_tags.tag_id = tags.id";
+        $query .= " GROUP BY tags.id ORDER BY count DESC";
+        $results = self::$pdb->query($query);
+        $ret = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            array_push($ret, $row);
+        }
+        return ret;
+    }
+
     static function GetAlbumList($includePrivate = false) {
         $albumFields = [
             "albums.id AS albumId",
@@ -564,9 +657,25 @@ class DB {
 
         self::$pdb->exec("COMMIT TRANSACTION;");
 
+
         if ($fromGroup != -1) {
             if ($photoIDs == null) {
                 $photoIDs = [];
+            }
+            else {
+                // fresh selection so new group will match existing ordering regardless
+                //   of how the IDs were passed in
+
+                // $photoIDs is pre-filtered numeric
+                $prepCommand = "SELECT photo_id FROM photos_groups WHERE group_id = ? ";
+                $prepCommand .= " AND photo_id IN (" . implode(", ", $photoIDs) . ") ORDER BY ordering";
+                $statement = self::$pdb->prepare($prepCommand);
+                $statement->bindParam(1, $fromGroup, SQLITE3_INTEGER);
+                $results = $statement->execute();
+                $photoIDs = [];
+                while ($row = $results->fetchArray(SQLITE3_NUM)) {
+                    array_push($photoIDs, $row[0]);
+                }
             }
             $order = 0;
             $prepCommand = "UPDATE photos_groups SET ";
@@ -818,10 +927,6 @@ class DB {
     }
 
     static function AddPhotoToAlbum($photoID, $albumID, $order) {
-        if ($albumID == null) {
-            $albumID = self::GetConfig("unsorted_album_index");
-        }
-
         $query = "SELECT id FROM groups WHERE album_id = ? ORDER BY ordering DESC LIMIT 1;";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
@@ -1024,5 +1129,54 @@ class DB {
         }
 
         return $albumData;
+    }
+
+
+
+    static function FilterPhotoList($photos) {
+        // need to rethink how this will work
+        return $photos;
+
+        // if ($_REQUEST["POZZO_AUTH"] > 0) {
+        //     return $photos;
+        // }
+
+        // $allIdx = self::GetConfig("all_album_index");
+        // $allPrivate = self::$pdb->querySingle("SELECT isPrivate FROM dynamicAlbums WHERE id = " . $allIdx . ";");
+        // if ($allPrivate == 0) {
+        //     return $photos;
+        // }
+
+        // // TODO: probably a way to do this without the nested query
+        // $publicPhotoQuery = "SELECT DISTINCT photos.id FROM photos";
+        // $publicPhotoQuery .= " JOIN photos_groups ON photos.id = photos_groups.photo_id";
+        // $publicPhotoQuery .= " WHERE group_id IN";
+        // $publicPhotoQuery .= " (SELECT groups.id FROM groups";
+        // $publicPhotoQuery .= "   JOIN albums ON groups.album_id = albums.id";
+        // $publicPhotoQuery .= "   WHERE albums.isPrivate = 0";
+        // $publicPhotoQuery .= " )";
+        // $results = self::$pdb->query($publicPhotoQuery);
+        // $publicIDs = [];
+        // while ($row = $results->fetchArray(SQLITE3_NUM)) {
+        //     array_push($publicIDs, $row[0]);
+        // }
+
+        // $unsortedIdx = self::GetConfig("unsorted_album_index");
+        // $unsortedPrivate = self::$pdb->querySingle("SELECT isPrivate FROM dynamicAlbums WHERE id = " . $unsortedIdx . ";");
+        // if ($unsortedPrivate == 0) {
+        //     $unsorteds = self::GetUnsortedPhotos(false);
+        //     foreach ($unsorteds as $usp) {
+        //         array_push($publicIDs, $usp["id"]);
+        //     }
+        // }
+
+        // $retPhotos = [];
+        // foreach ($photos as $p) {
+        //     if (array_search($p["id"], $publicIDs) !== false) {
+        //         array_push($retPhotos, $p);
+        //     }
+        // }
+
+        // return $retPhotos;
     }
 }

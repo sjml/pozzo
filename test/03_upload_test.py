@@ -8,7 +8,20 @@ import pytest
 
 from test_util import stat_assert, get_img_path
 
-def test_public_upload(server, req):
+def test_empty_photo_list(server, req):
+    res = req.get(
+        server.api("/dynamic/all")
+    )
+    stat_assert(res, 200)
+    assert len(res.json()) == 0
+
+    res = req.get(
+        server.api("/dynamic/unsorted")
+    )
+    stat_assert(res, 200)
+    assert len(res.json()) == 0
+
+def test_upload_auth(server, req):
     with open("./test_corpus/jpeg/01.jpeg", "rb") as f:
         res = req.post(
             server.api("/upload"),
@@ -16,7 +29,7 @@ def test_public_upload(server, req):
         )
     stat_assert(res, 401)
 
-def test_credentialed_upload(server, auth, req):
+def test_upload(server, auth, req):
     with open("./test_corpus/jpeg/01.jpeg", "rb") as f:
         res = req.post(
             server.api("/upload"),
@@ -24,6 +37,26 @@ def test_credentialed_upload(server, auth, req):
             files={"mediaUp": ("01.jpeg", f, "image/jpeg")},
         )
     stat_assert(res, 200)
+    upped = res.json()
+
+    res = req.get(
+        server.api("/dynamic/all")
+    )
+    stat_assert(res, 200)
+    assert len(res.json()) == 1
+    assert res.json()[0]["id"] == upped["id"]
+    assert res.json()[0]["hash"] == upped["hash"]
+    assert res.json()[0]["uniq"] == upped["uniq"]
+
+    res = req.get(
+        server.api("/dynamic/unsorted")
+    )
+    stat_assert(res, 200)
+    assert len(res.json()) == 1
+    assert res.json()[0]["id"] == upped["id"]
+    assert res.json()[0]["hash"] == upped["hash"]
+    assert res.json()[0]["uniq"] == upped["uniq"]
+
 
 def test_non_image_upload(server, auth, req):
     with open("./test_corpus/attributions.txt", "rb") as f:
@@ -66,10 +99,10 @@ def test_resize_comprehensiveness(server, req):
     stat_assert(res, 200)
     sizes = res.json()["sizes"]
 
-    res = req.get(server.api(f"/album/view/1"))
+    res = req.get(server.api("/dynamic/all"))
     stat_assert(res, 200)
-    adata = res.json()
-    plist = adata["photoGroups"][0]["photos"]
+    plist = res.json()
+    assert len(plist) == 10
 
     for i in range(1, 11):
         pdata = list(filter(lambda x: x["id"] == i, plist))[0]
@@ -79,10 +112,9 @@ def test_resize_comprehensiveness(server, req):
             stat_assert(res, 200)
 
 def test_orig_getback(server, req):
-    res = req.get(server.api(f"/album/view/1"))
+    res = req.get(server.api("/dynamic/all"))
     stat_assert(res, 200)
-    adata = res.json()
-    plist = adata["photoGroups"][0]["photos"]
+    plist = res.json()
 
     for i in range(1, 11):
         pdata = list(filter(lambda x: x["id"] == i, plist))[0]
@@ -109,14 +141,15 @@ def test_duplicate_allowed_but_unique(server, auth, req):
     stat_assert(res, 200)
     dupe_data = res.json()
 
-    res = req.get(server.api(f"/album/view/1"))
+    res = req.get(server.api("/dynamic/all"))
     stat_assert(res, 200)
-    adata = res.json()
-    plist = adata["photoGroups"][0]["photos"]
+    plist = res.json()
+    assert len(plist) == 11
 
     orig_data = list(filter(lambda x: x["id"] == 1, plist))[0]
 
     assert orig_data["hash"] == dupe_data["hash"]
     assert orig_data["uniq"] != dupe_data["uniq"]
+    assert orig_data["id"] != dupe_data["id"]
 
 

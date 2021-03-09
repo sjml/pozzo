@@ -5,41 +5,14 @@ import mimetypes
 import requests
 import pytest
 
-from test_util import stat_assert
+from test_util import stat_assert, create_album
 
-def test_list_view(server, req):
+def test_empty_list_view(server, req):
     res = req.get(
         server.api("/album/list"),
     )
     stat_assert(res, 200)
-    assert len(res.json()) == 1
-
-def test_album_view(server, req):
-    res = req.get(
-        server.api("/album/view/1")
-    )
-    stat_assert(res, 200)
-    adata = res.json()
-    assert adata["title"] == "[unsorted]"
-    assert len(adata["photoGroups"]) == 1
-    plist = adata["photoGroups"][0]["photos"]
-    assert len(plist) == 11
-
-def test_album_view_by_slug(server, req):
-    res = req.get(
-        server.api("/album/view/unsorted")
-    )
-    stat_assert(res, 200)
-    adata = res.json()
-    assert adata["title"] == "[unsorted]"
-    plist = adata["photoGroups"][0]["photos"]
-    assert len(plist) == 11
-
-def test_nonexistent_album_is_nonexistent(server, req):
-    res = req.post(
-        server.api("/album/view/2")
-    )
-    stat_assert(res, 404)
+    assert len(res.json()) == 0
 
 def test_create_album_auth(server, auth, req):
     res = req.post(
@@ -60,21 +33,47 @@ def test_create_album(server, auth, req):
         json={"title": "Test Album 1"}
     )
     stat_assert(res, 200)
+    assert res.json()["albumID"] == 1
 
     res = req.get(
         server.api("/album/list"),
     )
     stat_assert(res, 200)
-    assert len(res.json()) == 2
-    assert res.json()[1]["title"] == "Test Album 1"
+    assert len(res.json()) == 1
+    assert res.json()[0]["id"] == 1
+    assert res.json()[0]["title"] == "Test Album 1"
 
+def test_album_view(server, req):
     res = req.get(
-        server.api("/album/view/2")
+        server.api("/album/view/1")
     )
     stat_assert(res, 200)
-    assert len(res.json()["photoGroups"]) == 1
-    assert res.json()["photoGroups"][0]["id"] == 2
-    assert len(res.json()["photoGroups"][0]["photos"]) == 0
+    adata = res.json()
+
+    assert adata["id"] == 1
+    assert adata["title"] == "Test Album 1"
+    assert len(adata["photoGroups"]) == 1
+    assert adata["photoGroups"][0]["id"] == 1
+    assert len(adata["photoGroups"][0]["photos"]) == 0
+
+def test_album_view_by_slug(server, req):
+    res = req.get(
+        server.api("/album/view/test-album-1")
+    )
+    stat_assert(res, 200)
+    adata = res.json()
+
+    assert adata["id"] == 1
+    assert adata["title"] == "Test Album 1"
+    assert len(adata["photoGroups"]) == 1
+    assert adata["photoGroups"][0]["id"] == 1
+    assert len(adata["photoGroups"][0]["photos"]) == 0
+
+def test_nonexistent_album_is_nonexistent(server, req):
+    res = req.post(
+        server.api("/album/view/2")
+    )
+    stat_assert(res, 404)
 
 def test_album_unique_name(server, auth, req):
     res = req.post(
@@ -105,7 +104,7 @@ def test_copy_photos(server, auth, req):
     )
     stat_assert(res, 400)
 
-    copyInsts = [{"photoID": x, "groupID": 2} for x in range(1,6)]
+    copyInsts = [{"photoID": x, "groupID": 1} for x in range(1,6)]
     res = req.post(
         server.api("/photo/copy"),
         headers=auth,
@@ -117,7 +116,7 @@ def test_copy_photos(server, auth, req):
     assert res.json()["numErrors"] == 0
 
     res = req.get(
-        server.api("/album/view/2")
+        server.api("/album/view/1")
     )
     stat_assert(res, 200)
     adata = res.json()
@@ -137,7 +136,7 @@ def test_remove_photos(server, auth, req):
     )
     stat_assert(res, 400)
 
-    removeInsts = [{"photoID": x, "groupID": 1} for x in range(1,6)]
+    removeInsts = [{"photoID": x, "groupID": 1} for x in range(3,6)]
     res = req.post(
         server.api("/album/remove"),
         headers=auth,
@@ -151,7 +150,7 @@ def test_remove_photos(server, auth, req):
         server.api("/album/view/1")
     )
     stat_assert(res, 200)
-    assert len(res.json()["photoGroups"][0]["photos"]) == 6
+    assert len(res.json()["photoGroups"][0]["photos"]) == 2
 
 def test_create_private_album(server, auth, req):
     res = req.post(
@@ -163,12 +162,12 @@ def test_create_private_album(server, auth, req):
 
 def test_album_privacy(server, auth, req):
     res = req.get(
-        server.api("/album/view/3")
+        server.api("/album/view/2")
     )
     stat_assert(res, 404)
 
     res = req.get(
-        server.api("/album/view/3"),
+        server.api("/album/view/2"),
         headers=auth
     )
     stat_assert(res, 200)
@@ -178,14 +177,14 @@ def test_album_list_privacy(server, auth, req):
         server.api("/album/list"),
     )
     stat_assert(res, 200)
-    assert len(res.json()) == 2
+    assert len(res.json()) == 1
 
     res = req.get(
         server.api("/album/list"),
         headers=auth
     )
     stat_assert(res, 200)
-    assert len(res.json()) == 3
+    assert len(res.json()) == 2
 
 def test_album_metadata_auth(server, req):
     res = req.post(
@@ -193,16 +192,13 @@ def test_album_metadata_auth(server, req):
     )
     stat_assert(res, 401)
 
-def test_album_metadata_empty(server, auth, req):
-    res = req.post(
-        server.api("/album/new"),
-        headers=auth,
-        json={"title": "Test Album 3"}
-    )
-    stat_assert(res, 200)
+@pytest.fixture(scope="module")
+def ta3(server, auth):
+    return create_album("Test Album 3", [[2,3,4,5,6]], server, auth)
 
+def test_album_metadata_empty(server, auth, req, ta3):
     res = req.post(
-        server.api("/album/edit/4"),
+        server.api(f"/album/edit/{ta3}"),
         headers=auth
     )
     stat_assert(res, 400)
@@ -221,9 +217,9 @@ def test_album_metadata_nonexistent(server, auth, req):
     )
     stat_assert(res, 404)
 
-def test_album_metadata(server, auth, req):
+def test_album_metadata(server, auth, req, ta3):
     res = req.get(
-        server.api("/album/view/4")
+        server.api(f"/album/view/{ta3}")
     )
     stat_assert(res, 200)
     adata = res.json()
@@ -234,7 +230,7 @@ def test_album_metadata(server, auth, req):
     assert adata["coverPhoto"] == -1
 
     res = req.post(
-        server.api("/album/edit/4"),
+        server.api(f"/album/edit/{ta3}"),
         headers=auth,
         json={
             "title": "Edited Title",
@@ -247,7 +243,7 @@ def test_album_metadata(server, auth, req):
     stat_assert(res, 200)
 
     res = req.get(
-        server.api("/album/view/4"),
+        server.api(f"/album/view/{ta3}"),
         headers=auth
     )
     stat_assert(res, 200)
@@ -258,9 +254,9 @@ def test_album_metadata(server, auth, req):
     assert adata["showMap"] == True
     assert adata["coverPhoto"] == 1
 
-def test_album_invalid_metadata(server, req, auth):
+def test_album_invalid_metadata(server, req, auth, ta3):
     res = req.post(
-        server.api("/album/edit/4"),
+        server.api(f"/album/edit/{ta3}"),
         headers=auth,
         json={
             "title": 5,
@@ -271,47 +267,6 @@ def test_album_invalid_metadata(server, req, auth):
         }
     )
     stat_assert(res, 400)
-
-def test_delete_album_auth(server, req):
-    res = req.post(
-        server.api("/album/delete"),
-    )
-    stat_assert(res, 401)
-
-def test_delete_album(server, auth, req):
-    res = req.post(
-        server.api("/album/delete"),
-        headers=auth,
-    )
-    stat_assert(res, 400)
-
-    res = req.post(
-        server.api("/album/delete"),
-        headers=auth,
-        json={"albumID": 7}
-    )
-    stat_assert(res, 404)
-
-    res = req.post(
-        server.api("/album/delete"),
-        headers=auth,
-        json={"albumID": 4}
-    )
-    stat_assert(res, 200)
-
-    res = req.get(
-        server.api("/album/view/4"),
-        headers=auth
-    )
-    stat_assert(res, 404)
-
-def test_delete_nonexistent_album(server, auth, req):
-    res = req.post(
-        server.api("/album/delete"),
-        headers=auth,
-        json={"albumID": 4}
-    )
-    stat_assert(res, 404)
 
 def test_reorder_album_list_auth(server, req):
     res = req.post(
@@ -379,15 +334,9 @@ def test_reorder_album_list(server, auth, req):
     order = [a["id"] for a in res.json()]
     assert order == [3,2,1]
 
-
 # also checking the special cases to make sure all the code is covered
 def test_ordered_upload(server, auth, req):
-    res = req.post(
-        server.api("/album/new"),
-        headers=auth,
-        json={"title": "Ordered Album"}
-    )
-    stat_assert(res, 200)
+    ordered_id = create_album("Ordered Album", [], server, auth)
 
     files = os.listdir("./test_corpus/test_cases")
     files.sort()
@@ -398,18 +347,53 @@ def test_ordered_upload(server, auth, req):
                 server.api("/upload"),
                 headers=auth,
                 files={"mediaUp": (img, f, mimetypes.guess_type(img)[0])},
-                data={"data": json.dumps({"albumID": 4, "order": fcount - i})}
+                data={"data": json.dumps({"albumID": ordered_id, "order": fcount - i})}
             )
         stat_assert(res, 200)
 
     res = req.get(
-        server.api("/album/view/ordered-album")
+        server.api(f"/album/view/{ordered_id}")
     )
     stat_assert(res, 200)
     adata = res.json()
-    assert adata["id"] == 4
+    assert adata["id"] == ordered_id
     gdata = adata["photoGroups"][0]
     assert len(gdata["photos"]) == 2
     assert gdata["photos"][0]["id"] == 13
     assert gdata["photos"][1]["id"] == 12
 
+def test_delete_album_auth(server, req, ta3):
+    res = req.post(
+        server.api("/album/delete"),
+        json={"albumID": ta3}
+    )
+    stat_assert(res, 401)
+
+def test_delete_nonexistent_album(server, auth, req, ta3):
+    res = req.post(
+        server.api("/album/delete"),
+        headers=auth,
+        json={"albumID": ta3 + 5}
+    )
+    stat_assert(res, 404)
+
+def test_delete_album_params(server, auth, req):
+    res = req.post(
+        server.api("/album/delete"),
+        headers=auth,
+    )
+    stat_assert(res, 400)
+
+def test_delete_album(server, auth, req, ta3):
+    res = req.post(
+        server.api("/album/delete"),
+        headers=auth,
+        json={"albumID": ta3}
+    )
+    stat_assert(res, 200)
+
+    res = req.get(
+        server.api(f"/album/view/{ta3}"),
+        headers=auth
+    )
+    stat_assert(res, 404)

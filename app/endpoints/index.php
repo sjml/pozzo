@@ -33,9 +33,14 @@ $message = [
             "/copy",
             "/move",
             "/orig",
-            "/tagset",
+            // "/allTags",
+            "/tagSet",
             "/tag",
             "/untag",
+        ],
+        "/dynamic" => [
+            "/all",
+            "/unsorted",
         ],
     ],
 ];
