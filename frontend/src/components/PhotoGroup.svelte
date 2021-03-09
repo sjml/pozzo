@@ -63,7 +63,7 @@
             authorize: true
         });
         if (res.success) {
-            // no-op; frontend already shows backend's reality
+            dispatch("perusalChangeNeeded");
         }
         else {
             console.error(res);
@@ -78,6 +78,7 @@
         });
         if (res.success) {
             photoGroup.photos = evt.detail.newPhotos;
+            dispatch("perusalChangeNeeded");
         }
         else {
             console.error(res);
@@ -92,6 +93,7 @@
         });
         if (res.success) {
             photoGroup.photos = photoGroup.photos.filter(p => evt.detail.deleted.indexOf(p) < 0);
+            dispatch("perusalChangeNeeded");
         }
         else {
             console.error(res);
@@ -110,6 +112,7 @@
         });
         if (res.success) {
             photoGroup.photos = photoGroup.photos.filter(p => evt.detail.moved.indexOf(p) < 0);
+            dispatch("perusalChangeNeeded");
         }
         else {
             console.error(res);

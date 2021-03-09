@@ -8,7 +8,7 @@ $message = [
         "/setup" => [],
         "/login" => [
             "/",
-            "check"
+            "check",
         ],
         "/upload" => [],
         "/album" => [
@@ -19,7 +19,14 @@ $message = [
             "/delete",
             "/edit",
             "/reorderList",
+            "/reorderGroups",
+        ],
+        "/group" => [
+            "/new",
+            "/edit",
+            "/move",
             "/reorder",
+            "/merge",
         ],
         "/photo" => [
             "/delete",

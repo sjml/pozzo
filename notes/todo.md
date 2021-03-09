@@ -2,17 +2,6 @@
     - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
     - video breaks nav? (or maybe is just stealing keystrokes)
 
-- granularity pass
-    - frontend
-        - make sure these affect perusal list:
-            - adding/removing group description
-            - rearranging groups
-            - structural change
-            - deleting photos
-            - moving photos
-            - adding photos
-    - update endpoint index
-
 dynamic albums (can't have groups, but can take metadata):
     - all
     - unsorted

@@ -49,6 +49,7 @@
     <svelte:component this={loadedComponent} {...$$restProps}
         on:structuralChange
         on:uploaded
+        on:perusalChangeNeeded
 
         on:reordered
 

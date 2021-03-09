@@ -10,8 +10,8 @@
     export let albumSlug: string;
 
     onDestroy(() => {
-        $currentAlbumStore = null;
         $currentPerusalStore = null;
+        $currentAlbumStore = null;
     });
 
     $: {
@@ -70,6 +70,7 @@
             <LazyLoad loader={"AlbumPage"}
                 on:uploaded={() => getAlbum(albumSlug) }
                 on:structuralChange={() => getAlbum(albumSlug)}
+                on:perusalChangeNeeded={() => updatePerusals($currentAlbumStore)}
             />
         </Route>
 

@@ -214,6 +214,8 @@
                 on:shiftGroup={handleShiftGroup}
                 on:mergeUp={handleMergeUp}
                 on:coverChanged={updateMetaData}
+
+                on:perusalChangeNeeded
             />
         {/each}
     {:else}
