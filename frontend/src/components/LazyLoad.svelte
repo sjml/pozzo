@@ -1,6 +1,5 @@
-<script lang="ts">
-    import Loadable from "svelte-loadable";
-    import { register } from "svelte-loadable";
+<script>
+    import Loadable, { register } from "svelte-loadable";
 
     // unfortunately have to manually pass on any dispatched events
     //   from these sub-components
@@ -43,7 +42,7 @@
         }),
     };
 
-    export let loader: string;
+    export let loader;
 </script>
 
 <Loadable loader={registeredLoaders[loader]} let:component={loadedComponent} >

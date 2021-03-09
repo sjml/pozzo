@@ -28,17 +28,17 @@
         contextMenuVisible = true;
     }
 
-
-    function handleContextMenuDelete(evt: CustomEvent) {
-        photos = photos.filter(s => $navSelection.indexOf(s) < 0);
-        dispatch("deleted", {newPhotos: photos});
+    function handleContextMenuDelete(_: CustomEvent) {
+        dispatch("deleted", {deleted: photos.filter(s => $navSelection.indexOf(s) >= 0)});
         contextMenuVisible = false;
         $navSelection = [];
     }
 
     function handleContextMenuMove(evt: CustomEvent) {
-        photos = photos.filter(s => $navSelection.indexOf(s) < 0);
-        dispatch("moved", {newPhotos: photos, targetAlbumID: evt.detail.targetAlbumID});
+        dispatch("moved", {
+            moved: photos.filter(s => $navSelection.indexOf(s) >= 0),
+            targetAlbumID: evt.detail.targetAlbumID
+        });
         contextMenuVisible = false;
         $navSelection = [];
     }
@@ -54,7 +54,6 @@
         contextMenuVisible = false;
         $navSelection = [];
     }
-
 
     function handleKeyDown(evt: KeyboardEvent) {
         if (!$isLoggedInStore) {

@@ -195,7 +195,6 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        white-space: nowrap;
 
         transition-property: height, background-color;
         transition-duration: 600ms;
@@ -213,6 +212,10 @@
 
     nav div {
         display: flex;
+    }
+
+    .homeLink, .backLink {
+        white-space: nowrap;
     }
 
     .homeLink {

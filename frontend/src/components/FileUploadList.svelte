@@ -17,7 +17,8 @@
         let offset = 1;
         if ($currentAlbumStore != null) {
             targetAlbumID = $currentAlbumStore.id;
-            const existingIndices = $currentAlbumStore.photos.map((p) => (p as any).ordering);
+            const lastGroup = $currentAlbumStore.photoGroups[$currentAlbumStore.photoGroups.length-1];
+            const existingIndices = lastGroup.photos.map((p) => (p as any).ordering);
             if (existingIndices.length == 0) {
                 offset = 1;
             }

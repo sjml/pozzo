@@ -12,7 +12,7 @@ $_REQUEST["POZZO_REQUEST"] = preg_replace(
 require_once __DIR__ . "/../../app/router.php";
 $router = new Router();
 
-$router->AddHandler("/delete", ["deletePhoto"], true);
+$router->AddHandler("/delete", ["deletePhotos"], true);
 $router->AddHandler("/copy", ["copyPhotos"], true);
 $router->AddHandler("/move", ["movePhotos"], true);
 $router->AddHandler("/tagset", ["getPhotosTagged"]);
@@ -57,29 +57,28 @@ function downloadOrig() {
     readfile($filePath);
 }
 
-function deletePhoto() {
+function deletePhotos() {
     $input = json_decode(file_get_contents("php://input"), true);
-    if (!isset($input["photoID"]) || !is_numeric($input["photoID"])) {
-        output(["message" => "Invalid or missing parameter 'photoID'"], 400);
+    if (!isset($input["photoIDs"]) || !is_array($input["photoIDs"])) {
+        output(["message" => "Invalid or missing parameter 'photoIDs'"], 400);
         return;
     }
+    $deletionList = $input["photoIDs"];
 
-    $result = DB::DeletePhoto($input["photoID"]);
-
-    if (!is_array($result)) {
-        if ($result == -1) {
-            output(["message" => "Photo not found"], 404);
-            return;
-        }
-        elseif ($result == -2) {
-            output(["message" => "Could not delete photo"], 500);
+    foreach ($deletionList as $del) {
+        if (!is_numeric($del)) {
+            output(["message" => "Non-numeric value in 'photoIDs'"], 400);
             return;
         }
     }
 
-    deleteImagesWithHash($result["hash"], $result["uniq"]);
+    $results = DB::DeletePhotos($deletionList);
 
-    output(["message" => "Photo deleted", "data" => $result]);
+    foreach ($results as $deadPD) {
+        deleteImagesWithHash($deadPD["hash"], $deadPD["uniq"]);
+    }
+
+    output(["message" => "Photos deleted", "data" => $results]);
 }
 
 function copyPhotos() {
@@ -147,11 +146,20 @@ function movePhotos() {
         return;
     }
     if (!isset($input["toGroupID"]) || !is_numeric($input["toGroupID"])) {
-        output(
-            ["message" => "Missing or non-numeric value for 'toGroupID'"],
-            400,
-        );
-        return;
+        if (!isset($input["toAlbumID"]) || !is_numeric($input["toAlbumID"])) {
+            output(
+                ["message" => "Missing or non-numeric value for either 'toGroupID' or 'toAlbumID'"],
+                400,
+            );
+            return;
+        }
+        $album = DB::FindAlbum($input["toAlbumID"], true);
+        if ($album == false) {
+            output(["message" => "Target album not found"], 404);
+            return;
+        }
+        $lastGroup = end($album["photoGroups"]);
+        $input["toGroupID"] = $lastGroup["id"];
     }
 
     $result = DB::MovePhotos(

@@ -83,6 +83,38 @@
             console.error(res);
         }
     }
+
+    async function handlePhotoDeletion(evt: CustomEvent) {
+        const res = await RunApi("/photo/delete", {
+            params: {photoIDs: evt.detail.deleted.map(p => p.id)},
+            method: "POST",
+            authorize: true
+        });
+        if (res.success) {
+            photoGroup.photos = photoGroup.photos.filter(p => evt.detail.deleted.indexOf(p) < 0);
+        }
+        else {
+            console.error(res);
+        }
+    }
+
+    async function handlePhotoMove(evt: CustomEvent) {
+        const res = await RunApi(`/photo/move`, {
+            params: {
+                photoIDs: evt.detail.moved.map(p => p.id),
+                fromGroupID: photoGroup.id,
+                toAlbumID: evt.detail.targetAlbumID
+            },
+            method: "POST",
+            authorize: true
+        });
+        if (res.success) {
+            photoGroup.photos = photoGroup.photos.filter(p => evt.detail.moved.indexOf(p) < 0);
+        }
+        else {
+            console.error(res);
+        }
+    }
 </script>
 
 <div class="photoGroup"
@@ -183,13 +215,15 @@
                 style={`height: ${layout?.containerHeight || 0}px;`}
             >
                 {#if $isLoggedInStore}
-                <!-- on:coverChanged={() => updateMetaData()} -->
-                <!-- on:deleted={handlePhotoDeletion} -->
-                <!-- on:moved={handlePhotoMove} -->
                     <NavCollection
                         photos={photoGroup.photos}
                         on:splitGroup={(evt) => dispatch("splitGroup", Object.assign(evt.detail, {originGroup: photoGroup}))}
                         on:makeNewGroup={(evt) => dispatch("makeNewGroup", Object.assign(evt.detail, {originGroup: photoGroup}))}
+
+                        on:deleted={handlePhotoDeletion}
+                        on:moved={handlePhotoMove}
+
+                        on:coverChanged
                     >
                         {#each photoGroup.photos as photo, pi}
                             <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">

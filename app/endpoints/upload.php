@@ -29,6 +29,9 @@ function upload() {
                 $albumID = $input["albumID"];
             }
         }
+        if ($albumID == null) {
+            $orderSlot = null;
+        }
 
         if (substr($_FILES["mediaUp"]["type"], 0, 6) === "image/") {
             $photoData = importImage($_FILES["mediaUp"]["tmp_name"]);

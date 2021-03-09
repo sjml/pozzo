@@ -272,12 +272,7 @@ class DB {
         return false;
     }
 
-    static function InsertPhoto(
-        $photoData,
-        $originalFilename,
-        $albumID,
-        $order
-    ) {
+    static function InsertPhoto($photoData, $originalFilename, $albumID, $order) {
         $statement = self::$pdb->prepare(
             "INSERT INTO photos (
                 uploadTimeStamp, uploadedBy, originalFilename, isVideo, size,
@@ -358,34 +353,33 @@ class DB {
         return $photoData;
     }
 
-    static function DeletePhoto($id) {
-        $photoData = self::GetPhoto($id);
-        if ($photoData == null) {
-            return -1;
+    static function DeletePhotos($idList) {
+        // $idList pre-filtered to be numeric
+        $delIDs = "(" . implode(", ", $idList) . ")";
+
+        $photoData = [];
+        foreach ($idList as $del) {
+            $pd = self::GetPhoto($del);
+            if ($pd != null) {
+                array_push($pd);
+            }
         }
 
-        $query = "DELETE FROM photos_groups WHERE photo_id = ?";
+        $query = "DELETE FROM photos_groups WHERE photo_id IN " . $delIDs;
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
-        $query = "UPDATE albums SET coverPhoto = -1 WHERE coverPhoto = ?";
+        $query = "UPDATE albums SET coverPhoto = -1 WHERE coverPhoto IN " . $delIDs;
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
-        $query = "DELETE FROM photos_tags WHERE photo_id = ?";
+        $query = "DELETE FROM photos_tags WHERE photo_id IN " . $delIDs;
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
 
-        $query = "DELETE FROM photos WHERE id = ?";
+        $query = "DELETE FROM photos WHERE id IN " . $delIDs;
         $statement = self::$pdb->prepare($query);
-        $statement->bindParam(1, $photoData["id"], SQLITE3_INTEGER);
         $results = $statement->execute();
-        if (self::$pdb->changes() == 0) {
-            return -2;
-        }
 
         return $photoData;
     }

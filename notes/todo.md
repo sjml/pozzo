@@ -4,8 +4,14 @@
 
 - granularity pass
     - frontend
-        - restore setcoverphoto, delete, and move photo handlers
-        - then re-handle uploads (maybe just always add to last group; could be ok)
+        - make sure these affect perusal list:
+            - adding/removing group description
+            - rearranging groups
+            - structural change
+            - deleting photos
+            - moving photos
+            - adding photos
+    - update endpoint index
 
 dynamic albums (can't have groups, but can take metadata):
     - all
@@ -20,20 +26,20 @@ dynamic albums (can't have groups, but can take metadata):
     - re-org EXIF data display
     - darken overlay letter background or maybe add small outline; stuff still bleeds out
     - test if all the upheaval has left the editing frontend in a workable state
-    - UX niceties
+    - frontend UX
+        - move photos between groups in same album
         - make navbar breadcrumbs collapsible (down to icons)
         - edit photo title/description
         - add/remove tags from photo page and context menu
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
             - set the "don't leave" flag during any mutating operations
         - shift-click to select ranges
-        - bulk delete
     - requires backend support
         - album list context menu (delete / dissolve)
+        - groups need to be guarded against their album privacy (do with photo pass)
 
 0. Granularity
     - album collections
-        - open question -- how to set cover photo?
 1. Frontend pass
     - clean up hacks
         - check for all console error statements and handle gracefully in UI
@@ -46,27 +52,20 @@ dynamic albums (can't have groups, but can take metadata):
         - uploadzone should tell you when it rejects a file and why
 2. Backend pass
     - reorg tests to move all group ops to their own file
-    - groups need to be guarded against their album privacy (do with photo pass)
     - don't trust pre-filtering for params
     - reorg API (buncha group functions hang off album right now)
         - then document API
     - see if db's copypasta can be reduced without going full ORM
+    - cascade delete with foreign keys instead of manual? 
+    - check on use of is_numeric vs is_integer
+    - look at for loops in db.php and investigate if there are single queries to handle them
     - limit length of text things (titles, descriptions)
-    - directly fetched photos need to check if they're in a public album
-        - (basically all the /photo get endpoints)
     - get to 100% test coverage, just 'cause
 3. Frontend extra bonus points
-    - can I do something clever to try and pull all the images from an album as you're viewing the individual pages?
-        - something-something web workers? BLERGH.
-        - might be able to not do the blurs if the images are already loaded, though...
     - smarter font loading: https://www.zachleat.com/web/comprehensive-webfonts/
         - match: https://meowni.ca/font-style-matcher/
 
 ## future
-* special handling for unsorted album? (automatically removing from it)
-    - "smart" albums in general? (just unsorted and tags)
-    - option for copying to album instead of moving to it
-        - trivial on the backend, but UX of "this photo is in multiple albums" is questionable
 * share buttons? :-/
     - no, but generate share cards
 * sweep through API responses and make sure there's some consistency

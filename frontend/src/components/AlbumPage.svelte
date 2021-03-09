@@ -53,42 +53,6 @@
         }
     }
 
-    // async function handlePhotoDeletion(evt: CustomEvent) {
-    //     for (let p of $navSelection) {
-    //         const delRes = await RunApi("/photo/delete", {
-    //             authorize: true,
-    //             method: "POST",
-    //             params: {
-    //                 photoID: p.id
-    //             }
-    //         });
-    //         if (!delRes.success) {
-    //             console.error("Could not delete photo", delRes);
-    //             return;
-    //         }
-    //     }
-
-    //     $currentAlbumStore.photos = evt.detail.newPhotos;
-    // }
-
-    // async function handlePhotoMove(evt:CustomEvent) {
-    //     const res = await RunApi(`/photo/move`, {
-    //         params: {
-    //             photoIDs: $navSelection.map(ps => ps.id),
-    //             fromAlbumID: $currentAlbumStore.id,
-    //             toAlbumID: evt.detail.targetAlbumID
-    //         },
-    //         method: "POST",
-    //         authorize: true
-    //     });
-    //     if (res.success) {
-    //         $currentAlbumStore.photos = evt.detail.newPhotos;
-    //     }
-    //     else {
-    //         console.error(res);
-    //     }
-    // }
-
     async function newGroup(fromGroupID: number, offshoots: Photo[]) {
         const res = await RunApi("/group/new", {
             params: {
@@ -249,6 +213,7 @@
                 on:makeNewGroup={handleMakeNewGroup}
                 on:shiftGroup={handleShiftGroup}
                 on:mergeUp={handleMergeUp}
+                on:coverChanged={updateMetaData}
             />
         {/each}
     {:else}

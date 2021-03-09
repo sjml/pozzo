@@ -6,6 +6,10 @@ running list of tests that still need to be written as I think of them, awaiting
     delete album + images
         - images are gone from server
     deleting groups
+    deleting multiple photos
+    moving photo from group to album
+    cannot delete last group from album
+    cannot move photos to same group
     once exif import has been revised, check stored column data for images and make sure it matches expectations
     splitting group: check ordering if you split a middle group
 

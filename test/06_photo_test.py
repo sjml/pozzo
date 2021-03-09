@@ -8,7 +8,7 @@ from test_util import stat_assert
 def test_delete_photo_auth(server, auth, req):
     res = req.post(
         server.api("/photo/delete"),
-        json={"photoID": 1}
+        json={"photoIDs": [1]}
     )
     stat_assert(res, 401)
 
@@ -19,19 +19,11 @@ def test_delete_missing_params(server, auth, req):
     )
     stat_assert(res, 400)
 
-def test_delete_nonexistent_photo(server, auth, req):
-    res = req.post(
-        server.api("/photo/delete"),
-        headers=auth,
-        json={"photoID": 25}
-    )
-    stat_assert(res, 404)
-
 def test_delete_photo(server, auth, req):
     res = req.post(
         server.api("/photo/delete"),
         headers=auth,
-        json={"photoID": 1}
+        json={"photoIDs": [1]}
     )
     stat_assert(res, 200)
 
