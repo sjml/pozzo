@@ -5,8 +5,8 @@
     import L from "leaflet";
     import "leaflet/dist/leaflet.css";
 
-    import "../../lib/Leaflet.markercluster/dist/leaflet.markercluster";
-    import "../../lib/Leaflet.markercluster/dist/MarkerCluster.css";
+    import "leaflet.markercluster";
+    import "leaflet.markercluster/dist/MarkerCluster.css";
 
     import type { Photo } from "../pozzo.type";
     import { currentAlbumStore } from "../stores";

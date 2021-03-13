@@ -7,6 +7,7 @@
 
 * todos
     - tag albums
+    - see if the download attribute on images can be used to not have to run origDL through PHP
     - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
     - test if all the upheaval has left the editing frontend in a workable state
     - frontend UX

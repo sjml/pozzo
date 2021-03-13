@@ -30,6 +30,7 @@
     "justified-layout": "^4.1.0",
     "kleur": "^3.0.3",
     "leaflet": "^1.7.1",
+    "leaflet.markercluster": "^1.5.0",
     "markdown-it": "^12.0.4",
     "polka": "^0.5.2",
     "rollup": "^2.38.1",
