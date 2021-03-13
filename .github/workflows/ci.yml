@@ -12,7 +12,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 7.4
-        extensions: imagick
+        extensions: imagick, xdebug
         ini-values: "error_reporting=E_ERROR|E_WARNING|E_PARSE,upload_max_filesize=100M,post_max_size=100M,max_execution_time=300"
     - name: Setup Python
       uses: actions/setup-python@v2
