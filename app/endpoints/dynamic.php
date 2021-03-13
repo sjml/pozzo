@@ -23,11 +23,19 @@ function output($obj, $code = 200) {
 }
 
 function getAllPhotos() {
+    if (DB::GetConfig("dynamic_public") == 0 && $_REQUEST["POZZO_AUTH"] <= 0) {
+        output(["message" => "Unauthorized"], 401);
+        return;
+    }
     $photos = DB::GetAllPhotos();
     output($photos);
 }
 
 function getUnsortedPhotos() {
+    if (DB::GetConfig("dynamic_public") == 0 && $_REQUEST["POZZO_AUTH"] <= 0) {
+        output(["message" => "Unauthorized"], 401);
+        return;
+    }
     $photos = DB::GetUnsortedPhotos();
     output($photos);
 }

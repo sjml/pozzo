@@ -69,6 +69,10 @@ $router->AddHandler("/setup", [
     "require",
     __DIR__ . "/../../app/endpoints/setup.php",
 ]);
+$router->AddHandler("/config", [
+    "require",
+    __DIR__ . "/../../app/endpoints/config.php",
+]);
 $router->AddHandler("/login", [
     "require",
     __DIR__ . "/../../app/endpoints/login.php",

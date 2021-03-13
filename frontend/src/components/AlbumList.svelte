@@ -14,6 +14,32 @@
 
     export let typeOfAlbum: AlbumType = AlbumType.Album;
 
+    async function toggleDynamicPublic() {
+        const newSetting = !$siteData.dynamicPublic;
+        const res = await RunApi("/config/set", {
+            authorize: true,
+            method: "POST",
+            params: {
+                key: "dynamic_public",
+                value: newSetting ? 1 : 0,
+                type: "integer"
+            }
+        });
+        if (res.success) {
+            const sdRes = await RunApi("/info");
+            if (sdRes.success) {
+                $siteData = Object.assign($siteData, sdRes.data);
+            }
+            else {
+                console.error(sdRes);
+            }
+        }
+        else {
+            console.error(res);
+        }
+    }
+
+
     let albumList: Album[];
     let albumCovers: Photo[];
 
@@ -193,7 +219,7 @@
                 <Button
                     margin="0 0 0 10px"
                     title={$siteData.dynamicPublic ? "Make Private" : "Make Public"}
-                    on:click={() => {$siteData.dynamicPublic = !$siteData.dynamicPublic; /*updateMetaData();*/}}
+                    on:click={() => toggleDynamicPublic()}
                 >
                     {#if $siteData.dynamicPublic}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><path d="M128,55.99219C48,55.99219,16,128,16,128s32,71.99219,112,71.99219S240,128,240,128,208,55.99219,128,55.99219Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><circle cx="128" cy="128" r="32" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></circle></svg>

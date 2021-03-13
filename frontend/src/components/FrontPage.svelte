@@ -2,7 +2,7 @@
     import { navigate } from "svelte-routing";
 
     import { AlbumType } from "../pozzo.type";
-    import { isLoggedInStore } from "../stores";
+    import { isLoggedInStore, siteData } from "../stores";
     import LazyLoad from "./LazyLoad.svelte";
     import AlbumList from "./AlbumList.svelte";
 
@@ -19,6 +19,8 @@
 {/if}
 
 <div class="frontPage">
-    <AlbumList typeOfAlbum={AlbumType.Dynamic} />
+    {#if $isLoggedInStore || $siteData.dynamicPublic}
+        <AlbumList typeOfAlbum={AlbumType.Dynamic} />
+    {/if}
     <AlbumList typeOfAlbum={AlbumType.Album} />
 </div>

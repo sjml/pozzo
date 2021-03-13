@@ -3,7 +3,6 @@
     - video breaks nav? (or maybe is just stealing keystrokes)
 
 dynamic albums
-    - config endpoint at least to alter dynamic visibility
     - delete groups/albums
     - tag albums
 

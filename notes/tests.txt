@@ -1,5 +1,6 @@
 running list of tests that still need to be written as I think of them, awaiting the day I feel like it
 
+    config get/set
     delete individual image
         - no longer in album
         - upload image, should go at end rather than in the gap

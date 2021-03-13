@@ -6,6 +6,10 @@ $message = [
         "/index" => [],
         "/info" => [],
         "/setup" => [],
+        "/config" => [
+            "/get",
+            "/set",
+        ],
         "/login" => [
             "/",
             "check",

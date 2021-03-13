@@ -243,7 +243,7 @@ class DB {
     }
 
     static function SetConfig($key, $value, $type) {
-        $prepCommand = "INSERT INTO config(key, value, type) VALUES (?, ?, ?)";
+        $prepCommand = "INSERT OR REPLACE INTO config(key, value, type) VALUES (?, ?, ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $key, SQLITE3_TEXT);
         $statement->bindParam(2, $value, SQLITE3_TEXT);
@@ -273,6 +273,15 @@ class DB {
         }
 
         return false;
+    }
+
+    static function GetAllConfig() {
+        $results = self::$pdb->query("SELECT key, value, type FROM config");
+        $ret = [];
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            $ret[$row["key"]] = ["value" => $row["value"], "type" => $row["type"]];
+        }
+        return $ret;
     }
 
     static function InsertPhoto($photoData, $originalFilename, $albumID, $order) {
