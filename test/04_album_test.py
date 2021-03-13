@@ -227,7 +227,7 @@ def test_album_metadata(server, auth, req, ta3):
     assert adata["description"] == ""
     assert adata["isPrivate"] == False
     assert adata["hasMap"] == False
-    assert adata["coverPhoto"] == -1
+    assert adata["coverPhoto"] == None
 
     res = req.post(
         server.api(f"/album/edit/{ta3}"),
@@ -252,7 +252,7 @@ def test_album_metadata(server, auth, req, ta3):
     assert adata["description"] == "**New description.**"
     assert adata["isPrivate"] == True
     assert adata["hasMap"] == True
-    assert adata["coverPhoto"] == 1
+    assert adata["coverPhoto"]["id"] == 1
 
 def test_album_invalid_metadata(server, req, auth, ta3):
     res = req.post(

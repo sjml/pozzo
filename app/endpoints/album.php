@@ -95,6 +95,9 @@ function editMetadata() {
     $coverPhoto = array_key_exists("coverPhoto", $input)
         ? $input["coverPhoto"]
         : $album["coverPhoto"];
+    if ($coverPhoto == null) {
+        $coverPhoto = -1;
+    }
 
     if (
         !is_string($title) ||
