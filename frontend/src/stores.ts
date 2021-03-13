@@ -9,7 +9,7 @@ export const siteData = writable<SiteConfig>(
         siteTitle: false,
         sizes: [],
         promo: false,
-        dynamicPublic: true,
+        dynamicPublic: false,
         maxUploadBytes: 0,
         simultaneousUploads: 1,
     }

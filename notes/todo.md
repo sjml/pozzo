@@ -1,6 +1,9 @@
 - bugs
     - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
+        - looks like it has something to do with the way the filtering is happening
+        - I wrote all the frontend upload stuff when I was still learning Svelte, so might be worth an overhaul
     - video breaks nav? (or maybe is just stealing keystrokes)
+    - regression: cmd-A and cmd-D are selecting photos instead of text during description editing
 
 * todos
     - tag albums
