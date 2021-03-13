@@ -27,10 +27,6 @@ def test_delete_photo(server, auth, req):
     )
     stat_assert(res, 200)
 
-def test_original_nonexistent(server, req):
-    res = req.get(server.api(f"/photo/orig/25"))
-    stat_assert(res, 404)
-
 def test_photo_move_auth(server, req):
     res = req.post(
         server.api("/photo/move"),

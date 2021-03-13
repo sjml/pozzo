@@ -4,7 +4,7 @@
 
     import type { Photo, PhotoGroup } from "../pozzo.type";
     import { currentAlbumStore, currentPerusalStore, metadataVisible, siteData } from "../stores";
-    import { HumanBytes, TimestampToDateString, Fractionalize } from "../util";
+    import { HumanBytes, TimestampToDateString, Fractionalize, GetImgPath } from "../util";
     import LazyLoad from "./LazyLoad.svelte";
     import Button from "./Button.svelte";
     import StagedLoader from "./StagedLoader.svelte";
@@ -115,13 +115,16 @@
         {#if $siteData.contentLicense.length > 0}
             <tr><td class="label">Original: </td><td>{$currentPerusalStore.currentPhoto.width}×{$currentPerusalStore.currentPhoto.height} ({HumanBytes($currentPerusalStore.currentPhoto.size)})</td></tr>
             <div class="license">
-                <a href={`https://creativecommons.org/licenses/${$siteData.contentLicense.slice(3)}/4.0/`} target="_">
+                <a href={`https://creativecommons.org/licenses/${$siteData.contentLicense.slice(3)}/4.0/`} target="_blank">
                     <img src={`/img/licenses/${$siteData.contentLicense.slice(3)}.svg`} alt={`Creative Commons ${$siteData.contentLicense.slice(3).toUpperCase()} 4.0`}/>
                     {`Creative Commons ${$siteData.contentLicense.slice(3).toUpperCase()} 4.0`}
                 </a>
             </div>
             <div class="dlOrig">
-                <a href="/api/photo/orig/{$currentPerusalStore.currentPhoto.id}">
+                <a
+                    href={GetImgPath("orig", $currentPerusalStore.currentPhoto.hash, $currentPerusalStore.currentPhoto.uniq)}
+                    download={$currentPerusalStore.currentPhoto.originalFilename}
+                >
                     <Button margin="0 10px 0 0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
                         <div>Download Original</div>
@@ -141,8 +144,8 @@
                 />
             </div>
             <div class="mapLinks">
-                {"{"} <a target="_" href="https://www.openstreetmap.org/?mlat={$currentPerusalStore.currentPhoto.gpsLat}&mlon={$currentPerusalStore.currentPhoto.gpsLon}#map=18/{$currentPerusalStore.currentPhoto.gpsLat}/{$currentPerusalStore.currentPhoto.gpsLon}">OpenStreetMap</a>
-                | <a target="_" href="https://www.google.com/maps/search/?api=1&query={$currentPerusalStore.currentPhoto.gpsLat},{$currentPerusalStore.currentPhoto.gpsLon}">Google Maps</a> {"}"}
+                {"{"} <a target="_blank" href="https://www.openstreetmap.org/?mlat={$currentPerusalStore.currentPhoto.gpsLat}&mlon={$currentPerusalStore.currentPhoto.gpsLon}#map=18/{$currentPerusalStore.currentPhoto.gpsLat}/{$currentPerusalStore.currentPhoto.gpsLon}">OpenStreetMap</a>
+                | <a target="_blank" href="https://www.google.com/maps/search/?api=1&query={$currentPerusalStore.currentPhoto.gpsLat},{$currentPerusalStore.currentPhoto.gpsLon}">Google Maps</a> {"}"}
             </div>
         {/if}
 

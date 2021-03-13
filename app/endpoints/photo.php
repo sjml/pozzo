@@ -15,7 +15,6 @@ $router = new Router();
 $router->AddHandler("/delete", ["deletePhotos"], true);
 $router->AddHandler("/copy", ["copyPhotos"], true);
 $router->AddHandler("/move", ["movePhotos"], true);
-$router->AddHandler("/orig", ["downloadOrig"]);
 // $router->AddHandler("/allTags", ["getAllTags"]);
 $router->AddHandler("/tagSet", ["getPhotosTagged"]);
 $router->AddHandler("/tag", ["tagPhotos"], true);
@@ -27,35 +26,6 @@ function output($obj, $code = 200) {
     http_response_code($code);
     header("Content-Type: application/json");
     echo json_encode($obj);
-}
-
-function downloadOrig() {
-    $identifier = substr($_REQUEST["POZZO_REQUEST"], 1);
-    $photo = DB::GetPhoto($identifier);
-    if ($photo == null) {
-        output(["message" => "Photo not found"], 404);
-        return;
-    }
-
-    if ($photo["isVideo"]) {
-        $ext = pathinfo($photo["originalFilename"], PATHINFO_EXTENSION);
-        $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"], $ext);
-    }
-    else {
-        $filePath = getImagePath("orig", $photo["hash"], $photo["uniq"]);
-    }
-
-    header("Content-Description: File Transfer");
-    header("Content-Type: application/octet-stream");
-    header(
-        "Content-Disposition: attachment; filename=\"" .
-            $photo["originalFilename"] .
-            "\"",
-    );
-    header("Expires: 0");
-    header("Cache-Control: must-revalidate");
-    header("Content-Length: " . filesize($filePath));
-    readfile($filePath);
 }
 
 function deletePhotos() {
@@ -241,18 +211,21 @@ function getPhotosTagged() {
     }
     $tags = $input["tags"];
     if (count($tags) == 0) {
-        output([]);
+        output(["message" => "Empty tag array"], 400);
         return;
     }
     if (count($tags) > 1) {
-        output(
-            ["message" => "Only one tag at a time supported right now :("],
-            400,
-        );
+        output(["message" => "Only one tag at a time supported right now :("], 400);
         return;
     }
 
-    output(DB::GetPhotosTagged($tags[0]));
+    $taggedPhotos = DB::GetPhotosTagged($tags[0]);
+    if (count($taggedPhotos) == 0) {
+        output(["message" => "No photos with that tag"], 404);
+        return;
+    }
+
+    output($taggedPhotos);
 }
 
 // function getAllTags() {

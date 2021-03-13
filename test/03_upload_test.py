@@ -119,7 +119,7 @@ def test_orig_getback(server, req):
         pdata = list(filter(lambda x: x["id"] == i, plist))[0]
 
         with tempfile.TemporaryFile("w+b") as tf:
-            with req.get(server.api(f"/photo/orig/{i}"), stream=True) as res:
+            with req.get(server.access(get_img_path("orig", pdata["hash"], pdata["uniq"])), stream=True) as res:
                 stat_assert(res, 200)
                 for segment in res.iter_content(chunk_size=4096):
                     tf.write(segment)

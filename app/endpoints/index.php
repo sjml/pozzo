@@ -37,7 +37,6 @@ $message = [
             "/delete",
             "/copy",
             "/move",
-            "/orig",
             // "/allTags",
             "/tagSet",
             "/tag",

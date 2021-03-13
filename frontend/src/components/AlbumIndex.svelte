@@ -2,7 +2,7 @@
     import { onDestroy } from "svelte";
     import { Router, Route, navigate } from "svelte-routing";
 
-    import type { Album } from "../pozzo.type";
+    import type { Album, Photo } from "../pozzo.type";
     import { AlbumType } from "../pozzo.type";
     import { currentAlbumStore, currentPerusalStore, isLoggedInStore, siteData } from "../stores";
     import { RunApi } from "../api";
@@ -22,7 +22,29 @@
         }
     }
 
+    function makePseudoAlbum(photoList: Photo[], type: AlbumType): Album {
+        return {
+            id: -1,
+            title: "",
+            slug: "",
+            type: type,
+            isPrivate: false,
+            hasMap: false,
+            coverPhoto: null,
+            photoGroups: [{
+                id: -1,
+                description: "",
+                hasMap: false,
+                ordering: 1,
+                photos: photoList
+            }],
+            highestIndex: -1,
+            description: "",
+        };
+    }
+
     async function getAlbum(slug: string) {
+        $currentPerusalStore = null;
         if (albumType == AlbumType.Album) {
             const res = await RunApi(`/album/view/${slug}`, {
                 authorize: true
@@ -43,29 +65,38 @@
                 }
             }
         }
+        else if (albumType == AlbumType.Tag) {
+            const res = await RunApi(`/photo/tagSet`, {
+                authorize: true,
+                method: "POST",
+                params: {
+                    tags: [slug]
+                }
+            });
+            if (res.success) {
+                $currentAlbumStore = makePseudoAlbum(res.data, AlbumType.Tag);
+                $currentAlbumStore.isPrivate = !$siteData.dynamicPublic;
+                $currentAlbumStore.title = `#${slug}`;
+                $currentAlbumStore.slug = slug;
+                $currentAlbumStore.description = "";
+                $currentAlbumStore.hasMap = true;
+            }
+            else {
+                if (res.code == 404) {
+                    navigate("/");
+                }
+                else {
+                    console.error(res);
+                }
+            }
+        }
         else if (albumType == AlbumType.Dynamic) {
             const res = await RunApi(`/dynamic/${slug}`, {
                 authorize: true
             });
             if (res.success) {
-                $currentAlbumStore = {
-                    id: -1,
-                    title: "",
-                    slug: "",
-                    type: AlbumType.Dynamic,
-                    isPrivate: !$siteData.dynamicPublic,
-                    hasMap: false,
-                    coverPhoto: null,
-                    photoGroups: [{
-                        id: -1,
-                        description: "",
-                        hasMap: false,
-                        ordering: 1,
-                        photos: res.data
-                    }],
-                    highestIndex: -1,
-                    description: "",
-                };
+                $currentAlbumStore = makePseudoAlbum(res.data, AlbumType.Dynamic);
+                $currentAlbumStore.isPrivate = !$siteData.dynamicPublic;
                 if (slug == "all") {
                     $currentAlbumStore.title = "[all]";
                     $currentAlbumStore.slug = "all";

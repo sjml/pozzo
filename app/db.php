@@ -539,7 +539,8 @@ class DB {
             }
             array_push($taggedPhotos, $row);
         }
-        return $taggedPhotos;
+
+        return self::FilterPhotoList($taggedPhotos);
     }
 
     static function GetTagList() {
