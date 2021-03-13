@@ -57,7 +57,6 @@ def test_upload(server, auth, req):
     assert res.json()[0]["hash"] == upped["hash"]
     assert res.json()[0]["uniq"] == upped["uniq"]
 
-
 def test_non_image_upload(server, auth, req):
     with open("./test_corpus/attributions.txt", "rb") as f:
         res = req.post(

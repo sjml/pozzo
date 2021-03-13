@@ -6,7 +6,7 @@
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
     import NavBar from "./NavBar.svelte";
-    import AlbumList from "./AlbumList.svelte";
+    import FrontPage from "./FrontPage.svelte";
     import NotFound from "./NotFound.svelte";
 
     onMount(setup);
@@ -66,7 +66,7 @@
         <NavBar on:fullScreenOn={() => setFullscreen(true)} on:fullScreenOff={() => setFullscreen(false)} />
 
         <Route path="/">
-            <AlbumList />
+            <FrontPage />
         </Route>
 
         <Route path="/setup">
@@ -75,6 +75,10 @@
 
         <Route path="/album/:albumSlug/*" let:params>
             <LazyLoad loader={"AlbumIndex"} albumSlug={params.albumSlug} />
+        </Route>
+
+        <Route path="/dynamic/:dynamicSlug/*" let:params>
+            <LazyLoad loader={"AlbumIndex"} albumSlug={params.dynamicSlug} albumType="dynamic" />
         </Route>
 
         <Route>

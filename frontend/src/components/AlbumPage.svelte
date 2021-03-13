@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
 
     import type { Photo } from "../pozzo.type";
+    import { AlbumType } from "../pozzo.type";
     import { currentAlbumStore, currentPerusalStore, isLoggedInStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
@@ -30,17 +31,17 @@
     }
 
     async function updateMetaData() {
-        if ($currentAlbumStore.showMap == null || $currentAlbumStore.isPrivate == null) {
+        if ($currentAlbumStore.hasMap == null || $currentAlbumStore.isPrivate == null) {
             // probably just initial load
             return;
         }
         const res = await RunApi(`/album/edit/${$currentAlbumStore.id}`, {
             params: {
-                showMap: $currentAlbumStore.showMap,
+                hasMap: $currentAlbumStore.hasMap,
                 isPrivate: $currentAlbumStore.isPrivate,
                 description: $currentAlbumStore.description,
                 title: $currentAlbumStore.title,
-                coverPhoto: $currentAlbumStore.coverPhoto.id,
+                coverPhoto: $currentAlbumStore.coverPhoto?.id || -1,
             },
             method: "POST",
             authorize: true
@@ -143,7 +144,7 @@
 {#if $currentAlbumStore == null}
     <div>Loading…</div>
 {:else}
-    {#if $isLoggedInStore && !reordering}
+    {#if $isLoggedInStore && $currentAlbumStore.type != AlbumType.Tag && !reordering}
         <LazyLoad loader={"UploadZone"}
             on:done={() => dispatch("uploaded")}
         />
@@ -155,7 +156,7 @@
         {:else}
             <h2>{$currentAlbumStore.title}</h2>
         {/if}
-        {#if $isLoggedInStore}
+        {#if $isLoggedInStore && $currentAlbumStore.type == AlbumType.Album}
             <Button
                 margin="0 0 0 10px"
                 title={editingDescTitle ? "Commit Changes" : "Edit Title and Description"}
@@ -178,9 +179,9 @@
             {#if $currentPerusalStore.photoSet.length > 0}
                 <Button
                     margin="0 0 0 10px"
-                    isToggled={$currentAlbumStore.showMap}
-                    title={`${$currentAlbumStore.showMap ? "Hide" : "Show"} Map`}
-                    on:click={() => {$currentAlbumStore.showMap = !$currentAlbumStore.showMap; updateMetaData();}}
+                    isToggled={$currentAlbumStore.hasMap}
+                    title={`${$currentAlbumStore.hasMap ? "Hide" : "Show"} Map`}
+                    on:click={() => {$currentAlbumStore.hasMap = !$currentAlbumStore.hasMap; updateMetaData();}}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                 </Button>
@@ -198,7 +199,7 @@
         </div>
     {/if}
 
-    {#if $currentAlbumStore.showMap && $currentPerusalStore.photoSet.length > 0}
+    {#if $currentAlbumStore.hasMap && $currentPerusalStore.photoSet.length > 0}
         <div class="albumMap">
             <LazyLoad loader={"PhotoMap"}
                 photos={$currentPerusalStore.photoSet}

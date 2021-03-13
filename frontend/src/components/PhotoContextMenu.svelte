@@ -2,6 +2,7 @@
     import { onMount, createEventDispatcher, onDestroy } from "svelte";
 
     import type { Album } from "../pozzo.type";
+    import { AlbumType } from "../pozzo.type";
     import { currentAlbumStore, navSelection } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
@@ -67,28 +68,30 @@
     style={`left: ${posX}px; top: ${posY}px`}
 >
     <div class="header menuItem">{$navSelection.length} photo{$navSelection.length == 1 ? "" : "s"} selected</div>
-    {#if $navSelection.length == 1}
-        <Button on:click={() => dispatch("coverPhotoClicked", {})}>
-            <div class="cover menuItem">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="200 176 127.993 136 56 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><path d="M200,224l-72.0074-40L56,224V40a8,8,0,0,1,8-8H192a8,8,0,0,1,8,8Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-                <div>{$currentAlbumStore.coverPhoto.id == $navSelection[0].id ? "Unset" : "Set"} as Cover Photo</div>
-            </div>
-        </Button>
-    {/if}
-    {#if $navSelection.length == 1}
-        <Button on:click={() => dispatch("splitGroup", {})}>
-            <div class="splitGroup menuItem">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="88" y1="128" x2="12" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="44 96 12 128 44 160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="168" y1="128" x2="244" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="212 160 244 128 212 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
-                <div>Split Group Here</div>
-            </div>
-        </Button>
-    {:else}
-        <Button on:click={() => dispatch("makeNewGroup", {})}>
-            <div class="makeNewGroup menuItem">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="168 167.993 216 167.993 216 39.993 88 39.993 88 87.993" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline><rect x="39.99902" y="87.99414" width="128" height="128" stroke-width="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" fill="none"></rect></svg>
-                <div>Make Separate Group</div>
-            </div>
-        </Button>
+    {#if $currentAlbumStore.type == AlbumType.Album}
+        {#if $navSelection.length == 1}
+            <Button on:click={() => dispatch("coverPhotoClicked", {})}>
+                <div class="cover menuItem">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="200 176 127.993 136 56 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><path d="M200,224l-72.0074-40L56,224V40a8,8,0,0,1,8-8H192a8,8,0,0,1,8,8Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
+                    <div>{$currentAlbumStore.coverPhoto?.id === $navSelection[0].id ? "Unset" : "Set"} as Cover Photo</div>
+                </div>
+            </Button>
+        {/if}
+        {#if $navSelection.length == 1}
+            <Button on:click={() => dispatch("splitGroup", {})}>
+                <div class="splitGroup menuItem">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="88" y1="128" x2="12" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="44 96 12 128 44 160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="168" y1="128" x2="244" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><polyline points="212 160 244 128 212 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
+                    <div>Split Group Here</div>
+                </div>
+            </Button>
+        {:else}
+            <Button on:click={() => dispatch("makeNewGroup", {})}>
+                <div class="makeNewGroup menuItem">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="168 167.993 216 167.993 216 39.993 88 39.993 88 87.993" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline><rect x="39.99902" y="87.99414" width="128" height="128" stroke-width="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" fill="none"></rect></svg>
+                    <div>Make Separate Group</div>
+                </div>
+            </Button>
+        {/if}
     {/if}
     <Button on:click={() => albumListShown = !albumListShown}>
         <div class="move menuItem">
@@ -97,7 +100,11 @@
             {:else}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="208 96 128 176 48 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
             {/if}
-            <div class="label">Move To</div>
+            {#if $currentAlbumStore.type == AlbumType.Dynamic && $currentAlbumStore.slug == "all"}
+                <div class="label">Add To</div>
+            {:else}
+                <div class="label">Move To</div>
+            {/if}
         </div>
     </Button>
     {#if albumListShown}

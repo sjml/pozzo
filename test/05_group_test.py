@@ -218,7 +218,7 @@ def test_group_metadata_nonexistent(server, auth, req):
         headers=auth,
         json={
             "description": "**New description for a group.**",
-            "showMap": 1,
+            "hasMap": 1,
         }
     )
     stat_assert(res, 404)
@@ -233,14 +233,14 @@ def test_group_metadata(server, auth, req, aid, gid):
     assert gdata["id"] == gid
 
     assert adata["description"] == ""
-    assert adata["showMap"] == False
+    assert adata["hasMap"] == False
 
     res = req.post(
         server.api(f"/group/edit/{gid}"),
         headers=auth,
         json={
             "description": "**New description for a group.**",
-            "showMap": 1,
+            "hasMap": 1,
         }
     )
     stat_assert(res, 200)
@@ -254,7 +254,7 @@ def test_group_metadata(server, auth, req, aid, gid):
     assert gdata["id"] == gid
 
     assert gdata["description"] == "**New description for a group.**"
-    assert gdata["showMap"] == True
+    assert gdata["hasMap"] == True
 
 def test_group_invalid_metadata(server, req, auth, gid):
     res = req.post(
@@ -262,7 +262,7 @@ def test_group_invalid_metadata(server, req, auth, gid):
         headers=auth,
         json={
             "description": 1337,
-            "showMap": "nah"
+            "hasMap": "nah"
         }
     )
     stat_assert(res, 400)

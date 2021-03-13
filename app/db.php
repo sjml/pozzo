@@ -9,9 +9,11 @@ use Ausi\SlugGenerator\SlugGenerator;
 require_once __DIR__ . "/auth.php";
 require_once __DIR__ . "/image.php";
 
+
 class DB {
     private const DB_PATH = __DIR__ . "/../pozzo.DB";
     private static $pdb = null;
+    private static $sg = null;
 
     static function Init() {
         if (self::$pdb == null) {
@@ -27,6 +29,8 @@ class DB {
             if ($creationNeeded) {
                 self::_createDB();
             }
+
+            self::$sg = new SlugGenerator();
         }
     }
 
@@ -105,6 +109,8 @@ class DB {
         $prepCommand = "CREATE TABLE IF NOT EXISTS tags (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", tag TEXT UNIQUE";
+        $prepCommand .= ", slug TEXT UNIQUE";
+        $prepCommand .= ", pinned BOOLEAN";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -124,20 +130,6 @@ class DB {
         $statement->execute();
 
 
-        $prepCommand = "CREATE TABLE IF NOT EXISTS dynamicAlbums (";
-        $prepCommand .= "id INTEGER PRIMARY KEY";
-        $prepCommand .= ", title TEXT UNIQUE";
-        $prepCommand .= ", slug TEXT UNIQUE";
-        $prepCommand .= ", isPrivate BOOLEAN";
-        $prepCommand .= ", description TEXT";
-        $prepCommand .= ", coverPhoto INTEGER";
-        $prepCommand .= ", showMap BOOLEAN";
-        $prepCommand .= ")";
-
-        $statement = self::$pdb->prepare($prepCommand);
-        $statement->execute();
-
-
         $prepCommand = "CREATE TABLE IF NOT EXISTS albums (";
         $prepCommand .= "id INTEGER PRIMARY KEY";
         $prepCommand .= ", title TEXT UNIQUE";
@@ -146,7 +138,7 @@ class DB {
         $prepCommand .= ", description TEXT";
         $prepCommand .= ", ordering INTEGER";
         $prepCommand .= ", coverPhoto INTEGER";
-        $prepCommand .= ", showMap BOOLEAN";
+        $prepCommand .= ", hasMap BOOLEAN";
         $prepCommand .= ")";
 
         $statement = self::$pdb->prepare($prepCommand);
@@ -158,7 +150,7 @@ class DB {
         $prepCommand .= ", album_id INTEGER NOT NULL";
         $prepCommand .= ", ordering INTEGER";
         $prepCommand .= ", description TEXT";
-        $prepCommand .= ", showMap BOOLEAN";
+        $prepCommand .= ", hasMap BOOLEAN";
         $prepCommand .= ", FOREIGN KEY(album_id) REFERENCES albums(id)";
         $prepCommand .= ")";
 
@@ -205,36 +197,9 @@ class DB {
         $statement->execute();
 
 
-        $sg = new SlugGenerator();
-
-        $prepCommand = "INSERT INTO dynamicAlbums (title, slug, description, isPrivate, coverPhoto, showMap) VALUES (?, ?, ?, 0, -1, 0);";
-        $statement = self::$pdb->prepare($prepCommand);
-
-        $albumName = "[unsorted]";
-        $albumSlug = $sg->generate($albumName);
-        $albumDesc = "All photos that have not been added to an album";
-        $statement->bindParam(1, $albumName, SQLITE3_TEXT);
-        $statement->bindParam(2, $albumSlug, SQLITE3_TEXT);
-        $statement->bindParam(3, $albumDesc, SQLITE3_TEXT);
-        $statement->execute();
-        $statement->reset();
-        $unsortedIdx = self::$pdb->lastInsertRowID();
-        self::SetConfig("unsorted_album_index", $unsortedIdx, "integer");
-
-        $albumName = "[all]";
-        $albumSlug = $sg->generate($albumName);
-        $albumDesc = "All photos";
-        $statement->bindParam(1, $albumName, SQLITE3_TEXT);
-        $statement->bindParam(2, $albumSlug, SQLITE3_TEXT);
-        $statement->bindParam(3, $albumDesc, SQLITE3_TEXT);
-        $statement->execute();
-        $statement->reset();
-        $allIdx = self::$pdb->lastInsertRowID();
-        self::SetConfig("all_album_index", $allIdx, "integer");
-
-
         self::SetConfig("app_key", Auth::GenerateKey(), "string");
         self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
+        self::SetConfig("dynamic_public", 1, "integer");
 
         self::SetConfig("created", 1, "integer");
     }
@@ -361,7 +326,7 @@ class DB {
         $statement->execute();
         $photoData["id"] = self::$pdb->lastInsertRowID();
 
-        if ($albumID != null && $order != null) {
+        if ($albumID != null) {
             self::AddPhotoToAlbum($photoData["id"], $albumID, $order);
         }
 
@@ -480,9 +445,11 @@ class DB {
     static function TagPhoto($photoID, $tag) {
         $tagID = self::_getTagID($tag);
         if ($tagID == -1) {
-            $query = "INSERT INTO tags (tag) VALUES (?);";
+            $slug = self::$sg->generate($tag);
+            $query = "INSERT INTO tags (tag, slug, pinned) VALUES (?, ?, 0);";
             $statement = self::$pdb->prepare($query);
             $statement->bindParam(1, $tag, SQLITE3_TEXT);
+            $statement->bindParam(2, $slug, SQLITE3_TEXT);
             $statement->execute();
             $tagID = self::$pdb->lastInsertRowID();
         }
@@ -587,7 +554,7 @@ class DB {
             "description",
             "ordering",
             "coverPhoto",
-            "showMap"
+            "hasMap"
         ];
         $prepCommand = "SELECT " . implode(", ", $albumFields);
         $prepCommand .= ", '::', photos.*";
@@ -647,7 +614,7 @@ class DB {
             $order = self::$pdb->querySingle("SELECT ordering FROM groups WHERE id = " . $fromGroup . ";");
         }
 
-        $prepCommand = "INSERT INTO groups (album_id, ordering, description, showMap)";
+        $prepCommand = "INSERT INTO groups (album_id, ordering, description, hasMap)";
         $prepCommand .= " VALUES (?," . $order . ", '', 0);";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $albumID, SQLITE3_INTEGER);
@@ -766,11 +733,11 @@ class DB {
         return true;
     }
 
-    static function UpdateGroupMeta($id, $description, $showMap) {
-        $query = "UPDATE groups SET description = ?, showMap = ? WHERE id = ?";
+    static function UpdateGroupMeta($id, $description, $hasMap) {
+        $query = "UPDATE groups SET description = ?, hasMap = ? WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $description, SQLITE3_TEXT);
-        $statement->bindParam(2, $showMap, SQLITE3_INTEGER);
+        $statement->bindParam(2, $hasMap, SQLITE3_INTEGER);
         $statement->bindParam(3, $id, SQLITE3_INTEGER);
         $result = $statement->execute();
         if (!$result) {
@@ -839,8 +806,7 @@ class DB {
             return -2;
         }
 
-        $sg = new SlugGenerator();
-        $slug = $sg->generate($title);
+        $slug = self::$sg->generate($title);
 
         self::$pdb->exec("BEGIN IMMEDIATE TRANSACTION;");
         $order = self::$pdb->querySingle("SELECT MAX(ordering) FROM albums;");
@@ -850,7 +816,7 @@ class DB {
         $order += 1;
 
         $prepCommand =
-            "INSERT INTO albums(title, slug, description, isPrivate, showMap, coverPhoto, ordering) VALUES(?, ?, '', ?, 0, -1, ?)";
+            "INSERT INTO albums(title, slug, description, isPrivate, hasMap, coverPhoto, ordering) VALUES(?, ?, '', ?, 0, -1, ?)";
         $statement = self::$pdb->prepare($prepCommand);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $slug, SQLITE3_TEXT);
@@ -903,20 +869,19 @@ class DB {
         $title,
         $description,
         $isPrivate,
-        $showMap,
+        $hasMap,
         $coverPhoto
     ) {
-        $sg = new SlugGenerator();
-        $slug = $sg->generate($title);
+        $slug = self::$sg->generate($title);
 
         $query =
-            "UPDATE albums SET title = ?, slug = ?, description = ?, isPrivate = ?, showMap = ?, coverPhoto = ? WHERE id = ?";
+            "UPDATE albums SET title = ?, slug = ?, description = ?, isPrivate = ?, hasMap = ?, coverPhoto = ? WHERE id = ?";
         $statement = self::$pdb->prepare($query);
         $statement->bindParam(1, $title, SQLITE3_TEXT);
         $statement->bindParam(2, $slug, SQLITE3_TEXT);
         $statement->bindParam(3, $description, SQLITE3_TEXT);
         $statement->bindParam(4, $isPrivate, SQLITE3_INTEGER);
-        $statement->bindParam(5, $showMap, SQLITE3_INTEGER);
+        $statement->bindParam(5, $hasMap, SQLITE3_INTEGER);
         $statement->bindParam(6, $coverPhoto, SQLITE3_INTEGER);
         $statement->bindParam(7, $id, SQLITE3_INTEGER);
         $result = $statement->execute();
@@ -1052,7 +1017,7 @@ class DB {
             $photoGroups[$row["id"]] = [
                 "id" => $row["id"],
                 "description" => $row["description"],
-                "showMap" => $row["showMap"],
+                "hasMap" => $row["hasMap"],
                 "photos" => [],
             ];
         }
@@ -1128,55 +1093,76 @@ class DB {
             $albumData["photoGroups"] = $photos;
         }
 
+        if ($albumData["coverPhoto"] == -1) {
+            $albumData["coverPhoto"] = null;
+        }
+        else {
+            $albumData["coverPhoto"] = self::GetPhoto($albumData["coverPhoto"]);
+        }
+
         return $albumData;
     }
 
 
 
     static function FilterPhotoList($photos) {
-        // need to rethink how this will work
-        return $photos;
+        // authorized users can see everything; they can see it all
+        if ($_REQUEST["POZZO_AUTH"] > 0) {
+            return $photos;
+        }
 
-        // if ($_REQUEST["POZZO_AUTH"] > 0) {
-        //     return $photos;
-        // }
+        // get the IDs of all photos that are in private albums and NOT in public ones
+        //   this forms the list of all photos that should be rejected for non-authorized
+        //   viewers.
+        // Example situation and filtering:
+        //     Photo #1: not in any album
+        //     Photo #2: only in a public album
+        //     Photo #3: only in a private album
+        //     Photo #4: in both a public and a private album
+        // Non-authorized users will see everying except photo #3.
 
-        // $allIdx = self::GetConfig("all_album_index");
-        // $allPrivate = self::$pdb->querySingle("SELECT isPrivate FROM dynamicAlbums WHERE id = " . $allIdx . ";");
-        // if ($allPrivate == 0) {
-        //     return $photos;
-        // }
+        // this query, however, is pretty sub-optimal.
+        //   we'll see if it introduces appreciable bottlenecks.
+        // quick and dirty profiling shows that it takes about 4x-5x longer than
+        //   a simple "SELECT id FROM photos", but still tops out around half
+        //   a millisecond, so probably fast enough.
+        $query  = "SELECT id FROM photos ";
+        $query .= "WHERE id IN ( ";
+        $query .= "    SELECT DISTINCT photos.id FROM photos ";
+        $query .= "        JOIN photos_groups ON photos.id = photos_groups.photo_id ";
+        $query .= "        WHERE group_id IN ";
+        $query .= "            (SELECT groups.id FROM groups  ";
+        $query .= "                JOIN albums ON groups.album_id = albums.id ";
+        $query .= "                WHERE albums.isPrivate = 1 ";
+        $query .= "            ) ";
+        $query .= ") ";
+        $query .= "AND id NOT IN ( ";
+        $query .= "    SELECT DISTINCT photos.id FROM photos ";
+        $query .= "        JOIN photos_groups ON photos.id = photos_groups.photo_id ";
+        $query .= "        WHERE group_id IN ";
+        $query .= "            (SELECT groups.id FROM groups  ";
+        $query .= "                JOIN albums ON groups.album_id = albums.id ";
+        $query .= "                WHERE albums.isPrivate = 0 ";
+        $query .= "            ) ";
+        $query .= ") ";
 
-        // // TODO: probably a way to do this without the nested query
-        // $publicPhotoQuery = "SELECT DISTINCT photos.id FROM photos";
-        // $publicPhotoQuery .= " JOIN photos_groups ON photos.id = photos_groups.photo_id";
-        // $publicPhotoQuery .= " WHERE group_id IN";
-        // $publicPhotoQuery .= " (SELECT groups.id FROM groups";
-        // $publicPhotoQuery .= "   JOIN albums ON groups.album_id = albums.id";
-        // $publicPhotoQuery .= "   WHERE albums.isPrivate = 0";
-        // $publicPhotoQuery .= " )";
-        // $results = self::$pdb->query($publicPhotoQuery);
-        // $publicIDs = [];
-        // while ($row = $results->fetchArray(SQLITE3_NUM)) {
-        //     array_push($publicIDs, $row[0]);
-        // }
+        $results = self::$pdb->query($query);
+        $rejectIDs = [];
+        while ($row = $results->fetchArray(SQLITE3_NUM)) {
+            array_push($rejectIDs, $row[0]);
+        }
 
-        // $unsortedIdx = self::GetConfig("unsorted_album_index");
-        // $unsortedPrivate = self::$pdb->querySingle("SELECT isPrivate FROM dynamicAlbums WHERE id = " . $unsortedIdx . ";");
-        // if ($unsortedPrivate == 0) {
-        //     $unsorteds = self::GetUnsortedPhotos(false);
-        //     foreach ($unsorteds as $usp) {
-        //         array_push($publicIDs, $usp["id"]);
-        //     }
-        // }
+        if (count($rejectIDs) == 0) {
+            return $photos;
+        }
 
-        // $retPhotos = [];
-        // foreach ($photos as $p) {
-        //     if (array_search($p["id"], $publicIDs) !== false) {
-        //         array_push($retPhotos, $p);
-        //     }
-        // }
+        $retPhotos = [];
+        foreach ($photos as $p) {
+            if (array_search($p["id"], $rejectIDs) === false) {
+                array_push($retPhotos, $p);
+            }
+        }
 
-        // return $retPhotos;
+        return $retPhotos;
     }
 }

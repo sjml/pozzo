@@ -123,7 +123,7 @@
                         autoPanPadding: [150, 150],
                         autoClose: true,
                     })
-                    .setContent(`<a draggable="false" href="/album/${$currentAlbumStore.slug}/${placedPhotos[ci].id}"><img draggable="false" src="${popupImgUrl}" alt="${placedPhotos[ci].title}"/></a>`)
+                    .setContent(`<a draggable="false" href="/${$currentAlbumStore.type}/${$currentAlbumStore.slug}/${placedPhotos[ci].id}"><img draggable="false" src="${popupImgUrl}" alt="${placedPhotos[ci].title}"/></a>`)
                 );
             }
 

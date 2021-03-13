@@ -89,9 +89,9 @@ function editMetadata() {
     $isPrivate = array_key_exists("isPrivate", $input)
         ? $input["isPrivate"]
         : $album["isPrivate"];
-    $showMap = array_key_exists("showMap", $input)
-        ? $input["showMap"]
-        : $album["showMap"];
+    $hasMap = array_key_exists("hasMap", $input)
+        ? $input["hasMap"]
+        : $album["hasMap"];
     $coverPhoto = array_key_exists("coverPhoto", $input)
         ? $input["coverPhoto"]
         : $album["coverPhoto"];
@@ -100,7 +100,7 @@ function editMetadata() {
         !is_string($title) ||
         !is_string($description) ||
         !(is_numeric($isPrivate) || is_bool($isPrivate)) ||
-        !(is_numeric($showMap) || is_bool($showMap)) ||
+        !(is_numeric($hasMap) || is_bool($hasMap)) ||
         !is_numeric($coverPhoto)
     ) {
         output(["message" => "Could not update metadata"], 400);
@@ -112,7 +112,7 @@ function editMetadata() {
         $title,
         $description,
         $isPrivate,
-        $showMap,
+        $hasMap,
         $coverPhoto,
     );
 

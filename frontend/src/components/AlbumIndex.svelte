@@ -3,11 +3,13 @@
     import { Router, Route, navigate } from "svelte-routing";
 
     import type { Album } from "../pozzo.type";
-    import { currentAlbumStore, currentPerusalStore, isLoggedInStore } from "../stores";
+    import { AlbumType } from "../pozzo.type";
+    import { currentAlbumStore, currentPerusalStore, isLoggedInStore, siteData } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
 
     export let albumSlug: string;
+    export let albumType: AlbumType = AlbumType.Album;
 
     onDestroy(() => {
         $currentPerusalStore = null;
@@ -21,18 +23,67 @@
     }
 
     async function getAlbum(slug: string) {
-        const res = await RunApi(`/album/view/${slug}`, {
-            authorize: true
-        });
-        if (res.success) {
-            $currentAlbumStore = res.data;
-        }
-        else {
-            if (res.code == 404) {
-                navigate("/");
+        if (albumType == AlbumType.Album) {
+            const res = await RunApi(`/album/view/${slug}`, {
+                authorize: true
+            });
+            if (res.success) {
+                if (res.data.coverPhoto === -1) {
+                    res.data.coverPhoto = null;
+                }
+                $currentAlbumStore = res.data;
+                $currentAlbumStore.type = AlbumType.Album;
             }
             else {
-                console.error(res);
+                if (res.code == 404) {
+                    navigate("/");
+                }
+                else {
+                    console.error(res);
+                }
+            }
+        }
+        else if (albumType == AlbumType.Dynamic) {
+            const res = await RunApi(`/dynamic/${slug}`, {
+                authorize: true
+            });
+            if (res.success) {
+                $currentAlbumStore = {
+                    id: -1,
+                    title: "",
+                    slug: "",
+                    type: AlbumType.Dynamic,
+                    isPrivate: !$siteData.dynamicPublic,
+                    hasMap: false,
+                    coverPhoto: null,
+                    photoGroups: [{
+                        id: -1,
+                        description: "",
+                        hasMap: false,
+                        ordering: 1,
+                        photos: res.data
+                    }],
+                    highestIndex: -1,
+                    description: "",
+                };
+                if (slug == "all") {
+                    $currentAlbumStore.title = "[all]";
+                    $currentAlbumStore.slug = "all";
+                    $currentAlbumStore.description = "";
+                }
+                else if (slug == "unsorted") {
+                    $currentAlbumStore.title = "[unsorted]";
+                    $currentAlbumStore.slug = "unsorted";
+                    $currentAlbumStore.description = "";
+                }
+            }
+            else {
+                if (res.code == 404) {
+                    navigate("/");
+                }
+                else {
+                    console.error(res);
+                }
             }
         }
     }

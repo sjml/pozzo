@@ -74,13 +74,13 @@ function editMetadata() {
     $description = array_key_exists("description", $input)
         ? $input["description"]
         : $album["description"];
-    $showMap = array_key_exists("showMap", $input)
-        ? $input["showMap"]
-        : $album["showMap"];
+    $hasMap = array_key_exists("hasMap", $input)
+        ? $input["hasMap"]
+        : $album["hasMap"];
 
     if (
         !is_string($description) ||
-        !(is_numeric($showMap) || is_bool($showMap))
+        !(is_numeric($hasMap) || is_bool($hasMap))
     ) {
         output(["message" => "Could not update metadata"], 400);
         return;
@@ -89,7 +89,7 @@ function editMetadata() {
     $result = DB::UpdateGroupMeta(
         $group["id"],
         $description,
-        $showMap
+        $hasMap
     );
 
     output(["message" => "Metadata updated successfully"]);

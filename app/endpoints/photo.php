@@ -98,8 +98,20 @@ function copyPhotos() {
             return;
         }
         if (!array_key_exists("groupID", $copyInst) || !is_numeric($copyInst["groupID"])) {
-            output(["message" => "Invalid or missing parameter 'groupID' in instruction array. Copy may be partially complete."], 400);
-            return;
+            if (!isset($copyInst["albumID"]) || !is_numeric($copyInst["albumID"])) {
+                output(
+                    ["message" => "Missing or non-numeric value for either 'groupID' or 'albumID'"],
+                    400,
+                );
+                return;
+            }
+            $album = DB::FindAlbum($copyInst["albumID"], true);
+            if ($album == false) {
+                output(["message" => "Target album not found"], 404);
+                return;
+            }
+            $lastGroup = end($album["photoGroups"]);
+            $copyInst["groupID"] = $lastGroup["id"];
         }
         $result = DB::AddPhotoToGroup(
             $copyInst["photoID"],

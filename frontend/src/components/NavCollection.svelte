@@ -44,7 +44,7 @@
     }
 
     function handleContextMenuCoverPhoto(evt: CustomEvent) {
-        if ($currentAlbumStore.coverPhoto == $navSelection[0]) {
+        if ($currentAlbumStore.coverPhoto?.id === $navSelection[0].id) {
             $currentAlbumStore.coverPhoto = null;
         }
         else {

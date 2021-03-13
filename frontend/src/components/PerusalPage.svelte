@@ -83,7 +83,7 @@
         }
 
         if ($currentPerusalStore.currentPhoto == null && $currentPerusalStore.currentGroup == null) {
-            navigate(`/album/${$currentAlbumStore.slug}`);
+            navigate(`/${$currentAlbumStore.type}/${$currentAlbumStore.slug}`);
         }
     }
     $: getItem(perusalIdentifier)

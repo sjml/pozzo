@@ -2,6 +2,7 @@
     import { createEventDispatcher, onMount, onDestroy, tick } from "svelte";
 
     import type { FileUploadStatus } from "../pozzo.type";
+    import { AlbumType } from "../pozzo.type";
     import { currentAlbumStore, siteData, userStoppedUploadScroll } from "../stores";
     import FileUploader from "./FileUploader.svelte";
     import Button from "./Button.svelte";
@@ -15,7 +16,7 @@
 
         let targetAlbumID = null;
         let offset = 1;
-        if ($currentAlbumStore != null) {
+        if ($currentAlbumStore != null && $currentAlbumStore.type == AlbumType.Album) {
             targetAlbumID = $currentAlbumStore.id;
             const lastGroup = $currentAlbumStore.photoGroups[$currentAlbumStore.photoGroups.length-1];
             const existingIndices = lastGroup.photos.map((p) => (p as any).ordering);

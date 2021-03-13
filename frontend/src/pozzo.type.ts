@@ -5,6 +5,7 @@ export type SiteConfig = {
     formats: string[],
     sizes: any[],
     promo: boolean,
+    dynamicPublic: boolean,
     maxUploadBytes: number,
     simultaneousUploads: number,
 }
@@ -67,9 +68,15 @@ export type Photo = {
 export type PhotoGroup = {
     id: number,
     description: string,
-    showMap: boolean,
+    hasMap: boolean,
     ordering: number,
     photos: Photo[],
+}
+
+export enum AlbumType {
+    Album = "album",
+    Dynamic = "dynamic",
+    Tag = "tag",
 }
 
 export type Album = {
@@ -77,8 +84,9 @@ export type Album = {
     title: string,
     description: string,
     slug: string,
+    type: AlbumType,
     isPrivate: boolean,
-    showMap: boolean,
+    hasMap: boolean,
     coverPhoto: Photo|null,
     coverHash?: string,
     coverUniq?: string,

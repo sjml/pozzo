@@ -7,6 +7,7 @@
     import { Link } from "svelte-routing";
 
     import type { PhotoGroup } from "../pozzo.type";
+    import { AlbumType } from "../pozzo.type";
     import { isLoggedInStore, currentAlbumStore } from "../stores";
     import { RunApi } from "../api";
     import LazyLoad from "./LazyLoad.svelte";
@@ -52,13 +53,13 @@
     }
 
     async function updateMetaData() {
-        if (photoGroup.showMap == null) {
+        if (photoGroup.hasMap == null) {
             // probably just initial load
             return;
         }
         const res = await RunApi(`/group/edit/${photoGroup.id}`, {
             params: {
-                showMap: photoGroup.showMap,
+                hasMap: photoGroup.hasMap,
                 description: photoGroup.description,
             },
             method: "POST",
@@ -103,21 +104,43 @@
     }
 
     async function handlePhotoMove(evt: CustomEvent) {
-        const res = await RunApi(`/photo/move`, {
-            params: {
-                photoIDs: evt.detail.moved.map(p => p.id),
-                fromGroupID: photoGroup.id,
-                toAlbumID: evt.detail.targetAlbumID
-            },
-            method: "POST",
-            authorize: true
-        });
-        if (res.success) {
-            photoGroup.photos = photoGroup.photos.filter(p => evt.detail.moved.indexOf(p) < 0);
-            dispatch("perusalChangeNeeded");
+        if ($currentAlbumStore.type == AlbumType.Dynamic) {
+            const res = await RunApi(`/photo/copy`, {
+                params: {
+                    copies: evt.detail.moved.map(p => {
+                        return {photoID: p.id, albumID: evt.detail.targetAlbumID}
+                    })
+                },
+                method: "POST",
+                authorize: true
+            });
+            if (res.success) {
+                if ($currentAlbumStore.slug == "unsorted") {
+                    photoGroup.photos = photoGroup.photos.filter(p => evt.detail.moved.indexOf(p) < 0);
+                    dispatch("perusalChangeNeeded");
+                }
+            }
+            else {
+                console.error(res);
+            }
         }
         else {
-            console.error(res);
+            const res = await RunApi(`/photo/move`, {
+                params: {
+                    photoIDs: evt.detail.moved.map(p => p.id),
+                    fromGroupID: photoGroup.id,
+                    toAlbumID: evt.detail.targetAlbumID
+                },
+                method: "POST",
+                authorize: true
+            });
+            if (res.success) {
+                photoGroup.photos = photoGroup.photos.filter(p => evt.detail.moved.indexOf(p) < 0);
+                dispatch("perusalChangeNeeded");
+            }
+            else {
+                console.error(res);
+            }
         }
     }
 </script>
@@ -125,7 +148,7 @@
 <div class="photoGroup"
     bind:clientWidth={containerWidth}
 >
-    {#if $isLoggedInStore}
+    {#if $isLoggedInStore && $currentAlbumStore.type == AlbumType.Album}
         <div class="controls">
             <Button
                 margin="0 0 0 10px"
@@ -138,9 +161,9 @@
             {#if photoGroup.photos.length > 0}
                 <Button
                     margin="0 0 0 10px"
-                    isToggled={photoGroup.showMap}
-                    title={`${photoGroup.showMap ? "Hide" : "Show"} Map`}
-                    on:click={() => {photoGroup.showMap = !photoGroup.showMap; updateMetaData();}}
+                    isToggled={photoGroup.hasMap}
+                    title={`${photoGroup.hasMap ? "Hide" : "Show"} Map`}
+                    on:click={() => {photoGroup.hasMap = !photoGroup.hasMap; updateMetaData();}}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="96 184 32 200 32 56 96 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><polygon points="160 216 96 184 96 40 160 72 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polygon><polyline points="160 72 224 56 224 200 160 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                 </Button>
@@ -181,7 +204,7 @@
         </div>
     {/if}
 
-    {#if photoGroup.showMap && photoGroup.photos.length > 0}
+    {#if photoGroup.hasMap && photoGroup.photos.length > 0}
         <div class="photoGroupMap">
             <LazyLoad loader={"PhotoMap"}
                 photos={photoGroup.photos}
@@ -197,7 +220,7 @@
         </div>
     {/if}
 
-    {#if $isLoggedInStore && photoGroup.photos.length > 1}
+    {#if $isLoggedInStore && $currentAlbumStore.type == AlbumType.Album && photoGroup.photos.length > 1}
         <div class="reorderButton" class:toggled={reordering}>
             <Button
                 margin="0 0 0 10px"
@@ -231,14 +254,14 @@
                         on:coverChanged
                     >
                         {#each photoGroup.photos as photo, pi}
-                            <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">
+                            <Link to={`/${$currentAlbumStore.type}/${$currentAlbumStore.slug}/${photo.id}`}>
                                 <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
                             </Link>
                         {/each}
                     </NavCollection>
                 {:else}
                     {#each photoGroup.photos as photo, pi}
-                        <Link to="/album/{$currentAlbumStore.slug}/{photo.id}">
+                        <Link to={`/${$currentAlbumStore.type}/${$currentAlbumStore.slug}/${photo.id}`}>
                             <NavPhoto size="medium" photo={photo} layoutDims={layout.boxes[pi]} />
                         </Link>
                     {/each}

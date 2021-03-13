@@ -30,14 +30,14 @@
         }
         else {
             const prevNode = pd.nodes[pd.currentIdx - 1];
-            prevLink = `/album/${a.slug}/${prevNode.hasOwnProperty("hash") ? "" : "g"}${prevNode.id}`;
+            prevLink = `/${a.type}/${a.slug}/${prevNode.hasOwnProperty("hash") ? "" : "g"}${prevNode.id}`;
         }
         if (pd.currentIdx == pd.nodes.length-1) {
             nextLink = null;
         }
         else {
             const nextNode = pd.nodes[pd.currentIdx + 1];
-            nextLink = `/album/${a.slug}/${nextNode.hasOwnProperty("hash") ? "" : "g"}${nextNode.id}`;
+            nextLink = `/${a.type}/${a.slug}/${nextNode.hasOwnProperty("hash") ? "" : "g"}${nextNode.id}`;
         }
     }
     $: findNeighbors($currentPerusalStore, $currentAlbumStore)
@@ -71,9 +71,9 @@
             <div class="backLink">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 {#if $currentPerusalStore?.currentIdx >= 0}
-                    <Link to={`/album/${$currentAlbumStore.slug}`}>
-                        {$currentAlbumStore.title}
-                    </Link>
+                <Link to={`/${$currentAlbumStore.type}/${$currentAlbumStore.slug}`}>
+                    {$currentAlbumStore.title}
+                </Link>
                 {:else}
                     {$currentAlbumStore.title}
                 {/if}
@@ -91,7 +91,7 @@
     <div class="backButton">
         <div class="backLink">
             {#if $currentPerusalStore?.currentIdx >= 0}
-                <Link to={`/album/${$currentAlbumStore.slug}`}>
+                <Link to={`/${$currentAlbumStore.type}/${$currentAlbumStore.slug}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline></svg>
                     {$currentAlbumStore.title}
                 </Link>

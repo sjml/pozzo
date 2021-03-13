@@ -2,8 +2,8 @@
     - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
     - video breaks nav? (or maybe is just stealing keystrokes)
 
-dynamic albums (can't have groups, but can take metadata):
-    - frontend show all/unsorted
+dynamic albums
+    - config endpoint at least to alter dynamic visibility
     - delete groups/albums
     - tag albums
 
@@ -43,7 +43,7 @@ dynamic albums (can't have groups, but can take metadata):
         - uploadzone should tell you when it rejects a file and why
 2. Backend pass
     - centralize output functions
-    - reorg tests to move all group ops to their own file
+    - cleanup use of "isset" vs "array_key_exists"
     - don't trust pre-filtering for params
     - reorg API (buncha group functions hang off album right now)
         - then document API
