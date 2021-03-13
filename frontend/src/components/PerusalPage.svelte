@@ -3,7 +3,7 @@
     import { navigate } from "svelte-routing";
 
     import type { Photo, PhotoGroup } from "../pozzo.type";
-    import { currentAlbumStore, currentPerusalStore, metadataVisible } from "../stores";
+    import { currentAlbumStore, currentPerusalStore, metadataVisible, siteData } from "../stores";
     import { HumanBytes, TimestampToDateString, Fractionalize } from "../util";
     import LazyLoad from "./LazyLoad.svelte";
     import Button from "./Button.svelte";
@@ -111,20 +111,27 @@
 </div>
 {#if $currentPerusalStore.currentPhoto && $metadataVisible}
     <div class="metadata">
-        <!-- this could be made more data-driven, but for now, sticking with hand-crafted -->
         <div class="title"><span class="label">Title:</span> {$currentPerusalStore.currentPhoto.title}</div>
-        <table class="photoMeta">
-        <tr><td class="label">Original: </td><td>{$currentPerusalStore.currentPhoto.width}×{$currentPerusalStore.currentPhoto.height} ({HumanBytes($currentPerusalStore.currentPhoto.size)})</td></tr>
-        <tr><td class="label">Uploaded: </td><td>{$currentPerusalStore.currentPhoto.uploadTimeStamp}</td></tr>
-        </table>
-        <div class="dlOrig">
-            <a href="/api/photo/orig/{$currentPerusalStore.currentPhoto.id}">
-                <Button margin="0 10px 0 0">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
-                    <div>Download Original</div>
-                </Button>
-            </a>
-        </div>
+        {#if $siteData.contentLicense.length > 0}
+            <tr><td class="label">Original: </td><td>{$currentPerusalStore.currentPhoto.width}×{$currentPerusalStore.currentPhoto.height} ({HumanBytes($currentPerusalStore.currentPhoto.size)})</td></tr>
+            <div class="license">
+                <a href={`https://creativecommons.org/licenses/${$siteData.contentLicense.slice(3)}/4.0/`} target="_">
+                    <img src={`/img/licenses/${$siteData.contentLicense.slice(3)}.svg`} alt={`Creative Commons ${$siteData.contentLicense.slice(3).toUpperCase()} 4.0`}/>
+                    {`Creative Commons ${$siteData.contentLicense.slice(3).toUpperCase()} 4.0`}
+                </a>
+            </div>
+            <div class="dlOrig">
+                <a href="/api/photo/orig/{$currentPerusalStore.currentPhoto.id}">
+                    <Button margin="0 10px 0 0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><polyline points="86 110 128 152 170 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></polyline><line x1="128" y1="39.97056" x2="128" y2="151.97056" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M224,136v72a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
+                        <div>Download Original</div>
+                    </Button>
+                </a>
+            </div>
+        {/if}
+
+        <hr />
+
         {#if $currentPerusalStore.currentPhoto.gpsLat && $currentPerusalStore.currentPhoto.gpsLon}
             <div class="photoMap">
                 <LazyLoad loader={"PhotoMap"}
@@ -152,6 +159,7 @@
                     </tr>
                 {/if}
             {/each}
+            <tr><td class="label">Uploaded: </td><td>{$currentPerusalStore.currentPhoto.uploadTimeStamp}</td></tr>
         </table>
     </div>
 {/if}
@@ -200,6 +208,9 @@
 
     .dlOrig {
         margin-top: 10px;
+
+        display: flex;
+        justify-content: center;
     }
 
     .dlOrig a {
@@ -226,6 +237,19 @@
 
     .mapLinks a {
         text-decoration: underline;
+    }
+
+    .license {
+        margin: 8px 0;
+    }
+
+    .license a {
+        display: flex;
+        align-items: center;
+    }
+
+    .license a img {
+        margin-right: 8px;
     }
 
     .interstitial {

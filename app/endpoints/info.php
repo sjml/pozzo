@@ -40,6 +40,7 @@ $message = [
     "siteTitle" => DB::GetConfig("site_title"),
     "promo" => DB::GetConfig("promo"),
     "dynamicPublic" => DB::GetConfig("dynamic_public"),
+    "contentLicense" => DB::GetConfig("content_license"),
     "maxUploadBytes" => phpNotationToBytes(ini_get("upload_max_filesize")),
     "simultaneousUploads" => 4,
 ];

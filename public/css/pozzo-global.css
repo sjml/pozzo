@@ -123,6 +123,10 @@ a:visited, a {
     text-decoration: none;
 }
 
+hr {
+    border: 0px;
+    border-top: 1px solid var(--separator-color);
+}
 
 /* Mixture of scrollbar style directives to work across browsers */
 * {

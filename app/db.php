@@ -200,6 +200,7 @@ class DB {
         self::SetConfig("app_key", Auth::GenerateKey(), "string");
         self::SetConfig("jwt_expiration", 60 * 60 * 24, "integer");
         self::SetConfig("dynamic_public", 1, "integer");
+        self::SetConfig("content_license", "", "string");
 
         self::SetConfig("created", 1, "integer");
     }

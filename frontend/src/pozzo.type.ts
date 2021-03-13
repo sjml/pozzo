@@ -6,6 +6,7 @@ export type SiteConfig = {
     sizes: any[],
     promo: boolean,
     dynamicPublic: boolean,
+    contentLicense: string,
     maxUploadBytes: number,
     simultaneousUploads: number,
 }

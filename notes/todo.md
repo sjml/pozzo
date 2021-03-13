@@ -7,10 +7,7 @@
 
 * todos
     - tag albums
-    - maps on interstitials
     - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
-    - re-org EXIF data display
-    - darken overlay letter background or maybe add small outline; stuff still bleeds out
     - test if all the upheaval has left the editing frontend in a workable state
     - frontend UX
         - move photos between groups in same album
@@ -23,8 +20,8 @@
         - add an "are you sure?" prompt to deleting albums, groups(, photos?)
     - requires backend support
         - album list context menu (delete / dissolve)
-        - groups need to be guarded against their album privacy (do with photo pass)
-            - make guards consistently part of db response instead of frontend having to remember to filter (cf the albumlist fetch explicitly saying whether to get privates or not)
+        - make guards consistently part of db response instead of frontend having to remember to filter (cf the albumlist fetch explicitly saying whether to get privates or not)
+        - license configuration at site creation
 
 0. Granularity
     - album collections
@@ -33,7 +30,6 @@
         - check for all console error statements and handle gracefully in UI
             - test bad responses for everything... broken file upload hangs the UI?
     - UX niceties
-        - add license display option? (site config)
         - add little notification toasts for when people get redirected/bounced
         - transitions between albums and stuff
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
