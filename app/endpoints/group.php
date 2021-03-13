@@ -16,6 +16,7 @@ $router->AddHandler("/edit", ["editMetadata"], true);
 $router->AddHandler("/move", ["moveGroup"], true);
 $router->AddHandler("/reorder", ["reorderGroup"], true);
 $router->AddHandler("/merge", ["mergeGroups"], true);
+$router->AddHandler("/delete", ["deleteGroup"], true);
 
 $router->Route();
 
@@ -193,7 +194,7 @@ function mergeGroups() {
     }
 
     if ($absorbedGroup["album_id"] != $absorbingGroup["album_id"]) {
-        // guarding against accidentally merging away an album's only group?
+        // guarding against accidentally merging away an album's only group
         output(["message" => "Merging groups must be in the same album"], 400);
         return;
     }
@@ -201,4 +202,28 @@ function mergeGroups() {
     DB::MergeGroup($absorbingGroup["id"], $absorbedGroup["id"]);
 
     output(["message" => "Groups merged"]);
+}
+
+function deleteGroup() {
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (!isset($input["groupID"]) || !is_numeric($input["groupID"])) {
+        output(["message" => "Invalid or missing parameter 'groupID'"], 400);
+        return;
+    }
+
+    $deadGroupWalking = DB::GetGroup($input["groupID"]);
+    if ($deadGroupWalking == null) {
+        output(["message" => "Group not found"], 404);
+        return;
+    }
+
+    $owningAlbum = DB::FindAlbum($deadGroupWalking["album_id"], true);
+
+    if (count($owningAlbum["photoGroups"]) == 1) {
+        output(["message" => "Cannot delete an album's only group"], 400);
+        return;
+    }
+
+    DB::DeleteGroup($deadGroupWalking["id"]);
+    output(["message" => "Group deleted"]);
 }

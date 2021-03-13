@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import { navigate } from "svelte-routing";
 
     import type { Photo } from "../pozzo.type";
     import { AlbumType } from "../pozzo.type";
@@ -138,6 +139,38 @@
             console.error(res);
         }
     }
+
+    async function handleDeleteGroup(evt: CustomEvent) {
+        const res = await RunApi(`/group/delete`, {
+            authorize: true,
+            method: "POST",
+            params: {
+                groupID: evt.detail.group.id
+            }
+        });
+        if (res.success) {
+            dispatch("structuralChange");
+        }
+        else {
+            console.error(res);
+        }
+    }
+
+    async function handleDeleteAlbum(evt: CustomEvent) {
+        const res = await RunApi(`/album/delete`, {
+            authorize: true,
+            method: "POST",
+            params: {
+                albumID: $currentAlbumStore.id
+            }
+        });
+        if (res.success) {
+            navigate("/");
+        }
+        else {
+            console.error(res);
+        }
+    }
 </script>
 
 <div class="album">
@@ -187,7 +220,13 @@
                 </Button>
             {/if}
             <div class="spacer"></div>
-            <!-- delete album button goes here -->
+            <Button
+                margin="0 0 0 10px"
+                title="Delete Album"
+                on:click={handleDeleteAlbum}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><line x1="215.99609" y1="60" x2="39.99609" y2="60.00005" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="104" y1="104" x2="104" y2="168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><line x1="152" y1="104" x2="152" y2="168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line><path d="M199.99609,60.00005V208a8,8,0,0,1-8,8h-128a8,8,0,0,1-8-8v-148" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path><path d="M168,60V36a16,16,0,0,0-16-16H104A16,16,0,0,0,88,36V60" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></path></svg>
+            </Button>
         {/if}
     </div>
 
@@ -214,6 +253,7 @@
                 on:makeNewGroup={handleMakeNewGroup}
                 on:shiftGroup={handleShiftGroup}
                 on:mergeUp={handleMergeUp}
+                on:deleteGroup={handleDeleteGroup}
                 on:coverChanged={updateMetaData}
 
                 on:perusalChangeNeeded

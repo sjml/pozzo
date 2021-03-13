@@ -673,6 +673,19 @@ class DB {
         return $id;
     }
 
+    static function DeleteGroup($groupID) {
+        $query = "DELETE FROM photos_groups WHERE group_id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $groupID, SQLITE3_INTEGER);
+        $statement->execute();
+
+        $query = "DELETE FROM groups WHERE id = ?";
+        $statement = self::$pdb->prepare($query);
+        $statement->bindParam(1, $groupID, SQLITE3_INTEGER);
+        $statement->execute();
+        return;
+    }
+
     static function GetGroup($groupID) {
         $query = "SELECT * FROM groups WHERE id = ?";
         $statement = self::$pdb->prepare($query);

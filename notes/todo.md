@@ -2,15 +2,9 @@
     - when upload fails, the wrong photos get flagged for retry... this is gonna be a pain to repro/test >:(
     - video breaks nav? (or maybe is just stealing keystrokes)
 
-dynamic albums
-    - delete groups/albums
-    - tag albums
-
-
 * todos
-    - privacy guards 
-        - all/unsorted should probably be private by default
-        - dyn visibility shouldn't affect filtering but rather be affected *by* it
+    - tag albums
+    - maps on interstitials
     - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
     - re-org EXIF data display
     - darken overlay letter background or maybe add small outline; stuff still bleeds out
@@ -23,6 +17,7 @@ dynamic albums
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
             - set the "don't leave" flag during any mutating operations
         - shift-click to select ranges
+        - add an "are you sure?" prompt to deleting albums, groups(, photos?)
     - requires backend support
         - album list context menu (delete / dissolve)
         - groups need to be guarded against their album privacy (do with photo pass)

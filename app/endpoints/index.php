@@ -31,6 +31,7 @@ $message = [
             "/move",
             "/reorder",
             "/merge",
+            "/delete",
         ],
         "/photo" => [
             "/delete",
