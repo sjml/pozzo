@@ -7,20 +7,22 @@
 
 * todos
     - tag albums
-    - see if the download attribute on images can be used to not have to run origDL through PHP
-    - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
-    - test if all the upheaval has left the editing frontend in a workable state
-    - frontend UX
-        - move photos between groups in same album
-        - make navbar breadcrumbs collapsible (down to icons)
-        - edit photo title/description
+        - link from photo metadata
+            - right now it goes haywire from ordering of component destruction :-/
+        - pin tag to front page (automatically unpin if no photos?)
+            - consider how tags are entered/stored -- maybe should always be in slug form? 
         - add/remove tags from photo page and context menu
+    - frontend UX
+        - make navbar breadcrumbs collapsible (down to icons)
         - add spinners for waiting on stuff (esp large image loading, long server operations, etc)
             - set the "don't leave" flag during any mutating operations
         - shift-click to select ranges
         - add an "are you sure?" prompt to deleting albums, groups(, photos?)
+        - see if photomap links can use navigate instead of anchors
+        - test navigation on an album with lots (100s? thousands?) of photos to see if having to search for neighbors on each perusal load kills performance
+        - move photos between groups in same album
+        - edit photo title
     - requires backend support
-        - album list context menu (delete / dissolve)
         - make guards consistently part of db response instead of frontend having to remember to filter (cf the albumlist fetch explicitly saying whether to get privates or not)
         - license configuration at site creation
 
@@ -31,31 +33,32 @@
         - check for all console error statements and handle gracefully in UI
             - test bad responses for everything... broken file upload hangs the UI?
     - UX niceties
-        - add little notification toasts for when people get redirected/bounced
-        - transitions between albums and stuff
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
         - uploadzone should tell you when it rejects a file and why
+    - share cards
 2. Backend pass
+    - limit length of text things (titles, descriptions, tags, etc.)
     - centralize output functions
     - cleanup use of "isset" vs "array_key_exists"
-    - don't trust pre-filtering for params
-    - reorg API (buncha group functions hang off album right now)
-        - then document API
-    - see if db's copypasta can be reduced without going full ORM
-    - cascade delete with foreign keys instead of manual? 
     - check on use of is_numeric vs is_integer
-    - look at for loops in db.php and investigate if there are single queries to handle them
-    - limit length of text things (titles, descriptions)
+    - don't trust pre-filtering for params
+    - see if db's copypasta can be reduced without going full ORM
     - get to 100% test coverage, just 'cause
-3. Frontend extra bonus points
-    - smarter font loading: https://www.zachleat.com/web/comprehensive-webfonts/
-        - match: https://meowni.ca/font-style-matcher/
+    - reorg API 
+        - buncha group functions hang off album right now
+        - "error" vs "message", response codes, JSON schema, etc.
+        - some names are plural, others singular; some take GET query params, others only post; a little messy all around
+        - add index actions to each endpoint to explain what they can do?
+            - maybe the robustified Router can automatically do that?
+        - afterwards: document API
+    - look at for loops in db.php and investigate if there are single queries to handle them
+    - cascade delete with foreign keys instead of manual? 
 
 ## future
-* share buttons? :-/
-    - no, but generate share cards
-* sweep through API responses and make sure there's some consistency
-    - "error" vs "message", response codes, JSON schema, etc.
-    - some names are plural, others singular; some take GET query params, others only post; a little messy all around
-    - add index actions to each endpoint to explain what they can do?
-        - maybe the robustified Router can automatically do that?
+* generate static site? 
+    - could use 11ty and read the JSON from a server, recreating images from orig
+    - would allow for offline processing (webp, etc), uploading fully static to CDN
+* frontend extra bonus points
+    - smarter font loading: https://www.zachleat.com/web/comprehensive-webfonts/
+        - matcher: https://meowni.ca/font-style-matcher/
+
