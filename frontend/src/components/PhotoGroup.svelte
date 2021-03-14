@@ -205,19 +205,19 @@
         </div>
     {/if}
 
-    {#if photoGroup.hasMap && photoGroup.photos.length > 0}
-        <div class="photoGroupMap">
-            <LazyLoad loader={"PhotoMap"}
-                photos={photoGroup.photos}
-            />
-        </div>
-    {/if}
-
     {#if editingMeta}
         <textarea cols="500" rows="5" class="description editing" bind:value={rawDescription}></textarea>
     {:else if photoGroup.description.length > 0}
         <div class="description">
             <Markdown markdown={photoGroup.description} />
+        </div>
+    {/if}
+
+    {#if photoGroup.hasMap && photoGroup.photos.length > 0}
+        <div class="photoGroupMap">
+            <LazyLoad loader={"PhotoMap"}
+                photos={photoGroup.photos}
+            />
         </div>
     {/if}
 

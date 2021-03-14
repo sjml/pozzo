@@ -58,6 +58,7 @@
 * generate static site? 
     - could use 11ty and read the JSON from a server, recreating images from orig
     - would allow for offline processing (webp, etc), uploading fully static to CDN
+    - still needing to run dynamic: justifiedlayout, leaflet+markercluster, blurhash
 * frontend extra bonus points
     - smarter font loading: https://www.zachleat.com/web/comprehensive-webfonts/
         - matcher: https://meowni.ca/font-style-matcher/

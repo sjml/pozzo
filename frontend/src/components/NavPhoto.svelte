@@ -110,7 +110,7 @@
         font-size: 3.5em;
         text-shadow:
             0px 0px 20px var(--overlay-shadow-color),
-            0px 0px 1px var(--overlay-shadow-color)
+            0px 0px 5px var(--overlay-shadow-color)
         ;
     }
 
