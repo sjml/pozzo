@@ -4,6 +4,7 @@
         - I wrote all the frontend upload stuff when I was still learning Svelte, so might be worth an overhaul
     - video breaks nav? (or maybe is just stealing keystrokes)
     - regression: cmd-A and cmd-D are selecting photos instead of text during description editing
+    - splitting groups often results in wrong ordering, and/or throws an error and doesn't reload, but the split actually happened. (seems to only happen in production build *sigh*)
 
 * todos
     - tag albums
