@@ -26,6 +26,7 @@ class DB {
             self::$pdb->busyTimeout(10000);
             self::$pdb->enableExceptions(true);
             self::$pdb->query("PRAGMA foreign_keys = ON;");
+            self::$pdb->query("PRAGMA journal_mode = wal;");
             if ($creationNeeded) {
                 self::_createDB();
             }

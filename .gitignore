@@ -1,4 +1,6 @@
 /pozzo.DB
+/pozzo.DB-wal
+/pozzo.DB-shm
 /pozzo.DB.bak
 /public/photos
 /public/photos.bak
