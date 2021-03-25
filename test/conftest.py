@@ -35,6 +35,9 @@ class PozzoServer:
         if os.path.exists(self.dbPath):
             self.movedDB = True
             os.rename(self.dbPath, self.dbPath + ".bak")
+            for suff in ["-wal", "-shm"]:
+                if os.path.exists(self.dbPath + suff):
+                    os.rename(self.dbPath + suff, self.dbPath + suff + ".bak")
         self.movedImgs = False
         if os.path.exists(self.imgPath):
             self.movedImgs = True
@@ -65,6 +68,10 @@ class PozzoServer:
             if os.path.exists(self.dbPath):
                 os.remove(self.dbPath)
             os.rename(self.dbPath + ".bak", self.dbPath)
+            for suff in ["-wal", "-shm"]:
+                if os.path.exists(self.dbPath + suff):
+                    os.remove(self.dbPath + suff)
+                    os.rename(self.dbPath + suff + ".bak", self.dbPath + suff)
         if POZZO_CODE_COVERAGE:
             os.remove(os.path.join(self.baseDir, PUBLIC_DIR, "api", "index.php"))
             os.rename(os.path.join(self.baseDir, PUBLIC_DIR, "api", "index.real.php"), os.path.join(self.baseDir, PUBLIC_DIR, "api", "index.php"))

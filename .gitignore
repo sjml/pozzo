@@ -2,6 +2,8 @@
 /pozzo.DB-wal
 /pozzo.DB-shm
 /pozzo.DB.bak
+/pozzo.DB-wal.bak
+/pozzo.DB-shm.bak
 /public/photos
 /public/photos.bak
 /scripts/deploy.sh
