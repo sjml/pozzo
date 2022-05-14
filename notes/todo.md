@@ -36,7 +36,7 @@
     - UX niceties
         - things should respond to escape (from image back to album, from album back to list, dismissing menus, etc.)
         - uploadzone should tell you when it rejects a file and why
-    - share cards
+    - share cards -- per album, per image, front page
 2. Backend pass
     - limit length of text things (titles, descriptions, tags, etc.)
     - centralize output functions

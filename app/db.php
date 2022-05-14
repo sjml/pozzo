@@ -23,7 +23,7 @@ class DB {
             }
 
             self::$pdb = new SQLite3(self::DB_PATH);
-            self::$pdb->busyTimeout(10000);
+            self::$pdb->busyTimeout(30000);
             self::$pdb->enableExceptions(true);
             self::$pdb->query("PRAGMA foreign_keys = ON;");
             self::$pdb->query("PRAGMA journal_mode = wal;");
@@ -221,6 +221,27 @@ class DB {
         // this would only fail if (a) the database was failing for
         //    other reasons caught in other tests or (b) the name already
         //    exists.
+        catch (\Throwable $th) {
+            return false;
+        }
+        // @codeCoverageIgnoreEnd
+        return ["id" => self::$pdb->lastInsertRowID(), "name" => $user];
+    }
+
+    static function UpdateUserPassword($user, $pw) {
+        $pw = Auth::HashPassword($pw);
+        $prepCommand = "UPDATE users SET password = ? WHERE name = ?";
+        $statement = self::$pdb->prepare($prepCommand);
+        $statement->bindParam(1, $pw, SQLITE3_TEXT);
+        $statement->bindParam(2, $user, SQLITE3_TEXT);
+        try {
+            $result = $statement->execute();
+        }
+        // @codeCoverageIgnoreStart
+        // user management is intentionally not exposed to the API, so
+        //    testing this would be annoying and not prove much.
+        // this would only fail if the database was failing for
+        //    other reasons caught in other tests.
         catch (\Throwable $th) {
             return false;
         }
